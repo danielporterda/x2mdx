@@ -299,6 +299,7 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
 
             operations.append(
                 {
+                    "entity_key": f"operation::{method_name.upper()}::{path}",
                     "method": method_name.upper(),
                     "path": path,
                     "operation_id": operation.get("operationId"),
@@ -312,6 +313,13 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
             )
 
     return operations
+
+
+def extract_operation_details_by_key(doc: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {
+        str(operation["entity_key"]): dict(operation)
+        for operation in extract_latest_operation_details(doc)
+    }
 
 
 def pick_spec_variant(
@@ -544,6 +552,10 @@ def build_openapi_lifecycle_report_from_snapshots(
             }
             for tag, snapshot in versions.items()
         }
+        operation_details_by_version = {
+            tag: extract_operation_details_by_key(spec_docs[spec_id][tag])
+            for tag in versions_present
+        }
 
         specs.append(
             OpenApiSpecLifecycle(
@@ -563,6 +575,7 @@ def build_openapi_lifecycle_report_from_snapshots(
                 entity_lifecycle=entity_records,
                 latest_entities=summarize_latest_entities(entity_records, latest_version),
                 latest_operation_details=extract_latest_operation_details(latest_doc),
+                operation_details_by_version=operation_details_by_version,
                 per_version_entity_deltas=per_version_entity_deltas(versions, tags),
             )
         )

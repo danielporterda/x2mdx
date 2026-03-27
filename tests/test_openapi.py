@@ -227,9 +227,16 @@ class OpenApiLifecycleTests(unittest.TestCase):
                           operationId: getPing
                           summary: Ping endpoint
                           tags: [health]
+                          parameters:
+                            - name: limit
+                              in: query
+                              schema:
+                                type: integer
                           responses:
                             "200":
-                              description: ok
+                              description: pong
+                            "202":
+                              description: accepted
                     """,
                 ),
             ],
@@ -253,6 +260,11 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("OpenAPI Lifecycle Overview", overview)
         self.assertIn("[Open](./specs/utility-yaml)", overview)
         self.assertIn("Version Change Timeline", spec_page)
+        self.assertIn("Endpoint Diff Summary", spec_page)
+        self.assertIn("summary changed `Ping` -> `Ping endpoint`", spec_page)
+        self.assertIn("query param `limit` added", spec_page)
+        self.assertIn("response `200` description updated", spec_page)
+        self.assertIn("response `202` added", spec_page)
         self.assertIn("Endpoint Reference (Latest)", spec_page)
 
     def test_render_pages_keep_openapi_path_placeholders_readable(self) -> None:

@@ -59,6 +59,13 @@ def report_from_json_data(data: dict[str, Any]) -> OpenApiLifecycleReport:
                 for key, value in dict(spec.get("latest_entities", {})).items()
             },
             latest_operation_details=list(spec.get("latest_operation_details", [])),
+            operation_details_by_version={
+                version: {
+                    entity_key: dict(details)
+                    for entity_key, details in dict(version_details).items()
+                }
+                for version, version_details in dict(spec.get("operation_details_by_version", {})).items()
+            },
             per_version_entity_deltas=dict(spec.get("per_version_entity_deltas", {})),
         )
         for spec in data.get("specs", [])

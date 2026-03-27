@@ -15,6 +15,7 @@ MAX_CHANGED_ENTITIES = 300
 MAX_LATEST_OPERATIONS = 300
 MAX_LATEST_COMPONENTS = 400
 MAX_ENDPOINTS = 200
+MAX_ENDPOINT_DIFF_ROWS = 300
 
 
 def slugify(value: str) -> str:
@@ -54,6 +55,15 @@ def changed_versions_value(changed_versions: list[str]) -> str:
     return md_code(f"{head} (+{len(changed_versions) - 5} more)")
 
 
+def compact_change_summary(changes: list[str], *, max_items: int = 6) -> str:
+    if not changes:
+        return "-"
+    if len(changes) <= max_items:
+        return "; ".join(changes)
+    shown = "; ".join(changes[:max_items])
+    return f"{shown}; +{len(changes) - max_items} more"
+
+
 def lifecycle_counts(spec: OpenApiSpecLifecycle) -> dict[str, int]:
     return {
         "total": len(spec.entity_lifecycle),
@@ -74,6 +84,192 @@ def interesting_entities(spec: OpenApiSpecLifecycle) -> list[OpenApiEntityLifecy
         or record.removed_version
     ]
     rows.sort(key=lambda record: (record.entity_type, record.name))
+    return rows
+
+
+def parameter_key(parameter: dict[str, Any]) -> tuple[str, str]:
+    return (
+        str(parameter.get("in", "") or ""),
+        str(parameter.get("name", "") or ""),
+    )
+
+
+def parameter_label(parameter: dict[str, Any]) -> str:
+    location, name = parameter_key(parameter)
+    if location and name:
+        return f"{location} param {md_code(name)}"
+    return f"param {md_code(name or '-')}"
+
+
+def response_map(responses: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {str(response.get("code", "")): response for response in responses}
+
+
+def schema_map_changes(prefix: str, previous: dict[str, str], current: dict[str, str]) -> list[str]:
+    changes: list[str] = []
+    previous_keys = set(previous)
+    current_keys = set(current)
+    for content_type in sorted(current_keys - previous_keys):
+        changes.append(f"{prefix} content {md_code(content_type)} added")
+    for content_type in sorted(previous_keys - current_keys):
+        changes.append(f"{prefix} content {md_code(content_type)} removed")
+    for content_type in sorted(previous_keys & current_keys):
+        if previous[content_type] != current[content_type]:
+            changes.append(
+                f"{prefix} schema {md_code(content_type)} changed {md_code(previous[content_type])} -> {md_code(current[content_type])}"
+            )
+    return changes
+
+
+def summarize_operation_transition(previous: dict[str, Any] | None, current: dict[str, Any] | None) -> list[str]:
+    if previous is None and current is None:
+        return []
+    if previous is None:
+        return ["added endpoint"]
+    if current is None:
+        return ["removed endpoint"]
+
+    changes: list[str] = []
+    if (previous.get("operation_id") or "") != (current.get("operation_id") or ""):
+        changes.append(
+            f"operation id changed {md_code(previous.get('operation_id') or '-')} -> {md_code(current.get('operation_id') or '-')}"
+        )
+    if (previous.get("summary") or "") != (current.get("summary") or ""):
+        changes.append(f"summary changed {md_code(previous.get('summary') or '-')} -> {md_code(current.get('summary') or '-')}")
+    if (previous.get("description") or "") != (current.get("description") or ""):
+        changes.append("description updated")
+
+    previous_tags = set(str(tag) for tag in previous.get("tags", []))
+    current_tags = set(str(tag) for tag in current.get("tags", []))
+    for tag in sorted(current_tags - previous_tags):
+        changes.append(f"tag {md_code(tag)} added")
+    for tag in sorted(previous_tags - current_tags):
+        changes.append(f"tag {md_code(tag)} removed")
+
+    previous_parameters = {parameter_key(param): param for param in previous.get("parameters", [])}
+    current_parameters = {parameter_key(param): param for param in current.get("parameters", [])}
+    for key in sorted(current_parameters.keys() - previous_parameters.keys()):
+        changes.append(f"{parameter_label(current_parameters[key])} added")
+    for key in sorted(previous_parameters.keys() - current_parameters.keys()):
+        changes.append(f"{parameter_label(previous_parameters[key])} removed")
+    for key in sorted(previous_parameters.keys() & current_parameters.keys()):
+        previous_param = previous_parameters[key]
+        current_param = current_parameters[key]
+        field_changes: list[str] = []
+        if bool(previous_param.get("required")) != bool(current_param.get("required")):
+            field_changes.append("required")
+        if (previous_param.get("schema") or "-") != (current_param.get("schema") or "-"):
+            field_changes.append("schema")
+        if (previous_param.get("description") or "") != (current_param.get("description") or ""):
+            field_changes.append("description")
+        if field_changes:
+            changes.append(f"{parameter_label(current_param)} changed ({', '.join(field_changes)})")
+
+    previous_request_body = previous.get("request_body") or {}
+    current_request_body = current.get("request_body") or {}
+    if not previous_request_body and current_request_body:
+        changes.append("request body added")
+    elif previous_request_body and not current_request_body:
+        changes.append("request body removed")
+    elif previous_request_body and current_request_body:
+        if bool(previous_request_body.get("required")) != bool(current_request_body.get("required")):
+            changes.append("request body required flag changed")
+        changes.extend(
+            schema_map_changes(
+                "request body",
+                {
+                    str(content_type): str(schema)
+                    for content_type, schema in dict(previous_request_body.get("schema_by_content_type", {})).items()
+                },
+                {
+                    str(content_type): str(schema)
+                    for content_type, schema in dict(current_request_body.get("schema_by_content_type", {})).items()
+                },
+            )
+        )
+
+    previous_responses = response_map(previous.get("responses", []))
+    current_responses = response_map(current.get("responses", []))
+    for code in sorted(current_responses.keys() - previous_responses.keys()):
+        changes.append(f"response {md_code(code)} added")
+    for code in sorted(previous_responses.keys() - current_responses.keys()):
+        changes.append(f"response {md_code(code)} removed")
+    for code in sorted(previous_responses.keys() & current_responses.keys()):
+        previous_response = previous_responses[code]
+        current_response = current_responses[code]
+        if (previous_response.get("description") or "") != (current_response.get("description") or ""):
+            changes.append(f"response {md_code(code)} description updated")
+        changes.extend(
+            schema_map_changes(
+                f"response {md_code(code)}",
+                {
+                    str(content_type): str(schema)
+                    for content_type, schema in dict(previous_response.get("schema_by_content_type", {})).items()
+                },
+                {
+                    str(content_type): str(schema)
+                    for content_type, schema in dict(current_response.get("schema_by_content_type", {})).items()
+                },
+            )
+        )
+
+    return changes
+
+
+def endpoint_diff_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
+    rows: list[list[str]] = []
+    operation_records = [
+        record
+        for record in spec.entity_lifecycle
+        if record.entity_type == "operation"
+        and (
+            record.introduced_version != spec.introduced_version
+            or record.changed_in_versions
+            or record.removed_version
+        )
+    ]
+    operation_records.sort(key=lambda record: record.name)
+
+    for record in operation_records:
+        details_by_version = spec.operation_details_by_version
+        if record.introduced_version != spec.introduced_version:
+            current = details_by_version.get(record.introduced_version, {}).get(record.entity_key)
+            rows.append(
+                [
+                    md_code(record.name),
+                    md_code(record.introduced_version),
+                    md_code("added"),
+                    compact_change_summary(summarize_operation_transition(None, current)),
+                ]
+            )
+
+        for changed_version in record.changed_in_versions:
+            index = record.versions_present.index(changed_version)
+            if index == 0:
+                continue
+            previous_version = record.versions_present[index - 1]
+            previous = details_by_version.get(previous_version, {}).get(record.entity_key)
+            current = details_by_version.get(changed_version, {}).get(record.entity_key)
+            rows.append(
+                [
+                    md_code(record.name),
+                    md_code(changed_version),
+                    md_code("changed"),
+                    compact_change_summary(summarize_operation_transition(previous, current)),
+                ]
+            )
+
+        if record.removed_version:
+            previous = details_by_version.get(record.versions_present[-1], {}).get(record.entity_key)
+            rows.append(
+                [
+                    md_code(record.name),
+                    md_code(record.removed_version),
+                    md_code("removed"),
+                    compact_change_summary(summarize_operation_transition(previous, None)),
+                ]
+            )
+
     return rows
 
 
@@ -253,6 +449,24 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
             blocks.append(
                 Paragraph(
                     f"_Showing first {MAX_CHANGED_ENTITIES} rows out of {len(interesting)} changed entities._"
+                )
+            )
+
+    endpoint_diffs = endpoint_diff_rows(spec)
+    blocks.append(Heading(level=2, text="Endpoint Diff Summary"))
+    if not endpoint_diffs:
+        blocks.append(Paragraph("No endpoint-level diffs in the selected version range."))
+    else:
+        blocks.append(
+            Table(
+                headers=["Endpoint", "Version", "Event", "Changes"],
+                rows=endpoint_diffs[:MAX_ENDPOINT_DIFF_ROWS],
+            )
+        )
+        if len(endpoint_diffs) > MAX_ENDPOINT_DIFF_ROWS:
+            blocks.append(
+                Paragraph(
+                    f"_Showing first {MAX_ENDPOINT_DIFF_ROWS} endpoint diff rows out of {len(endpoint_diffs)}._"
                 )
             )
 

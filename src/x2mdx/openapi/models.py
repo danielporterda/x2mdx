@@ -51,6 +51,7 @@ class OpenApiSpecLifecycle:
     entity_lifecycle: list[OpenApiEntityLifecycle]
     latest_entities: dict[str, list[dict[str, Any]]]
     latest_operation_details: list[dict[str, Any]]
+    operation_details_by_version: dict[str, dict[str, dict[str, Any]]]
     per_version_entity_deltas: dict[str, dict[str, Any]]
 
 

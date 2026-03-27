@@ -43,6 +43,8 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
         pages = build_pages(report)
         overview = next(page for page in pages if page.path == "overview.mdx")
         self.assertEqual(overview.title, "OpenAPI Lifecycle Overview")
+        spec_page = next(page for page in pages if page.path == "specs/json-ledger-api-openapi-yaml.mdx")
+        self.assertTrue(any(getattr(block, "text", "") == "Endpoint Diff Summary" for block in spec_page.blocks))
 
     def test_cli_build_api_pages_from_manifest_writes_mdx_pages(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -76,6 +78,8 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
 
             self.assertTrue((output_dir / "overview.mdx").exists())
             self.assertTrue((output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").exists())
+            spec_page = (output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").read_text(encoding="utf-8")
+            self.assertIn("Endpoint Diff Summary", spec_page)
 
 
 if __name__ == "__main__":
