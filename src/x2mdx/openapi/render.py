@@ -300,30 +300,6 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
         return "No endpoint details available in the latest spec."
 
     shown = operations[:max_endpoints]
-    lines.extend(
-        [
-            "| Endpoint | Operation ID | Summary | Tags |",
-            "| --- | --- | --- | --- |",
-        ]
-    )
-    for operation in shown:
-        operation_id = operation.get("operation_id") or "-"
-        summary = operation.get("summary") or "-"
-        tags = ", ".join(operation.get("tags") or []) or "-"
-        endpoint = endpoint_name(operation)
-        lines.append(
-            f"| {endpoint_anchor_link(endpoint)} | {md_code(operation_id)} | {md_text(summary)} | {md_code(tags)} |"
-        )
-
-    if len(operations) > max_endpoints:
-        lines.extend(
-            [
-                "",
-                f"_Showing first {max_endpoints} endpoints out of {len(operations)}._",
-            ]
-        )
-        return "\n".join(lines)
-
     for operation in shown:
         endpoint = endpoint_name(operation)
         lines.extend(["", f'<a id="{endpoint_anchor_id(endpoint)}"></a>', "", f"### {endpoint_header(operation)}", ""])
@@ -358,10 +334,21 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
             lines.append(f"- Required: {md_code('yes' if request_body.get('required') else 'no')}")
             content_types = request_body.get("content_types", [])
             schema_by_content_type = request_body.get("schema_by_content_type", {})
+            required_fields_by_content_type = request_body.get("required_fields_by_content_type", {})
             if content_types:
-                lines.append("- Content:")
+                lines.extend(
+                    [
+                        "",
+                        "| Content Type | Schema | Required Fields |",
+                        "| --- | --- | --- |",
+                    ]
+                )
                 for content_type in content_types:
-                    lines.append(f"  - {md_code(content_type)} -> {md_code(schema_by_content_type.get(content_type, '-'))}")
+                    required_fields = required_fields_by_content_type.get(content_type, [])
+                    required_fields_value = ", ".join(md_code(field_name) for field_name in required_fields) if required_fields else "-"
+                    lines.append(
+                        f"| {md_code(content_type)} | {md_code(schema_by_content_type.get(content_type, '-'))} | {required_fields_value} |"
+                    )
             else:
                 lines.append(f"- Content: {md_code('-')}")
 
@@ -388,6 +375,14 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
                 lines.append(
                     f"| {md_code(response.get('code', '-'))} | {md_text(response.get('description', '-') or '-')} | {md_code(content_value)} | {md_code(schema_value)} |"
                 )
+
+    if len(operations) > max_endpoints:
+        lines.extend(
+            [
+                "",
+                f"_Showing first {max_endpoints} endpoints out of {len(operations)}._",
+            ]
+        )
 
     return "\n".join(lines)
 

@@ -271,6 +271,63 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertGreater(spec_page.index("Spec Metadata"), spec_page.index("Latest Components"))
         self.assertGreater(spec_page.index("Entity Summary"), spec_page.index("Spec Metadata"))
         self.assertIn("Endpoint Reference (Latest)", spec_page)
+        self.assertIn("### `GET /ping`", spec_page)
+        self.assertNotIn("| Endpoint | Operation ID | Summary | Tags |", spec_page)
+
+    def test_render_pages_show_required_request_body_fields(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.1.0
+                    paths:
+                      /submit:
+                        post:
+                          operationId: submitCommand
+                          requestBody:
+                            required: true
+                            content:
+                              application/json:
+                                schema:
+                                  $ref: '#/components/schemas/SubmitRequest'
+                          responses:
+                            "200":
+                              description: accepted
+                    components:
+                      schemas:
+                        SubmitRequest:
+                          type: object
+                          required:
+                            - commandId
+                            - payload
+                          properties:
+                            commandId:
+                              type: string
+                            payload:
+                              type: object
+                            traceId:
+                              type: string
+                    """,
+                ),
+            ],
+            self._config(),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+        pages = build_pages(report)
+
+        out_dir = self.root / "out-request-body"
+        write_pages(pages, out_dir)
+        spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
+
+        self.assertIn("### `POST /submit`", spec_page)
+        self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
+        self.assertIn("| `application/json` | `object` | `commandId`, `payload` |", spec_page)
 
     def test_render_pages_keep_openapi_path_placeholders_readable(self) -> None:
         report = build_openapi_lifecycle_report_from_snapshots(
@@ -495,6 +552,7 @@ class OpenApiLifecycleTests(unittest.TestCase):
         rendered = output_file.read_text(encoding="utf-8")
         self.assertIn('title: "Utility API"', rendered)
         self.assertIn("Endpoint Reference (Latest)", rendered)
+        self.assertNotIn("| Endpoint | Operation ID | Summary | Tags |", rendered)
 
         docs_json = json.loads(docs_json_path.read_text(encoding="utf-8"))
         versions = docs_json["navigation"]["dropdowns"][0]["versions"]

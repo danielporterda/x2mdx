@@ -204,6 +204,54 @@ def schema_brief(doc: dict[str, Any], schema: Any) -> str:
     return "-"
 
 
+def object_schema_properties_and_required(
+    doc: dict[str, Any],
+    schema: Any,
+    *,
+    max_depth: int = 6,
+) -> tuple[dict[str, Any], set[str]]:
+    if max_depth <= 0:
+        return {}, set()
+
+    resolved = resolve_local_ref(doc, schema)
+    if not isinstance(resolved, dict):
+        return {}, set()
+
+    properties: dict[str, Any] = {}
+    required: set[str] = set()
+
+    all_of = resolved.get("allOf")
+    if isinstance(all_of, list):
+        for item in all_of:
+            item_properties, item_required = object_schema_properties_and_required(
+                doc,
+                item,
+                max_depth=max_depth - 1,
+            )
+            properties.update(item_properties)
+            required.update(item_required)
+
+    raw_properties = resolved.get("properties")
+    if isinstance(raw_properties, dict):
+        properties.update(raw_properties)
+
+    raw_required = resolved.get("required")
+    if isinstance(raw_required, list):
+        required.update(str(name) for name in raw_required if isinstance(name, str))
+
+    return properties, required
+
+
+def schema_required_field_names(doc: dict[str, Any], schema: Any) -> list[str]:
+    properties, required = object_schema_properties_and_required(doc, schema)
+    if not required:
+        return []
+
+    known = sorted(name for name in required if name in properties)
+    unknown = sorted(name for name in required if name not in properties)
+    return [*known, *unknown]
+
+
 def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]]:
     operations: list[dict[str, Any]] = []
     paths = doc.get("paths", {})
@@ -252,18 +300,23 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
                     content = resolved_request_body.get("content", {})
                     content_types: list[str] = []
                     schema_by_content_type: dict[str, str] = {}
+                    required_fields_by_content_type: dict[str, list[str]] = {}
                     if isinstance(content, dict):
                         for content_type in sorted(content):
                             content_types.append(content_type)
                             media_type = content[content_type]
                             if isinstance(media_type, dict):
-                                schema_by_content_type[content_type] = schema_brief(doc, media_type.get("schema"))
+                                schema = media_type.get("schema")
+                                schema_by_content_type[content_type] = schema_brief(doc, schema)
+                                required_fields_by_content_type[content_type] = schema_required_field_names(doc, schema)
                             else:
                                 schema_by_content_type[content_type] = "-"
+                                required_fields_by_content_type[content_type] = []
                     request_body = {
                         "required": bool(resolved_request_body.get("required", False)),
                         "content_types": content_types,
                         "schema_by_content_type": schema_by_content_type,
+                        "required_fields_by_content_type": required_fields_by_content_type,
                     }
 
             responses: list[dict[str, Any]] = []

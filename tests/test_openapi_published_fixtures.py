@@ -80,6 +80,8 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
             self.assertTrue((output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").exists())
             spec_page = (output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").read_text(encoding="utf-8")
             self.assertIn("Endpoint Diff Summary", spec_page)
+            self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
+            self.assertIn("| `application/json` | `object` | `actAs`, `commandId`, `commands` |", spec_page)
 
 
 if __name__ == "__main__":
