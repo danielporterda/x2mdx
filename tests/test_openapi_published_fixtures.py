@@ -86,6 +86,7 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
             self.assertIn('"commandId": "<string>"', spec_page)
             self.assertIn('"commands": [', spec_page)
             self.assertIn('"CreateAndExerciseCommand": {', spec_page)
+            self.assertIn('"templateId": "<string>"', spec_page)
 
 
 if __name__ == "__main__":

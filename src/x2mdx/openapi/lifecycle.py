@@ -254,6 +254,38 @@ def schema_required_field_names(doc: dict[str, Any], schema: Any) -> list[str]:
     return [*known, *unknown]
 
 
+def schema_type_token(doc: dict[str, Any], schema: Any) -> Any:
+    resolved = resolve_local_ref(doc, schema)
+    if not isinstance(resolved, dict):
+        return "<value>"
+
+    one_of = resolved.get("oneOf")
+    if isinstance(one_of, list) and one_of:
+        return schema_type_token(doc, one_of[0])
+
+    any_of = resolved.get("anyOf")
+    if isinstance(any_of, list) and any_of:
+        return schema_type_token(doc, any_of[0])
+
+    type_name = resolved.get("type")
+    if type_name == "string":
+        return "<string>"
+    if type_name == "integer":
+        return "<integer>"
+    if type_name == "number":
+        return "<number>"
+    if type_name == "boolean":
+        return "<boolean>"
+    if type_name == "array":
+        return [schema_type_token(doc, resolved.get("items"))]
+
+    properties, _required = object_schema_properties_and_required(doc, resolved)
+    if type_name == "object" or properties or isinstance(resolved.get("allOf"), list):
+        return "<object>"
+
+    return "<value>"
+
+
 def schema_sample_value(
     doc: dict[str, Any],
     schema: Any,
@@ -264,7 +296,7 @@ def schema_sample_value(
     seen_refs: set[str] | None = None,
 ) -> Any:
     if max_depth <= 0:
-        return "..."
+        return schema_type_token(doc, schema)
 
     if seen_refs is None:
         seen_refs = set()
@@ -273,7 +305,7 @@ def schema_sample_value(
         ref = schema.get("$ref")
         if isinstance(ref, str):
             if ref in seen_refs:
-                return "..."
+                return schema_type_token(doc, schema)
             return schema_sample_value(
                 doc,
                 resolve_local_ref(doc, schema),
@@ -285,11 +317,7 @@ def schema_sample_value(
 
     resolved = resolve_local_ref(doc, schema)
     if not isinstance(resolved, dict):
-        return "..."
-
-    enum_values = resolved.get("enum")
-    if isinstance(enum_values, list) and enum_values:
-        return enum_values[0]
+        return schema_type_token(doc, schema)
 
     one_of = resolved.get("oneOf")
     if isinstance(one_of, list) and one_of:
@@ -339,7 +367,7 @@ def schema_sample_value(
                     seen_refs=seen_refs,
                 )
             else:
-                sample[name] = "..."
+                sample[name] = "<value>"
         return sample
 
     if type_name == "array":
@@ -357,13 +385,13 @@ def schema_sample_value(
     if type_name == "string":
         return "<string>"
     if type_name == "integer":
-        return 0
+        return "<integer>"
     if type_name == "number":
-        return 0
+        return "<number>"
     if type_name == "boolean":
-        return False
+        return "<boolean>"
 
-    return "..."
+    return schema_type_token(doc, resolved)
 
 
 def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]]:
