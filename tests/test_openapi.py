@@ -261,10 +261,15 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("[Open](./specs/utility-yaml)", overview)
         self.assertIn("Version Change Timeline", spec_page)
         self.assertIn("Endpoint Diff Summary", spec_page)
+        self.assertIn("[`GET /ping`](#endpoint-get-ping)", spec_page)
+        self.assertIn('<a id="endpoint-get-ping"></a>', spec_page)
         self.assertIn("summary changed `Ping` -> `Ping endpoint`", spec_page)
         self.assertIn("query param `limit` added", spec_page)
         self.assertIn("response `200` description updated", spec_page)
         self.assertIn("response `202` added", spec_page)
+        self.assertLess(spec_page.index("Endpoint Diff Summary"), spec_page.index("Spec Metadata"))
+        self.assertGreater(spec_page.index("Spec Metadata"), spec_page.index("Latest Components"))
+        self.assertGreater(spec_page.index("Entity Summary"), spec_page.index("Spec Metadata"))
         self.assertIn("Endpoint Reference (Latest)", spec_page)
 
     def test_render_pages_keep_openapi_path_placeholders_readable(self) -> None:

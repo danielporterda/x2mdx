@@ -218,6 +218,7 @@ def summarize_operation_transition(previous: dict[str, Any] | None, current: dic
 
 def endpoint_diff_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
     rows: list[list[str]] = []
+    linkable_endpoints = {endpoint_name(operation) for operation in spec.latest_operation_details}
     operation_records = [
         record
         for record in spec.entity_lifecycle
@@ -236,7 +237,7 @@ def endpoint_diff_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
             current = details_by_version.get(record.introduced_version, {}).get(record.entity_key)
             rows.append(
                 [
-                    md_code(record.name),
+                    endpoint_anchor_link(record.name) if record.name in linkable_endpoints else md_code(record.name),
                     md_code(record.introduced_version),
                     md_code("added"),
                     compact_change_summary(summarize_operation_transition(None, current)),
@@ -252,7 +253,7 @@ def endpoint_diff_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
             current = details_by_version.get(changed_version, {}).get(record.entity_key)
             rows.append(
                 [
-                    md_code(record.name),
+                    endpoint_anchor_link(record.name) if record.name in linkable_endpoints else md_code(record.name),
                     md_code(changed_version),
                     md_code("changed"),
                     compact_change_summary(summarize_operation_transition(previous, current)),
@@ -263,7 +264,7 @@ def endpoint_diff_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
             previous = details_by_version.get(record.versions_present[-1], {}).get(record.entity_key)
             rows.append(
                 [
-                    md_code(record.name),
+                    endpoint_anchor_link(record.name) if record.name in linkable_endpoints else md_code(record.name),
                     md_code(record.removed_version),
                     md_code("removed"),
                     compact_change_summary(summarize_operation_transition(previous, None)),
@@ -277,6 +278,20 @@ def endpoint_header(operation: dict[str, Any]) -> str:
     method = str(operation.get("method", "")).strip()
     path = str(operation.get("path", "")).strip()
     return md_code(f"{method} {path}".strip())
+
+
+def endpoint_name(operation: dict[str, Any]) -> str:
+    method = str(operation.get("method", "")).strip()
+    path = str(operation.get("path", "")).strip()
+    return f"{method} {path}".strip()
+
+
+def endpoint_anchor_id(endpoint: str) -> str:
+    return f"endpoint-{slugify(endpoint)}"
+
+
+def endpoint_anchor_link(endpoint: str) -> str:
+    return f"[{md_code(endpoint)}](#{endpoint_anchor_id(endpoint)})"
 
 
 def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: int) -> str:
@@ -295,8 +310,9 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
         operation_id = operation.get("operation_id") or "-"
         summary = operation.get("summary") or "-"
         tags = ", ".join(operation.get("tags") or []) or "-"
+        endpoint = endpoint_name(operation)
         lines.append(
-            f"| {endpoint_header(operation)} | {md_code(operation_id)} | {md_text(summary)} | {md_code(tags)} |"
+            f"| {endpoint_anchor_link(endpoint)} | {md_code(operation_id)} | {md_text(summary)} | {md_code(tags)} |"
         )
 
     if len(operations) > max_endpoints:
@@ -309,7 +325,8 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
         return "\n".join(lines)
 
     for operation in shown:
-        lines.extend(["", f"### {endpoint_header(operation)}", ""])
+        endpoint = endpoint_name(operation)
+        lines.extend(["", f'<a id="{endpoint_anchor_id(endpoint)}"></a>', "", f"### {endpoint_header(operation)}", ""])
         if operation.get("operation_id"):
             lines.append(f"- Operation ID: {md_code(operation['operation_id'])}")
         if operation.get("summary"):
@@ -378,6 +395,7 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
 def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     counts = lifecycle_counts(spec)
     interesting = interesting_entities(spec)
+    endpoint_diffs = endpoint_diff_rows(spec)
     latest_operations = spec.latest_entities.get("operations", [])
     latest_components = spec.latest_entities.get("components", [])
     latest_paths = spec.latest_entities.get("paths", [])
@@ -385,47 +403,43 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
 
     blocks = [
         Paragraph("Generated from supplied versioned OpenAPI artifacts."),
-        Heading(level=2, text="Spec Metadata"),
-        BulletList(
-            items=[
-                f"Canonical spec id: {md_code(spec.spec_id)}",
-                f"Latest source path: {md_code(spec.latest_source_path)}",
-                f"OpenAPI version (latest): {md_code(spec.latest_openapi_version or '-')}",
-                f"Introduced: {lifecycle_value(spec.introduced_version, 'introduced')}",
-                f"Changed in versions: {changed_versions_value(spec.changed_in_versions)}",
-                f"Removed: {lifecycle_value(spec.removed_version, 'removed')}",
-            ]
-        ),
-        Heading(level=2, text="Entity Summary"),
-        BulletList(
-            items=[
-                f"Total entities tracked: {md_code(counts['total'])}",
-                f"Entities introduced after spec introduction: {md_code(counts['introduced_later'])}",
-                f"Entities changed at least once: {md_code(counts['changed'])}",
-                f"Entities removed: {md_code(counts['removed'])}",
-                f"Latest operations: {md_code(len(latest_operations))}",
-                f"Latest paths: {md_code(len(latest_paths))}",
-                f"Latest components: {md_code(len(latest_components))}",
-                f"Latest tags: {md_code(len(latest_tags))}",
-            ]
-        ),
-        Heading(level=2, text="Endpoint Reference (Latest)"),
-        RawMarkdown(render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS)),
-        Heading(level=2, text="Version Change Timeline"),
-        Table(
-            headers=["Version", "Added", "Changed", "Removed"],
-            rows=[
-                [
-                    md_code(version),
-                    md_code(spec.per_version_entity_deltas.get(version, {}).get("added_count", 0)),
-                    md_code(spec.per_version_entity_deltas.get(version, {}).get("changed_count", 0)),
-                    md_code(spec.per_version_entity_deltas.get(version, {}).get("removed_count", 0)),
-                ]
-                for version in spec.versions_present
-            ],
-        ),
-        Heading(level=2, text="Changed Entities"),
+        Heading(level=2, text="Endpoint Diff Summary"),
     ]
+    if not endpoint_diffs:
+        blocks.append(Paragraph("No endpoint-level diffs in the selected version range."))
+    else:
+        blocks.append(
+            Table(
+                headers=["Endpoint", "Version", "Event", "Changes"],
+                rows=endpoint_diffs[:MAX_ENDPOINT_DIFF_ROWS],
+            )
+        )
+        if len(endpoint_diffs) > MAX_ENDPOINT_DIFF_ROWS:
+            blocks.append(
+                Paragraph(
+                    f"_Showing first {MAX_ENDPOINT_DIFF_ROWS} endpoint diff rows out of {len(endpoint_diffs)}._"
+                )
+            )
+    blocks.extend(
+        [
+            Heading(level=2, text="Endpoint Reference (Latest)"),
+            RawMarkdown(render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS)),
+            Heading(level=2, text="Version Change Timeline"),
+            Table(
+                headers=["Version", "Added", "Changed", "Removed"],
+                rows=[
+                    [
+                        md_code(version),
+                        md_code(spec.per_version_entity_deltas.get(version, {}).get("added_count", 0)),
+                        md_code(spec.per_version_entity_deltas.get(version, {}).get("changed_count", 0)),
+                        md_code(spec.per_version_entity_deltas.get(version, {}).get("removed_count", 0)),
+                    ]
+                    for version in spec.versions_present
+                ],
+            ),
+            Heading(level=2, text="Changed Entities"),
+        ]
+    )
 
     if not interesting:
         blocks.append(Paragraph("No entity-level lifecycle changes in the selected version range."))
@@ -449,24 +463,6 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
             blocks.append(
                 Paragraph(
                     f"_Showing first {MAX_CHANGED_ENTITIES} rows out of {len(interesting)} changed entities._"
-                )
-            )
-
-    endpoint_diffs = endpoint_diff_rows(spec)
-    blocks.append(Heading(level=2, text="Endpoint Diff Summary"))
-    if not endpoint_diffs:
-        blocks.append(Paragraph("No endpoint-level diffs in the selected version range."))
-    else:
-        blocks.append(
-            Table(
-                headers=["Endpoint", "Version", "Event", "Changes"],
-                rows=endpoint_diffs[:MAX_ENDPOINT_DIFF_ROWS],
-            )
-        )
-        if len(endpoint_diffs) > MAX_ENDPOINT_DIFF_ROWS:
-            blocks.append(
-                Paragraph(
-                    f"_Showing first {MAX_ENDPOINT_DIFF_ROWS} endpoint diff rows out of {len(endpoint_diffs)}._"
                 )
             )
 
@@ -519,6 +515,35 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
                     f"_Showing first {MAX_LATEST_COMPONENTS} components out of {len(latest_components)}._"
                 )
             )
+
+    blocks.extend(
+        [
+            Heading(level=2, text="Spec Metadata"),
+            BulletList(
+                items=[
+                    f"Canonical spec id: {md_code(spec.spec_id)}",
+                    f"Latest source path: {md_code(spec.latest_source_path)}",
+                    f"OpenAPI version (latest): {md_code(spec.latest_openapi_version or '-')}",
+                    f"Introduced: {lifecycle_value(spec.introduced_version, 'introduced')}",
+                    f"Changed in versions: {changed_versions_value(spec.changed_in_versions)}",
+                    f"Removed: {lifecycle_value(spec.removed_version, 'removed')}",
+                ]
+            ),
+            Heading(level=2, text="Entity Summary"),
+            BulletList(
+                items=[
+                    f"Total entities tracked: {md_code(counts['total'])}",
+                    f"Entities introduced after spec introduction: {md_code(counts['introduced_later'])}",
+                    f"Entities changed at least once: {md_code(counts['changed'])}",
+                    f"Entities removed: {md_code(counts['removed'])}",
+                    f"Latest operations: {md_code(len(latest_operations))}",
+                    f"Latest paths: {md_code(len(latest_paths))}",
+                    f"Latest components: {md_code(len(latest_components))}",
+                    f"Latest tags: {md_code(len(latest_tags))}",
+                ]
+            ),
+        ]
+    )
 
     return Page(
         path=f"{spec_dir_name}/{slugify(spec.spec_id)}.mdx",
