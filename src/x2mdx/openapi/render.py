@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 from pathlib import Path
 from typing import Any
@@ -335,6 +336,7 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
             content_types = request_body.get("content_types", [])
             schema_by_content_type = request_body.get("schema_by_content_type", {})
             required_fields_by_content_type = request_body.get("required_fields_by_content_type", {})
+            sample_by_content_type = request_body.get("sample_by_content_type", {})
             if content_types:
                 lines.extend(
                     [
@@ -348,6 +350,20 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
                     required_fields_value = ", ".join(md_code(field_name) for field_name in required_fields) if required_fields else "-"
                     lines.append(
                         f"| {md_code(content_type)} | {md_code(schema_by_content_type.get(content_type, '-'))} | {required_fields_value} |"
+                    )
+                for content_type in content_types:
+                    sample = sample_by_content_type.get(content_type)
+                    if sample is None:
+                        continue
+                    lines.extend(
+                        [
+                            "",
+                            f"**Request Example: {md_code(content_type)}**",
+                            "",
+                            "```json",
+                            json.dumps(sample, indent=2),
+                            "```",
+                        ]
                     )
             else:
                 lines.append(f"- Content: {md_code('-')}")

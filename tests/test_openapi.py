@@ -310,6 +310,13 @@ class OpenApiLifecycleTests(unittest.TestCase):
                               type: string
                             payload:
                               type: object
+                              required:
+                                - innerId
+                              properties:
+                                innerId:
+                                  type: string
+                                includeDetails:
+                                  type: boolean
                             traceId:
                               type: string
                     """,
@@ -328,6 +335,10 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("### `POST /submit`", spec_page)
         self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
         self.assertIn("| `application/json` | `object` | `commandId`, `payload` |", spec_page)
+        self.assertIn("**Request Example: `application/json`**", spec_page)
+        self.assertIn('"commandId": "<string>"', spec_page)
+        self.assertIn('"payload": {', spec_page)
+        self.assertIn('"innerId": "<string>"', spec_page)
 
     def test_render_pages_keep_openapi_path_placeholders_readable(self) -> None:
         report = build_openapi_lifecycle_report_from_snapshots(

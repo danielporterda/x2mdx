@@ -82,6 +82,10 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
             self.assertIn("Endpoint Diff Summary", spec_page)
             self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
             self.assertIn("| `application/json` | `object` | `actAs`, `commandId`, `commands` |", spec_page)
+            self.assertIn("**Request Example: `application/json`**", spec_page)
+            self.assertIn('"commandId": "<string>"', spec_page)
+            self.assertIn('"commands": [', spec_page)
+            self.assertIn('"CreateAndExerciseCommand": {', spec_page)
 
 
 if __name__ == "__main__":

@@ -19,6 +19,8 @@ from x2mdx.openapi.models import (
 )
 
 HTTP_METHODS = {"get", "post", "put", "patch", "delete", "options", "head", "trace"}
+REQUEST_SAMPLE_MAX_DEPTH = 4
+REQUEST_SAMPLE_MAX_PROPERTIES = 8
 
 
 def sha256_json(value: Any) -> str:
@@ -252,6 +254,118 @@ def schema_required_field_names(doc: dict[str, Any], schema: Any) -> list[str]:
     return [*known, *unknown]
 
 
+def schema_sample_value(
+    doc: dict[str, Any],
+    schema: Any,
+    *,
+    max_depth: int = REQUEST_SAMPLE_MAX_DEPTH,
+    max_properties: int = REQUEST_SAMPLE_MAX_PROPERTIES,
+    required_only: bool = True,
+    seen_refs: set[str] | None = None,
+) -> Any:
+    if max_depth <= 0:
+        return "..."
+
+    if seen_refs is None:
+        seen_refs = set()
+
+    if isinstance(schema, dict):
+        ref = schema.get("$ref")
+        if isinstance(ref, str):
+            if ref in seen_refs:
+                return "..."
+            return schema_sample_value(
+                doc,
+                resolve_local_ref(doc, schema),
+                max_depth=max_depth,
+                max_properties=max_properties,
+                required_only=required_only,
+                seen_refs=seen_refs | {ref},
+            )
+
+    resolved = resolve_local_ref(doc, schema)
+    if not isinstance(resolved, dict):
+        return "..."
+
+    enum_values = resolved.get("enum")
+    if isinstance(enum_values, list) and enum_values:
+        return enum_values[0]
+
+    one_of = resolved.get("oneOf")
+    if isinstance(one_of, list) and one_of:
+        return schema_sample_value(
+            doc,
+            one_of[0],
+            max_depth=max_depth,
+            max_properties=max_properties,
+            required_only=required_only,
+            seen_refs=seen_refs,
+        )
+
+    any_of = resolved.get("anyOf")
+    if isinstance(any_of, list) and any_of:
+        return schema_sample_value(
+            doc,
+            any_of[0],
+            max_depth=max_depth,
+            max_properties=max_properties,
+            required_only=required_only,
+            seen_refs=seen_refs,
+        )
+
+    properties, required = object_schema_properties_and_required(doc, resolved, max_depth=max_depth)
+    type_name = resolved.get("type")
+    if type_name == "object" or properties or isinstance(resolved.get("allOf"), list):
+        property_names = list(properties.keys())
+        required_names = [name for name in property_names if name in required]
+        optional_names = [name for name in property_names if name not in required]
+        unknown_required_names = sorted(name for name in required if name not in properties)
+
+        names_to_render = required_names if required_only and required_names else property_names
+        if not names_to_render and unknown_required_names:
+            names_to_render = unknown_required_names
+
+        names_to_render = names_to_render[:max_properties]
+
+        sample: dict[str, Any] = {}
+        for name in names_to_render:
+            if name in properties:
+                sample[name] = schema_sample_value(
+                    doc,
+                    properties[name],
+                    max_depth=max_depth - 1,
+                    max_properties=max_properties,
+                    required_only=required_only,
+                    seen_refs=seen_refs,
+                )
+            else:
+                sample[name] = "..."
+        return sample
+
+    if type_name == "array":
+        return [
+            schema_sample_value(
+                doc,
+                resolved.get("items"),
+                max_depth=max_depth - 1,
+                max_properties=max_properties,
+                required_only=required_only,
+                seen_refs=seen_refs,
+            )
+        ]
+
+    if type_name == "string":
+        return "<string>"
+    if type_name == "integer":
+        return 0
+    if type_name == "number":
+        return 0
+    if type_name == "boolean":
+        return False
+
+    return "..."
+
+
 def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]]:
     operations: list[dict[str, Any]] = []
     paths = doc.get("paths", {})
@@ -301,6 +415,7 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
                     content_types: list[str] = []
                     schema_by_content_type: dict[str, str] = {}
                     required_fields_by_content_type: dict[str, list[str]] = {}
+                    sample_by_content_type: dict[str, Any] = {}
                     if isinstance(content, dict):
                         for content_type in sorted(content):
                             content_types.append(content_type)
@@ -309,14 +424,17 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
                                 schema = media_type.get("schema")
                                 schema_by_content_type[content_type] = schema_brief(doc, schema)
                                 required_fields_by_content_type[content_type] = schema_required_field_names(doc, schema)
+                                sample_by_content_type[content_type] = schema_sample_value(doc, schema)
                             else:
                                 schema_by_content_type[content_type] = "-"
                                 required_fields_by_content_type[content_type] = []
+                                sample_by_content_type[content_type] = "..."
                     request_body = {
                         "required": bool(resolved_request_body.get("required", False)),
                         "content_types": content_types,
                         "schema_by_content_type": schema_by_content_type,
                         "required_fields_by_content_type": required_fields_by_content_type,
+                        "sample_by_content_type": sample_by_content_type,
                     }
 
             responses: list[dict[str, Any]] = []
