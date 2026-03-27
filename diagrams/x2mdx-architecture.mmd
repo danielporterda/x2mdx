@@ -1,0 +1,51 @@
+flowchart TB
+    subgraph Sources["Checked-In Sources"]
+        manifest["manifest.json\nversion -> fixture path -> source path"]
+        openapi34["3.4/openapi.yaml"]
+        openapi35["3.5/openapi.yaml"]
+    end
+
+    subgraph Harness["Harness"]
+        refresher["refresh_ledger_api_openapi_fixtures.py\nrefresh checked-in fixtures when needed"]
+    end
+
+    subgraph Entry["CLI Entry Points"]
+        listFormats["x2mdx list-formats"]
+        buildLifecycle["x2mdx openapi build-api-pages-from-manifest\n--manifest ... --output-dir ..."]
+    end
+
+    subgraph Core["x2mdx Core"]
+        snapshotLoader["load_openapi_source_snapshots"]
+        lifecycleBuilder["build_openapi_lifecycle_report_from_snapshots"]
+        sharedModel["Shared output page/block model"]
+        mdxRenderer["build_pages"]
+    end
+
+    subgraph Outputs["Outputs"]
+        mdxPages["MDX pages"]
+        lifecycleJson["Lifecycle JSON\noptional lower-level/debug path"]
+    end
+
+    subgraph Consumers["Downstream Consumers"]
+        daDocs["digital-asset/docs"]
+        daApps["digital-asset/apps"]
+    end
+
+    refresher -. refreshes .-> manifest
+    refresher -. refreshes .-> openapi34
+    refresher -. refreshes .-> openapi35
+
+    manifest --> snapshotLoader
+    openapi34 --> snapshotLoader
+    openapi35 --> snapshotLoader
+    buildLifecycle --> snapshotLoader
+
+    snapshotLoader --> lifecycleBuilder
+    lifecycleBuilder --> sharedModel
+    sharedModel --> mdxRenderer
+    mdxRenderer --> mdxPages
+
+    lifecycleBuilder -. optional internal/debug .-> lifecycleJson
+
+    mdxPages --> daDocs
+    mdxPages --> daApps

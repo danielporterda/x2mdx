@@ -1,0 +1,32 @@
+tag_regex: '^(v)?0\.[0-9]+\.[0-9]+$'
+roots:
+  - "app/backend/utility-api-services/src/main/openapi"
+  - "app/openapi"
+include_spec_patterns:
+  - '^cn-validator/token-metadata-v1\.yaml$'
+  - '^cn-validator/token-metadata\.yaml$'
+  - '^cn-validator/transfer-instruction\.yaml$'
+  - '^utility-token-standard/v1/allocation-instruction-v1\.yaml$'
+  - '^utility-token-standard/v1/allocation-v1\.yaml$'
+  - '^utility-token-standard/v1/token-metadata-v1\.yaml$'
+  - '^utility-token-standard/v1/transfer-instruction-v1\.yaml$'
+  - '^utility\.yaml$'
+canonical_path_map:
+  "cn-token-standard/token-metadata.yaml": "cn-validator/token-metadata.yaml"
+  "cn-token-standard/token-metadata-v1.yaml": "cn-validator/token-metadata-v1.yaml"
+  "cn-token-standard/transfer-instruction.yaml": "cn-validator/transfer-instruction.yaml"
+  "cn-validator/scan-internal.yaml": "cn-validator/scan.yaml"
+  "utility-token-standard/allocation.yaml": "utility-token-standard/v1/allocation-v1.yaml"
+  "utility-token-standard/allocation-instruction.yaml": "utility-token-standard/v1/allocation-instruction-v1.yaml"
+  "utility-token-standard/token-metadata.yaml": "utility-token-standard/v1/token-metadata-v1.yaml"
+  "utility-token-standard/transfer-instruction.yaml": "utility-token-standard/v1/transfer-instruction-v1.yaml"
+  "cn-validator/allocation.yaml": "utility-token-standard/v1/allocation-v1.yaml"
+  "cn-validator/allocation-v1.yaml": "utility-token-standard/v1/allocation-v1.yaml"
+  "cn-validator/allocation-instruction.yaml": "utility-token-standard/v1/allocation-instruction-v1.yaml"
+  "cn-validator/allocation-instruction-v1.yaml": "utility-token-standard/v1/allocation-instruction-v1.yaml"
+  "cn-validator/token-metadata.yaml": "utility-token-standard/v1/token-metadata-v1.yaml"
+  "cn-validator/token-metadata-v1.yaml": "utility-token-standard/v1/token-metadata-v1.yaml"
+  "cn-validator/transfer-instruction.yaml": "utility-token-standard/v1/transfer-instruction-v1.yaml"
+priority_prefixes:
+  - "app/backend/utility-api-services/src/main/openapi/"
+  - "app/openapi/"
