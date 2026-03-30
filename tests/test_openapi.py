@@ -379,13 +379,13 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertNotIn("&#123;", spec_page)
         self.assertNotIn("&#125;", spec_page)
 
-    def test_cli_list_formats_outputs_openapi(self) -> None:
+    def test_cli_list_formats_outputs_supported_formats(self) -> None:
         stdout = io.StringIO()
         with redirect_stdout(stdout):
             result = cli_main(["list-formats"])
 
         self.assertEqual(result, 0)
-        self.assertEqual(stdout.getvalue(), "openapi\n")
+        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\n")
 
     def test_cli_build_api_pages_from_manifest_writes_mdx_pages(self) -> None:
         manifest_path = self._write_manifest(

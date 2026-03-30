@@ -65,6 +65,25 @@ def build_openapi_report_from_manifest_args(args: argparse.Namespace):
     )
 
 
+def build_jvm_doc_report_from_manifest_args(args: argparse.Namespace):
+    from x2mdx.jvm_docs.lifecycle import build_jvm_doc_lifecycle_report_from_sources
+    from x2mdx.jvm_docs.snapshots import load_jvm_doc_sources
+
+    manifest_path = Path(args.manifest)
+    include_versions = set(args.version) if args.version else None
+    fixture_root = Path(args.fixture_root) if args.fixture_root else None
+    sources = load_jvm_doc_sources(
+        manifest_path,
+        fixture_root=fixture_root,
+        include_versions=include_versions,
+    )
+    return build_jvm_doc_lifecycle_report_from_sources(
+        sources,
+        source_name=args.source_name or str(manifest_path),
+        version_filter=args.version_filter or ("selected manifest versions" if include_versions else "manifest versions"),
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="x2mdx")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -136,6 +155,67 @@ def build_parser() -> argparse.ArgumentParser:
         help="Group label path under the selected dropdown/version where the page should be inserted. Repeat for nested groups.",
     )
 
+    jvm_docs = subparsers.add_parser("jvm-docs", help="Javadoc/Scaladoc commands")
+    jvm_docs_subparsers = jvm_docs.add_subparsers(dest="jvm_docs_command", required=True)
+
+    build_jvm_docs = jvm_docs_subparsers.add_parser(
+        "build-api-pages-from-manifest",
+        help="Build JVM API lifecycle pages directly from local Javadoc/Scaladoc jars",
+    )
+    build_jvm_docs.add_argument(
+        "--manifest",
+        required=True,
+        help="Path to a JSON/YAML manifest that lists local Javadoc/Scaladoc jars",
+    )
+    build_jvm_docs.add_argument(
+        "--overview-file",
+        required=True,
+        help="Exact MDX file path to write for the overview page",
+    )
+    build_jvm_docs.add_argument(
+        "--details-dir",
+        required=True,
+        help="Directory where artifact and type pages should be written",
+    )
+    build_jvm_docs.add_argument(
+        "--fixture-root",
+        help="Directory to resolve manifest jar paths from; defaults to the manifest directory",
+    )
+    build_jvm_docs.add_argument(
+        "--version",
+        action="append",
+        default=[],
+        help="Version to include from the manifest. Repeat to include multiple versions.",
+    )
+    build_jvm_docs.add_argument(
+        "--source-name",
+        help="Optional source label to record in the lifecycle report",
+    )
+    build_jvm_docs.add_argument(
+        "--version-filter",
+        help="Optional label describing the selected version set",
+    )
+    build_jvm_docs.add_argument(
+        "--docs-json",
+        help="Optional docs.json file to update with the generated overview page",
+    )
+    build_jvm_docs.add_argument(
+        "--nav-dropdown",
+        help="Dropdown label in docs.json where the generated overview page should be inserted",
+    )
+    build_jvm_docs.add_argument(
+        "--nav-version",
+        action="append",
+        default=[],
+        help="Version label under the selected dropdown to update. Repeat to target multiple versions. Defaults to all versions in the dropdown.",
+    )
+    build_jvm_docs.add_argument(
+        "--nav-group",
+        action="append",
+        default=[],
+        help="Group label path under the selected dropdown/version where the page should be inserted. Repeat for nested groups.",
+    )
+
     return parser
 
 
@@ -145,6 +225,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "list-formats":
         print("openapi")
+        print("jvm-docs")
         return 0
 
     if args.command == "openapi":
@@ -182,6 +263,38 @@ def main(argv: Sequence[str] | None = None) -> int:
                 return 0
 
             write_pages(build_pages(report, overview_name=args.overview_name), Path(args.output_dir))
+            return 0
+
+    if args.command == "jvm-docs":
+        if args.jvm_docs_command == "build-api-pages-from-manifest":
+            from x2mdx.jvm_docs.render import build_pages
+            from x2mdx.mintlify import MintlifyNavTarget, update_docs_json_navigation
+            from x2mdx.render import write_pages
+
+            if (args.nav_dropdown or args.nav_version or args.nav_group) and not args.docs_json:
+                parser.error("--nav-dropdown/--nav-version/--nav-group require --docs-json")
+            if args.docs_json and not args.nav_dropdown:
+                parser.error("--docs-json requires --nav-dropdown")
+
+            report = build_jvm_doc_report_from_manifest_args(args)
+            overview_file = Path(args.overview_file)
+            details_dir = Path(args.details_dir)
+            output_root, pages = build_pages(
+                report,
+                overview_output=overview_file,
+                details_dir=details_dir,
+            )
+            write_pages(pages, output_root)
+            if args.docs_json:
+                update_docs_json_navigation(
+                    Path(args.docs_json),
+                    output_file=overview_file,
+                    target=MintlifyNavTarget(
+                        dropdown=args.nav_dropdown,
+                        versions=args.nav_version or None,
+                        groups=args.nav_group,
+                    ),
+                )
             return 0
 
     parser.error("unknown command")

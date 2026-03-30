@@ -10,6 +10,7 @@ Architectural boundary:
 Current implementation priority:
 
 - `OpenAPI -> MDX`
+- `JVM docs (Javadoc/Scaladoc) -> MDX`
 - `DAML JSON -> MDX` later
 
 The tool is designed around:
@@ -24,6 +25,7 @@ The tool is designed around:
 ```bash
 x2mdx list-formats
 x2mdx openapi build-api-pages-from-manifest --manifest fixtures/manifest.json --root published --output-dir ./out
+x2mdx jvm-docs build-api-pages-from-manifest --manifest fixtures/jvm-docs.json --overview-file ./out/jvm/index.mdx --details-dir ./out/jvm/details
 ```
 
 ## OpenAPI Build Flags
@@ -44,7 +46,7 @@ These map to repeated CLI args such as:
 
 ## Published Ledger API Fixtures
 
-The primary OpenAPI fixture set now comes from published JSON Ledger API OpenAPI pages on `docs.digitalasset.com`, captured into checked-in local fixtures under `tests/fixtures/openapi/ledger_api/`.
+The primary OpenAPI fixture set now comes from published JSON Ledger API OpenAPI pages on `docs.digitalasset.com`, captured into checked-in local fixtures under `/Users/danielporter/control/tests/fixtures/openapi/ledger_api/`.
 
 Refresh them with:
 
@@ -73,13 +75,27 @@ direnv exec . x2mdx openapi build-api-pages-from-manifest \
 
 `build-api-pages-from-manifest` is the only OpenAPI CLI build command exposed right now. It writes MDX pages directly; preview-site generation is not part of the public CLI surface at the moment.
 
+## JVM Docs
+
+`jvm-docs build-api-pages-from-manifest` consumes a local manifest of Javadoc/Scaladoc jars and renders:
+
+- one overview page
+- one artifact page per configured jar family
+- one type page per discovered type
+
+The intended split is:
+
+- downstream docs repos fetch or cache jars and write manifests
+- `x2mdx` parses those supplied local jars and renders MDX
+
 ## Running In `digital-asset/docs`
 
-If `x2mdx` is on your `PATH`, you can run it from inside a downstream docs repo and write a single generated page into `docs-main/` while updating `docs-main/docs.json` in one step:
+From inside `/Users/danielporter/control/docs`, you can write a single generated page into `docs-main/` and update `docs-main/docs.json` in one step:
 
 ```bash
+PATH=/Users/danielporter/control/.venv/bin:$PATH \
 x2mdx openapi build-api-pages-from-manifest \
-  --manifest /path/to/x2mdx/tests/fixtures/openapi/ledger_api/manifest.json \
+  --manifest ../tests/fixtures/openapi/ledger_api/manifest.json \
   --root published \
   --include-spec-pattern '^json-ledger-api/openapi\.yaml$' \
   --version 3.4 \
@@ -102,7 +118,7 @@ This mode is intended for downstream docs repos:
 
 ## direnv / Nix
 
-This repo includes `.envrc` and `shell.nix` so `direnv` can give you a Mintlify-compatible Node runtime.
+This repo now includes [.envrc](/Users/danielporter/control/.envrc) and [shell.nix](/Users/danielporter/control/shell.nix) so `direnv` can give you a Mintlify-compatible Node runtime.
 
 Activate it with:
 

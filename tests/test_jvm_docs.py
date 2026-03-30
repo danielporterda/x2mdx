@@ -1,0 +1,314 @@
+from __future__ import annotations
+
+import io
+import json
+import tempfile
+import textwrap
+import unittest
+import zipfile
+from contextlib import redirect_stdout
+from pathlib import Path
+
+from x2mdx.cli import main as cli_main
+from x2mdx.jvm_docs.lifecycle import build_jvm_doc_lifecycle_report_from_sources
+from x2mdx.jvm_docs.snapshots import load_jvm_doc_sources
+
+
+def write_text(path: Path, contents: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(textwrap.dedent(contents).lstrip(), encoding="utf-8")
+
+
+class JvmDocsTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def _build_jar(self, relative_path: str, files: dict[str, str]) -> None:
+        jar_path = self.root / relative_path
+        jar_path.parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(jar_path, "w") as archive:
+            for member_path, contents in files.items():
+                archive.writestr(member_path, textwrap.dedent(contents).lstrip())
+
+    def _write_manifest(self) -> Path:
+        self._build_jar(
+            "jars/bindings-java/1.0.0/bindings-java-1.0.0-javadoc.jar",
+            {
+                "type-search-index.js": """
+                    typeSearchIndex = [{"p":"com.example","l":"Foo"}];updateSearchResults();
+                """,
+                "member-search-index.js": """
+                    memberSearchIndex = [{"p":"com.example","c":"Foo","l":"oldMethod","u":"oldMethod()"}];updateSearchResults();
+                """,
+                "com/example/Foo.html": """
+                    <html>
+                      <head><meta name="description" content="Foo summary v1.0.0"></head>
+                      <body>
+                        <div class="type-signature">public class Foo</div>
+                        <section class="class-description"><div class="block">Foo summary v1.0.0</div></section>
+                      </body>
+                    </html>
+                """,
+            },
+        )
+        self._build_jar(
+            "jars/bindings-java/1.1.0/bindings-java-1.1.0-javadoc.jar",
+            {
+                "type-search-index.js": """
+                    typeSearchIndex = [{"p":"com.example","l":"Foo"}];updateSearchResults();
+                """,
+                "member-search-index.js": """
+                    memberSearchIndex = [
+                      {"p":"com.example","c":"Foo","l":"oldMethod","u":"oldMethod()"},
+                      {"p":"com.example","c":"Foo","l":"newMethod","u":"newMethod()"}
+                    ];updateSearchResults();
+                """,
+                "deprecated-list.html": """
+                    <div class="col-summary-item-name"><a href="com/example/Foo.html#oldMethod()">oldMethod</a></div>
+                    <div class="col-last"><div class="deprecation-comment">Deprecated, since 1.1.0 use newMethod()</div></div>
+                """,
+                "com/example/Foo.html": """
+                    <html>
+                      <head><meta name="description" content="Foo summary v1.1.0"></head>
+                      <body>
+                        <div class="type-signature">public class Foo</div>
+                        <section class="class-description"><div class="block">Foo summary v1.1.0</div></section>
+                      </body>
+                    </html>
+                """,
+            },
+        )
+        self._build_jar(
+            "jars/bindings-java/1.2.0/bindings-java-1.2.0-javadoc.jar",
+            {
+                "type-search-index.js": """
+                    typeSearchIndex = [
+                      {"p":"com.example","l":"Foo"},
+                      {"p":"com.example","l":"Bar"}
+                    ];updateSearchResults();
+                """,
+                "member-search-index.js": """
+                    memberSearchIndex = [{"p":"com.example","c":"Foo","l":"newMethod","u":"newMethod()"}];updateSearchResults();
+                """,
+                "com/example/Foo.html": """
+                    <html>
+                      <head><meta name="description" content="Foo summary v1.2.0"></head>
+                      <body>
+                        <div class="type-signature">public class Foo</div>
+                        <section class="class-description"><div class="block">Foo summary v1.2.0</div></section>
+                      </body>
+                    </html>
+                """,
+                "com/example/Bar.html": """
+                    <html>
+                      <head><meta name="description" content="Bar summary v1.2.0"></head>
+                      <body>
+                        <div class="type-signature">public class Bar</div>
+                        <section class="class-description"><div class="block">Bar summary v1.2.0</div></section>
+                      </body>
+                    </html>
+                """,
+            },
+        )
+
+        self._build_jar(
+            "jars/bindings-scala_2.13/2.0.0/bindings-scala_2.13-2.0.0-javadoc.jar",
+            {
+                "index.js": """
+                    Index.PACKAGES = {
+                      "com.example.scala": [
+                        {
+                          "name": "com.example.scala.Baz",
+                          "class": "com/example/scala/Baz.html",
+                          "members_class": [
+                            {"member":"com.example.scala.Baz.run","tail":"()","link":"com/example/scala/Baz.html#run()"}
+                          ]
+                        }
+                      ]
+                    };
+                """,
+                "com/example/scala/Baz.html": """
+                    <html>
+                      <head><meta content="Baz summary v2.0.0" name="description"></head>
+                      <body>
+                        <h4 id="signature" class="signature">final class Baz</h4>
+                        <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Baz summary v2.0.0</p></div></div>
+                      </body>
+                    </html>
+                """,
+            },
+        )
+        self._build_jar(
+            "jars/bindings-scala_2.13/2.1.0/bindings-scala_2.13-2.1.0-javadoc.jar",
+            {
+                "index.js": """
+                    Index.PACKAGES = {
+                      "com.example.scala": [
+                        {
+                          "name": "com.example.scala.Baz",
+                          "class": "com/example/scala/Baz.html",
+                          "members_class": [
+                            {"member":"com.example.scala.Baz.run","tail":"()","link":"com/example/scala/Baz.html#run()"},
+                            {"member":"com.example.scala.Baz.stop","tail":"()","link":"com/example/scala/Baz.html#stop()"}
+                          ]
+                        },
+                        {
+                          "name": "com.example.scala.Qux",
+                          "class": "com/example/scala/Qux.html",
+                          "members_class": []
+                        }
+                      ]
+                    };
+                """,
+                "com/example/scala/Baz.html": """
+                    <html>
+                      <head><meta content="Baz summary v2.1.0" name="description"></head>
+                      <body>
+                        <h4 id="signature" class="signature">final class Baz</h4>
+                        <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Baz summary v2.1.0</p></div></div>
+                      </body>
+                    </html>
+                """,
+                "com/example/scala/Qux.html": """
+                    <html>
+                      <head><meta content="Qux summary v2.1.0" name="description"></head>
+                      <body>
+                        <h4 id="signature" class="signature">final class Qux</h4>
+                        <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Qux summary v2.1.0</p></div></div>
+                      </body>
+                    </html>
+                """,
+            },
+        )
+
+        manifest = {
+            "source": "unit test jvm docs",
+            "artifacts": [
+                {
+                    "group": "com.example",
+                    "artifact": "bindings-java",
+                    "language": "java",
+                    "include_prefixes": ["com.example"],
+                    "versions": [
+                        {"version": "1.0.0", "jar_path": "jars/bindings-java/1.0.0/bindings-java-1.0.0-javadoc.jar"},
+                        {"version": "1.1.0", "jar_path": "jars/bindings-java/1.1.0/bindings-java-1.1.0-javadoc.jar"},
+                        {"version": "1.2.0", "jar_path": "jars/bindings-java/1.2.0/bindings-java-1.2.0-javadoc.jar"},
+                    ],
+                },
+                {
+                    "group": "com.example",
+                    "artifact": "bindings-scala_2.13",
+                    "language": "scala",
+                    "include_prefixes": ["com.example.scala"],
+                    "versions": [
+                        {"version": "2.0.0", "jar_path": "jars/bindings-scala_2.13/2.0.0/bindings-scala_2.13-2.0.0-javadoc.jar"},
+                        {"version": "2.1.0", "jar_path": "jars/bindings-scala_2.13/2.1.0/bindings-scala_2.13-2.1.0-javadoc.jar"},
+                    ],
+                },
+            ],
+        }
+        manifest_path = self.root / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return manifest_path
+
+    def test_build_report_tracks_lifecycle_from_local_jars(self) -> None:
+        manifest_path = self._write_manifest()
+        sources = load_jvm_doc_sources(manifest_path)
+        report = build_jvm_doc_lifecycle_report_from_sources(
+            sources,
+            source_name="unit test jars",
+            version_filter="unit test versions",
+        )
+
+        self.assertEqual(report.summary["artifact_count"], 2)
+        java_artifact = next(artifact for artifact in report.artifacts if artifact.artifact == "bindings-java")
+        scala_artifact = next(artifact for artifact in report.artifacts if artifact.artifact == "bindings-scala_2.13")
+
+        java_symbols = {symbol.symbol: symbol for symbol in java_artifact.symbols}
+        self.assertEqual(java_symbols["com.example.Foo"].latest_summary, "Foo summary v1.2.0")
+        self.assertEqual(java_symbols["com.example.Bar"].introduced_version, "1.2.0")
+        self.assertEqual(java_symbols["com.example.Foo#newMethod"].introduced_version, "1.1.0")
+
+        old_method = java_symbols["com.example.Foo#oldMethod"]
+        self.assertEqual(old_method.deprecated_version, "1.1.0")
+        self.assertEqual(old_method.removed_version, "1.2.0")
+        self.assertIn("newMethod", old_method.deprecation_note or "")
+
+        scala_symbols = {symbol.symbol: symbol for symbol in scala_artifact.symbols}
+        self.assertEqual(scala_symbols["com.example.scala.Baz"].latest_signature, "final class Baz")
+        self.assertEqual(scala_symbols["com.example.scala.Baz"].latest_summary, "Baz summary v2.1.0")
+        self.assertEqual(scala_symbols["com.example.scala.Qux"].introduced_version, "2.1.0")
+        self.assertEqual(scala_symbols["com.example.scala.Baz.stop()"].introduced_version, "2.1.0")
+
+    def test_cli_builds_pages_and_updates_docs_json(self) -> None:
+        manifest_path = self._write_manifest()
+        docs_json = self.root / "docs.json"
+        docs_json.write_text(
+            json.dumps(
+                {
+                    "navigation": {
+                        "dropdowns": [
+                            {"dropdown": "Reference", "pages": []},
+                        ]
+                    }
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        overview = self.root / "reference" / "jvm-api" / "index.mdx"
+        details_dir = self.root / "reference" / "jvm-api" / "details"
+
+        result = cli_main(
+            [
+                "jvm-docs",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--overview-file",
+                str(overview),
+                "--details-dir",
+                str(details_dir),
+                "--docs-json",
+                str(docs_json),
+                "--nav-dropdown",
+                "Reference",
+                "--source-name",
+                "unit test jars",
+                "--version-filter",
+                "unit test versions",
+            ]
+        )
+
+        self.assertEqual(result, 0)
+        self.assertTrue(overview.exists())
+        self.assertTrue((details_dir / "bindings-java.mdx").exists())
+        self.assertTrue((details_dir / "bindings-scala-2-13.mdx").exists())
+        self.assertTrue(list((details_dir / "bindings-java-types").glob("*.mdx")))
+        self.assertTrue(list((details_dir / "bindings-scala-2-13-types").glob("*.mdx")))
+
+        overview_text = overview.read_text(encoding="utf-8")
+        java_text = (details_dir / "bindings-java.mdx").read_text(encoding="utf-8")
+        docs_payload = json.loads(docs_json.read_text(encoding="utf-8"))
+
+        self.assertIn("JVM API Lifecycle", overview_text)
+        self.assertIn("details/bindings-java", overview_text)
+        self.assertIn("Changed Symbols", java_text)
+        self.assertEqual(
+            docs_payload["navigation"]["dropdowns"][0]["pages"],
+            ["reference/jvm-api/index"],
+        )
+
+    def test_cli_list_formats_outputs_openapi_and_jvm_docs(self) -> None:
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            result = cli_main(["list-formats"])
+
+        self.assertEqual(result, 0)
+        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\n")
