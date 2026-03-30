@@ -84,6 +84,45 @@ def build_jvm_doc_report_from_manifest_args(args: argparse.Namespace):
     )
 
 
+def build_daml_doc_report_from_manifest_args(args: argparse.Namespace):
+    from x2mdx.daml_json.lifecycle import build_daml_doc_report_from_sources
+    from x2mdx.daml_json.snapshots import load_daml_doc_sources
+
+    manifest_path = Path(args.manifest)
+    include_versions = set(args.version) if args.version else None
+    fixture_root = Path(args.fixture_root) if args.fixture_root else None
+    sources = load_daml_doc_sources(
+        manifest_path,
+        fixture_root=fixture_root,
+        include_versions=include_versions,
+    )
+    return build_daml_doc_report_from_sources(
+        sources,
+        source_name=args.source_name or sources.source or str(manifest_path),
+        version_filter=args.version_filter or ("selected manifest versions" if include_versions else "manifest versions"),
+        publish_version=args.publish_version,
+    )
+
+
+def build_protobuf_report_from_manifest_args(args: argparse.Namespace):
+    from x2mdx.protobuf.lifecycle import build_protobuf_history_report_from_sources
+    from x2mdx.protobuf.snapshots import load_protobuf_sources
+
+    manifest_path = Path(args.manifest)
+    include_versions = set(args.version) if args.version else None
+    fixture_root = Path(args.fixture_root) if args.fixture_root else None
+    sources = load_protobuf_sources(
+        manifest_path,
+        fixture_root=fixture_root,
+        include_versions=include_versions,
+    )
+    return build_protobuf_history_report_from_sources(
+        sources,
+        source_name=args.source_name or sources.source or str(manifest_path),
+        version_filter=args.version_filter or ("selected manifest versions" if include_versions else "manifest versions"),
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="x2mdx")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -221,6 +260,82 @@ def build_parser() -> argparse.ArgumentParser:
         help="Group label path under the selected dropdown/version where the page should be inserted. Repeat for nested groups.",
     )
 
+    daml_json = subparsers.add_parser("daml-json", help="Daml docs JSON commands")
+    daml_json_subparsers = daml_json.add_subparsers(dest="daml_json_command", required=True)
+
+    build_daml_json = daml_json_subparsers.add_parser(
+        "build-api-pages-from-manifest",
+        help="Build Daml Standard Library MDX pages directly from local docs JSON snapshots",
+    )
+    build_daml_json.add_argument(
+        "--manifest",
+        required=True,
+        help="Path to a JSON/YAML manifest that lists local Daml docs JSON snapshots",
+    )
+    build_daml_json.add_argument(
+        "--output-dir",
+        required=True,
+        help="Directory where generated MDX pages should be written",
+    )
+    build_daml_json.add_argument(
+        "--fixture-root",
+        help="Directory to resolve manifest JSON paths from; defaults to the manifest directory",
+    )
+    build_daml_json.add_argument(
+        "--version",
+        action="append",
+        default=[],
+        help="Version to include from the manifest. Repeat to include multiple versions.",
+    )
+    build_daml_json.add_argument(
+        "--publish-version",
+        help="Version whose module tree should be published; defaults to the manifest or latest selected version.",
+    )
+    build_daml_json.add_argument(
+        "--source-name",
+        help="Optional source label to record in the generated pages.",
+    )
+    build_daml_json.add_argument(
+        "--version-filter",
+        help="Optional label describing the selected version set.",
+    )
+
+    protobuf = subparsers.add_parser("protobuf", help="Descriptor-backed protobuf commands")
+    protobuf_subparsers = protobuf.add_subparsers(dest="protobuf_command", required=True)
+
+    build_protobuf = protobuf_subparsers.add_parser(
+        "build-api-pages-from-manifest",
+        help="Build protobuf history and endpoint pages directly from local descriptor-image snapshots",
+    )
+    build_protobuf.add_argument(
+        "--manifest",
+        required=True,
+        help="Path to a JSON/YAML manifest that lists local protobuf descriptor-image snapshots",
+    )
+    build_protobuf.add_argument(
+        "--output-dir",
+        required=True,
+        help="Directory where generated MDX pages should be written",
+    )
+    build_protobuf.add_argument(
+        "--fixture-root",
+        help="Directory to resolve manifest paths from; defaults to the manifest directory",
+    )
+    build_protobuf.add_argument(
+        "--version",
+        action="append",
+        default=[],
+        help="Version to include from the manifest. Repeat to include multiple versions.",
+    )
+    build_protobuf.add_argument(
+        "--source-name",
+        help="Optional source label to record in the generated pages.",
+    )
+    build_protobuf.add_argument(
+        "--version-filter",
+        help="Optional label describing the selected version set.",
+    )
+
     return parser
 
 
@@ -231,6 +346,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "list-formats":
         print("openapi")
         print("jvm-docs")
+        print("daml-json")
+        print("protobuf")
         return 0
 
     if args.command == "openapi":
@@ -301,6 +418,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                         groups=args.nav_group,
                     ),
                 )
+            return 0
+
+    if args.command == "daml-json":
+        if args.daml_json_command == "build-api-pages-from-manifest":
+            from x2mdx.daml_json.render import build_pages
+            from x2mdx.render import write_pages
+
+            report = build_daml_doc_report_from_manifest_args(args)
+            output_root, pages = build_pages(report, output_dir=Path(args.output_dir))
+            write_pages(pages, output_root)
+            return 0
+
+    if args.command == "protobuf":
+        if args.protobuf_command == "build-api-pages-from-manifest":
+            from x2mdx.protobuf.render import build_pages
+            from x2mdx.render import write_pages
+
+            report = build_protobuf_report_from_manifest_args(args)
+            output_root, pages = build_pages(report, output_dir=Path(args.output_dir))
+            write_pages(pages, output_root)
             return 0
 
     parser.error("unknown command")

@@ -1,0 +1,185 @@
+from __future__ import annotations
+
+import gzip
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from google.protobuf import descriptor_pb2
+
+from x2mdx.cli import main as cli_main
+from x2mdx.protobuf.lifecycle import build_protobuf_history_report_from_sources
+from x2mdx.protobuf.snapshots import load_protobuf_sources
+
+
+def make_field(name: str, number: int, *, type_name: str = "", scalar_type: int | None = None) -> descriptor_pb2.FieldDescriptorProto:
+    field = descriptor_pb2.FieldDescriptorProto(name=name, number=number, label=descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL)
+    if type_name:
+        field.type = descriptor_pb2.FieldDescriptorProto.TYPE_MESSAGE
+        field.type_name = type_name
+    else:
+        field.type = scalar_type or descriptor_pb2.FieldDescriptorProto.TYPE_STRING
+    return field
+
+
+def make_message(name: str, fields: list[descriptor_pb2.FieldDescriptorProto]) -> descriptor_pb2.DescriptorProto:
+    message = descriptor_pb2.DescriptorProto(name=name)
+    message.field.extend(fields)
+    return message
+
+
+def make_method(name: str, request_type: str, response_type: str) -> descriptor_pb2.MethodDescriptorProto:
+    return descriptor_pb2.MethodDescriptorProto(name=name, input_type=request_type, output_type=response_type)
+
+
+class ProtobufTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def _write_descriptor_image(self, relative_path: str, file_proto: descriptor_pb2.FileDescriptorProto) -> Path:
+        path = self.root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor_set = descriptor_pb2.FileDescriptorSet()
+        descriptor_set.file.extend([file_proto])
+        path.write_bytes(gzip.compress(descriptor_set.SerializeToString()))
+        return path
+
+    def _write_manifest(self) -> Path:
+        base_import = "com/example/service.proto"
+        repo_path = "community/example/src/main/protobuf/com/example/service.proto"
+
+        v1 = descriptor_pb2.FileDescriptorProto(name=base_import, package="com.example.v1", syntax="proto3")
+        v1.message_type.extend(
+            [
+                make_message("FooRequest", [make_field("id", 1)]),
+                make_message("FooResponse", [make_field("name", 1)]),
+            ]
+        )
+        service_v1 = descriptor_pb2.ServiceDescriptorProto(name="ExampleService")
+        service_v1.method.extend([make_method("GetFoo", ".com.example.v1.FooRequest", ".com.example.v1.FooResponse")])
+        v1.service.extend([service_v1])
+
+        v2 = descriptor_pb2.FileDescriptorProto(name=base_import, package="com.example.v1", syntax="proto3")
+        v2.message_type.extend(
+            [
+                make_message("FooRequest", [make_field("id", 1)]),
+                make_message("FooResponseV2", [make_field("name", 1), make_field("verbose", 2, scalar_type=descriptor_pb2.FieldDescriptorProto.TYPE_BOOL)]),
+                make_message("BarRequest", [make_field("query", 1)]),
+                make_message("BarResponse", [make_field("count", 1, scalar_type=descriptor_pb2.FieldDescriptorProto.TYPE_INT32)]),
+            ]
+        )
+        service_v2 = descriptor_pb2.ServiceDescriptorProto(name="ExampleService")
+        service_v2.method.extend(
+            [
+                make_method("GetFoo", ".com.example.v1.FooRequest", ".com.example.v1.FooResponseV2"),
+                make_method("GetBar", ".com.example.v1.BarRequest", ".com.example.v1.BarResponse"),
+            ]
+        )
+        v2.service.extend([service_v2])
+
+        image_v1 = self._write_descriptor_image("snapshots/1.0.0/image.bin.gz", v1)
+        image_v2 = self._write_descriptor_image("snapshots/1.1.0/image.bin.gz", v2)
+
+        metadata = {
+            "schemaVersion": 1,
+            "files": {},
+            "services": {},
+            "endpoints": {},
+            "messages": {},
+            "fields": {},
+            "enums": {},
+            "enumValues": {},
+        }
+        metadata_path = self.root / "metadata.json"
+        metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+
+        manifest = {
+            "source": "unit test protobuf snapshots",
+            "repo": {
+                "remote": "https://github.com/example/repo.git",
+                "web_url": "https://github.com/example/repo",
+            },
+            "metadata_path": str(metadata_path),
+            "versions": [
+                {
+                    "version": "1.0.0",
+                    "tag": "v1.0.0",
+                    "date": "2026-01-01",
+                    "descriptor_image_path": str(image_v1),
+                    "import_to_repo_path": {base_import: repo_path},
+                },
+                {
+                    "version": "1.1.0",
+                    "tag": "v1.1.0",
+                    "date": "2026-02-01",
+                    "descriptor_image_path": str(image_v2),
+                    "import_to_repo_path": {base_import: repo_path},
+                },
+            ],
+        }
+        manifest_path = self.root / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return manifest_path
+
+    def test_build_report_tracks_endpoint_lifecycle(self) -> None:
+        manifest_path = self._write_manifest()
+        sources = load_protobuf_sources(manifest_path)
+        report = build_protobuf_history_report_from_sources(
+            sources,
+            source_name="unit test protobuf snapshots",
+            version_filter="unit test versions",
+        )
+
+        self.assertEqual(report["latestSnapshot"]["stats"]["endpoints"], 2)
+        lifecycle = {entry["id"]: entry for entry in report["endpointLifecycle"]}
+        self.assertEqual(
+            lifecycle["com.example.v1.ExampleService/GetFoo"]["lastChangedIn"],
+            "1.1.0",
+        )
+        self.assertEqual(
+            lifecycle["com.example.v1.ExampleService/GetBar"]["introducedIn"],
+            "1.1.0",
+        )
+
+    def test_cli_builds_overview_and_endpoint_pages(self) -> None:
+        manifest_path = self._write_manifest()
+        output_dir = self.root / "out" / "protobuf-history"
+
+        result = cli_main(
+            [
+                "protobuf",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--output-dir",
+                str(output_dir),
+                "--source-name",
+                "unit test protobuf snapshots",
+                "--version-filter",
+                "unit test versions",
+            ]
+        )
+
+        self.assertEqual(result, 0)
+        overview_text = (output_dir / "index.mdx").read_text(encoding="utf-8")
+        endpoint_text = (
+            output_dir
+            / "endpoints"
+            / "com"
+            / "example"
+            / "v1"
+            / "exampleservice"
+            / "getfoo"
+            / "index.mdx"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("Canton Protobuf History", overview_text)
+        self.assertIn("GetBar", overview_text)
+        self.assertIn("rpc ExampleService.GetFoo", endpoint_text)
+        self.assertIn("FooResponseV2", endpoint_text)
+

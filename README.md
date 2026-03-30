@@ -11,7 +11,8 @@ Current implementation priority:
 
 - `OpenAPI -> MDX`
 - `JVM docs (Javadoc/Scaladoc) -> MDX`
-- `DAML JSON -> MDX` later
+- `DAML JSON -> MDX`
+- `protobuf descriptor images -> MDX`
 
 The tool is designed around:
 
@@ -26,6 +27,8 @@ The tool is designed around:
 x2mdx list-formats
 x2mdx openapi build-api-pages-from-manifest --manifest fixtures/manifest.json --root published --output-dir ./out
 x2mdx jvm-docs build-api-pages-from-manifest --manifest fixtures/jvm-docs.json --overview-file ./out/jvm/index.mdx --details-dir ./out/jvm/details
+x2mdx daml-json build-api-pages-from-manifest --manifest fixtures/daml.json --output-dir ./out/daml
+x2mdx protobuf build-api-pages-from-manifest --manifest fixtures/protobuf.json --output-dir ./out/protobuf
 ```
 
 ## OpenAPI Build Flags
@@ -87,6 +90,32 @@ The intended split is:
 
 - downstream docs repos fetch or cache jars and write manifests
 - `x2mdx` parses those supplied local jars and renders MDX
+
+## Daml JSON Docs
+
+`daml-json build-api-pages-from-manifest` consumes a local manifest of versioned Daml docs JSON snapshots and renders:
+
+- one overview page
+- one page per published module in the selected publish version
+- lifecycle metadata for introduced, deprecated, and removed modules
+
+The intended split is:
+
+- downstream docs repos invoke `damlc docs` or equivalent SDK-local tooling and cache the JSON
+- `x2mdx` turns those supplied snapshots into MDX and lifecycle summaries
+
+## Protobuf Docs
+
+`protobuf build-api-pages-from-manifest` consumes a local manifest of descriptor images plus import-path metadata and renders:
+
+- one overview page
+- one page per endpoint in the latest snapshot
+- lifecycle history for endpoints, messages, enums, and files across versions
+
+The intended split is:
+
+- downstream docs repos clone/fetch the source repo, materialize descriptor images, and write the manifest
+- `x2mdx` parses those supplied local descriptor artifacts and renders MDX
 
 ## Running In `digital-asset/docs`
 

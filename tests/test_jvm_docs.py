@@ -307,10 +307,10 @@ class JvmDocsTests(unittest.TestCase):
             ["reference/jvm-api/index"],
         )
 
-    def test_cli_list_formats_outputs_openapi_and_jvm_docs(self) -> None:
+    def test_cli_list_formats_outputs_all_supported_formats(self) -> None:
         stdout = io.StringIO()
         with redirect_stdout(stdout):
             result = cli_main(["list-formats"])
 
         self.assertEqual(result, 0)
-        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\n")
+        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\ndaml-json\nprotobuf\n")

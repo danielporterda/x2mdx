@@ -1,0 +1,486 @@
+"""Render Daml docs JSON reports into MDX pages."""
+
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+from x2mdx.daml_json.models import DamlDocsReport
+from x2mdx.output import Page, RawMarkdown
+
+EXCLUDED_MODULE_NAMES = frozenset(
+    {
+        "GHC.Show.Text",
+        "GHC.Tuple.Check",
+        "Ghc.Show.Text",
+        "Ghc.Tuple.Check",
+    }
+)
+ACRONYM_PARTS = {
+    "da": "DA",
+    "ghc": "GHC",
+    "lf": "LF",
+}
+
+
+def slugify(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def escape_md_cell(text: str) -> str:
+    return text.replace("|", r"\|").replace("\n", "<br/>")
+
+
+def render_doc_blocks(descr: Any) -> str:
+    if not descr:
+        return ""
+    if isinstance(descr, str):
+        return descr.strip()
+
+    paragraphs = descr if isinstance(descr, list) else [descr]
+    blocks: list[str] = []
+    for paragraph in paragraphs:
+        if isinstance(paragraph, list):
+            lines: list[str] = []
+            for line in paragraph:
+                if isinstance(line, list):
+                    lines.extend(str(item) for item in line)
+                else:
+                    lines.append(str(line))
+            raw = "\n".join(lines).strip()
+            has_doctest = any(line.lstrip().startswith(">>>") for line in lines)
+            has_fence = any(line.strip().startswith("```") for line in lines)
+            if has_doctest and not has_fence:
+                raw = f"```text\n{raw}\n```"
+        else:
+            raw = str(paragraph).strip()
+        if raw:
+            blocks.append(raw)
+    return "\n\n".join(blocks)
+
+
+def extract_tagged_warning_messages(warns: Any, tag: str) -> list[str]:
+    values: list[Any]
+    if warns is None:
+        values = []
+    elif isinstance(warns, list):
+        values = warns
+    else:
+        values = [warns]
+
+    out: list[str] = []
+
+    def append_texts(node: Any) -> None:
+        if isinstance(node, list):
+            for item in node:
+                append_texts(item)
+            return
+        if node is None:
+            return
+        text = str(node).strip()
+        if text:
+            out.append(text)
+
+    for entry in values:
+        if not isinstance(entry, dict):
+            continue
+        if tag in entry:
+            append_texts(entry[tag])
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for item in out:
+        if item in seen:
+            continue
+        seen.add(item)
+        deduped.append(item)
+    return deduped
+
+
+def module_display_name(module_name: str) -> str:
+    parts = [part for part in module_name.split(".") if part]
+    if not parts:
+        return module_name
+    normalized: list[str] = []
+    for part in parts:
+        mapped = ACRONYM_PARTS.get(part.lower())
+        if mapped:
+            normalized.append(mapped)
+        elif part.isupper():
+            normalized.append(part)
+        elif part.islower():
+            normalized.append(part.capitalize())
+        else:
+            normalized.append(part)
+    return ".".join(normalized)
+
+
+def as_union(node: dict[str, Any]) -> tuple[str, Any]:
+    if len(node) != 1:
+        raise ValueError(f"Expected tagged union object, got keys={list(node.keys())}")
+    [(tag, payload)] = node.items()
+    return tag, payload
+
+
+def render_type(ty: Any, prec: int = 0) -> str:
+    if not isinstance(ty, dict):
+        return str(ty)
+    tag, payload = as_union(ty)
+    if tag == "TypeApp":
+        _ref, name, args = payload
+        rendered_args = [render_type(arg, 2) for arg in args]
+        text = " ".join([str(name), *rendered_args]).strip()
+        return f"({text})" if prec >= 2 and args else text
+    if tag == "TypeFun":
+        parts = [render_type(part, 1) for part in payload]
+        text = " -> ".join(parts)
+        return f"({text})" if prec >= 1 else text
+    if tag == "TypeList":
+        return f"[{render_type(payload, 0)}]"
+    if tag == "TypeTuple":
+        items = [render_type(part, 0) for part in payload]
+        return items[0] if len(items) == 1 else f"({', '.join(items)})"
+    if tag == "TypeLit":
+        return str(payload)
+    return str(ty)
+
+
+def render_context(ctx: list[Any]) -> str:
+    if not ctx:
+        return ""
+    items = [render_type(item, 0) for item in ctx]
+    return f"{items[0]} => " if len(items) == 1 else f"({', '.join(items)}) => "
+
+
+def render_fields_table(fields: list[dict[str, Any]]) -> str:
+    if not fields:
+        return "(no fields)"
+    rows = [
+        "| Field | Type | Description |",
+        "| :---- | :--- | :---------- |",
+    ]
+    for field in fields:
+        rows.append(
+            f"| {escape_md_cell(str(field['fd_name']))} | "
+            f"{escape_md_cell(render_type(field['fd_type']))} | "
+            f"{escape_md_cell(render_doc_blocks(field.get('fd_descr')))} |"
+        )
+    return "\n".join(rows)
+
+
+def render_instance(inst: dict[str, Any]) -> str:
+    return f"instance {render_context(inst.get('id_context', []))}{render_type(inst['id_type'])}"
+
+
+def render_function(fn: dict[str, Any]) -> str:
+    name = str(fn["fct_name"])
+    anchor = fn.get("fct_anchor")
+    signature = f"{name} : {render_context(fn.get('fct_context', []))}{render_type(fn['fct_type'])}"
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    parts.append(f"### `{name}`")
+    parts.append(f"```daml\n{signature}\n```")
+    descr = render_doc_blocks(fn.get("fct_descr"))
+    if descr:
+        parts.append(descr)
+    return "\n\n".join(parts)
+
+
+def render_class_method(method: dict[str, Any]) -> str:
+    name = str(method["cm_name"])
+    signature = f"{name} : {render_context(method.get('cm_localContext', []))}{render_type(method['cm_type'])}"
+    desc = render_doc_blocks(method.get("cm_descr"))
+    out = [f"- `{signature}`"]
+    if desc:
+        out.append(f"  {desc.replace(chr(10), chr(10) + '  ')}")
+    return "\n".join(out)
+
+
+def render_class(cls: dict[str, Any]) -> str:
+    name = str(cls["cl_name"])
+    anchor = cls.get("cl_anchor")
+    args = " ".join(cls.get("cl_args", []))
+    header = f"class {render_context(cls.get('cl_super', []))}{name}"
+    if args:
+        header = f"{header} {args}"
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    parts.append(f"### `{header}`")
+    desc = render_doc_blocks(cls.get("cl_descr"))
+    if desc:
+        parts.append(desc)
+    methods = cls.get("cl_methods", [])
+    if methods:
+        parts.append("Methods:")
+        parts.append("\n".join(render_class_method(method) for method in methods))
+    instances = cls.get("cl_instances", [])
+    if instances:
+        parts.append("Instances:")
+        parts.append("\n".join(f"- `{render_instance(instance)}`" for instance in instances))
+    return "\n\n".join(parts)
+
+
+def render_constructor(constructor: dict[str, Any]) -> str:
+    tag, payload = as_union(constructor)
+    name = str(payload["ac_name"])
+    anchor = payload.get("ac_anchor")
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    if tag == "PrefixC":
+        args = " ".join(render_type(arg, 2) for arg in payload.get("ac_args", []))
+        parts.append(f"- `{f'{name} {args}'.strip()}`")
+    elif tag == "RecordC":
+        parts.append(f"- `{name}`")
+        parts.append(render_fields_table(payload.get("ac_fields", [])))
+    elif tag == "InfixC":
+        left = render_type(payload["ac_left"], 2)
+        right = render_type(payload["ac_right"], 2)
+        parts.append(f"- `{left} {name} {right}`")
+    else:
+        parts.append(f"- `{name}`")
+    desc = render_doc_blocks(payload.get("ac_descr"))
+    if desc:
+        parts.append(desc)
+    return "\n".join(parts)
+
+
+def render_adt(adt_union: dict[str, Any]) -> str:
+    tag, adt = as_union(adt_union)
+    name = str(adt["ad_name"])
+    anchor = adt.get("ad_anchor")
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    if tag in {"Data", "Newtype", "Template", "Interface"}:
+        args = " ".join(adt.get("ad_args", []))
+        header = f"{'newtype' if tag == 'Newtype' else 'data'} {name}"
+        if args:
+            header = f"{header} {args}"
+        parts.append(f"### `{header}`")
+        desc = render_doc_blocks(adt.get("ad_descr"))
+        if desc:
+            parts.append(desc)
+        constrs = adt.get("ad_constrs", [])
+        if constrs:
+            parts.append("Constructors:")
+            parts.append("\n".join(render_constructor(constructor) for constructor in constrs))
+    elif tag == "Synonym":
+        rhs = render_type(adt["ad_rhs"])
+        parts.append(f"### `type {name} = {rhs}`")
+        desc = render_doc_blocks(adt.get("ad_descr"))
+        if desc:
+            parts.append(desc)
+    else:
+        parts.append(f"### `{name}`")
+        parts.append(f"```json\n{json.dumps(adt_union, indent=2)}\n```")
+
+    instances = adt.get("ad_instances", [])
+    if instances:
+        parts.append("Instances:")
+        parts.append("\n".join(f"- `{render_instance(instance)}`" for instance in instances))
+    return "\n\n".join(parts)
+
+
+def module_file_name(module_name: str) -> str:
+    return f"{slugify(module_name)}.mdx"
+
+
+def render_module_body(
+    module_doc: dict[str, Any],
+    *,
+    module_deprecation_introduced_in: str | None,
+    module_lifecycle: dict[str, str | None] | None,
+) -> str:
+    name = str(module_doc["md_name"])
+    display_name = module_display_name(name)
+    anchor = module_doc.get("md_anchor")
+    body_parts: list[str] = []
+    if anchor:
+        body_parts.append(f'<a id="{anchor}"></a>')
+    body_parts.append(f"# {display_name}")
+    descr = render_doc_blocks(module_doc.get("md_descr"))
+    if descr:
+        body_parts.append(descr)
+
+    module_warnings = extract_tagged_warning_messages(module_doc.get("md_warn"), "WarnData")
+    module_deprecations = extract_tagged_warning_messages(module_doc.get("md_warn"), "DeprecatedData")
+    module_alpha_warning = next((msg for msg in module_warnings if "alpha" in msg.lower()), None)
+    module_deprecation_warning = module_deprecations[0] if module_deprecations else None
+
+    module_status = "active"
+    introduced_in = "-"
+    removed_in = "-"
+    if module_lifecycle:
+        raw_status = str(module_lifecycle.get("status", "active")).strip().lower()
+        if raw_status:
+            module_status = raw_status
+        raw_introduced = module_lifecycle.get("introduced_in")
+        if isinstance(raw_introduced, str) and raw_introduced.strip():
+            introduced_in = raw_introduced.strip()
+        raw_removed = module_lifecycle.get("removed_in")
+        if isinstance(raw_removed, str) and raw_removed.strip():
+            removed_in = raw_removed.strip()
+
+    lifecycle = "Stable."
+    if module_status == "removed":
+        lifecycle = "Removed."
+    elif module_alpha_warning:
+        lifecycle = "Alpha (experimental)."
+    elif module_deprecation_warning:
+        lifecycle = "Deprecated."
+    elif module_warnings:
+        lifecycle = "Warning."
+
+    deprecation_since_line = "Deprecated since: `-`"
+    if module_deprecations and module_deprecation_introduced_in:
+        deprecation_since_line = f"Deprecated since: `{module_deprecation_introduced_in}`"
+
+    body_parts.append("## Module Snapshot")
+    body_parts.append(
+        "\n".join(
+            [
+                "<CardGroup cols={2}>",
+                '<Card title="Lifecycle">',
+                lifecycle,
+                "</Card>",
+                '<Card title="Notices">',
+                f"Status: `{module_status}`",
+                f"Introduced in: `{introduced_in}`",
+                f"Removed in: `{removed_in}`",
+                f"Warnings: `{len(module_warnings)}`",
+                f"Deprecations: `{len(module_deprecations)}`",
+                deprecation_since_line,
+                "</Card>",
+                "</CardGroup>",
+            ]
+        )
+    )
+    if module_status == "removed":
+        message = (
+            f"This module was removed in `{removed_in}` and is shown here for historical reference."
+            if removed_in != "-"
+            else "This module is removed and is shown here for historical reference."
+        )
+        body_parts.append("\n".join(["<Warning>", message, "</Warning>"]))
+    elif module_alpha_warning:
+        body_parts.append("\n".join(["<Warning>", module_alpha_warning, "</Warning>"]))
+    elif module_deprecation_warning:
+        body_parts.append("\n".join(["<Warning>", module_deprecation_warning, "</Warning>"]))
+    if module_warnings:
+        warning_lines = ["<AccordionGroup>", f'<Accordion title="All warnings ({len(module_warnings)})">']
+        warning_lines.extend(f"- {item}" for item in module_warnings)
+        warning_lines.extend(["</Accordion>", "</AccordionGroup>"])
+        body_parts.append("\n".join(warning_lines))
+    if module_deprecations:
+        deprecation_lines = [
+            "<AccordionGroup>",
+            f'<Accordion title="All deprecations ({len(module_deprecations)})">',
+        ]
+        deprecation_lines.extend(f"- {item}" for item in module_deprecations)
+        deprecation_lines.extend(["</Accordion>", "</AccordionGroup>"])
+        body_parts.append("\n".join(deprecation_lines))
+
+    sections: list[tuple[str, list[str]]] = []
+    if module_doc.get("md_adts"):
+        sections.append(("Data Types", [render_adt(item) for item in module_doc["md_adts"]]))
+    if module_doc.get("md_classes"):
+        sections.append(("Typeclasses", [render_class(item) for item in module_doc["md_classes"]]))
+    if module_doc.get("md_functions"):
+        sections.append(("Functions", [render_function(item) for item in module_doc["md_functions"]]))
+    if module_doc.get("md_interfaces"):
+        sections.append(
+            ("Interfaces", [f"```json\n{json.dumps(item, indent=2)}\n```" for item in module_doc["md_interfaces"]])
+        )
+    if module_doc.get("md_templates"):
+        sections.append(
+            ("Templates", [f"```json\n{json.dumps(item, indent=2)}\n```" for item in module_doc["md_templates"]])
+        )
+
+    orphan_instances = [item for item in module_doc.get("md_instances", []) if item.get("id_isOrphan")]
+    if orphan_instances:
+        sections.append(
+            ("Orphan Typeclass Instances", [f"- `{render_instance(item)}`" for item in orphan_instances])
+        )
+
+    for section_name, bodies in sections:
+        body_parts.append(f"## {section_name}")
+        body_parts.append("\n\n".join(bodies))
+
+    return "\n\n".join(body_parts).rstrip()
+
+
+def build_pages(report: DamlDocsReport, *, output_dir: Path) -> tuple[Path, list[Page]]:
+    root = output_dir.parent
+    pages: list[Page] = []
+    module_entries: list[tuple[str, str, str]] = []
+    modules_sorted = sorted(
+        report.modules,
+        key=lambda module: module_display_name(str(module.get("md_name", ""))).lower(),
+    )
+
+    for module in modules_sorted:
+        name = str(module["md_name"])
+        if name in EXCLUDED_MODULE_NAMES:
+            continue
+        display_name = module_display_name(name)
+        target = output_dir / module_file_name(name)
+        target_ref = module_file_name(name).removesuffix(".mdx")
+        module_entries.append((name, display_name, target_ref))
+        pages.append(
+            Page(
+                path=target.relative_to(root).as_posix(),
+                title=display_name,
+                description=f"Reference documentation for Daml module {display_name}.",
+                blocks=[
+                    RawMarkdown(
+                        render_module_body(
+                            module,
+                            module_deprecation_introduced_in=report.module_deprecation_first_seen.get(name),
+                            module_lifecycle=report.module_lifecycle.get(name),
+                        )
+                    )
+                ],
+            )
+        )
+
+    index_lines = [
+        "# Daml Standard Library",
+        "",
+        "This page is generated from versioned Daml docs JSON snapshots.",
+        "",
+        "## Source",
+        "",
+        f"- Source name: `{report.source_name}`",
+        f"- Version filter: `{report.version_filter}`",
+        f"- Publish version: `{report.publish_version}`",
+        f"- Versions analyzed: `{', '.join(report.versions)}`",
+        "",
+        "## Modules",
+        "",
+    ]
+    for source_name, display_name, target in module_entries:
+        status_suffix = ""
+        lifecycle = report.module_lifecycle.get(source_name, {})
+        if lifecycle.get("status") == "removed":
+            removed_in = lifecycle.get("removed_in")
+            if isinstance(removed_in, str) and removed_in.strip():
+                status_suffix = f" - removed in `{removed_in}`"
+            else:
+                status_suffix = " - removed"
+        index_lines.append(f"- [{display_name}](./{target}){status_suffix}")
+
+    pages.insert(
+        0,
+        Page(
+            path=(output_dir / "index.mdx").relative_to(root).as_posix(),
+            title="Daml Standard Library",
+            description="Reference documentation for Daml Standard Library modules.",
+            blocks=[RawMarkdown("\n".join(index_lines).rstrip())],
+        ),
+    )
+    return root, pages
