@@ -275,6 +275,8 @@ class JvmDocsTests(unittest.TestCase):
                 str(overview),
                 "--details-dir",
                 str(details_dir),
+                "--overview-title",
+                "Custom JVM Docs",
                 "--docs-json",
                 str(docs_json),
                 "--nav-dropdown",
@@ -297,7 +299,7 @@ class JvmDocsTests(unittest.TestCase):
         java_text = (details_dir / "bindings-java.mdx").read_text(encoding="utf-8")
         docs_payload = json.loads(docs_json.read_text(encoding="utf-8"))
 
-        self.assertIn("JVM API Lifecycle", overview_text)
+        self.assertIn("Custom JVM Docs", overview_text)
         self.assertIn("details/bindings-java", overview_text)
         self.assertIn("Changed Symbols", java_text)
         self.assertEqual(

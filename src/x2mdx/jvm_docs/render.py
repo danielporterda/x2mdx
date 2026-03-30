@@ -360,6 +360,7 @@ def build_pages(
     *,
     overview_output: Path,
     details_dir: Path,
+    overview_title: str = "JVM API Lifecycle",
 ) -> tuple[Path, list[Page]]:
     root = compute_output_root(overview_output, details_dir)
     pages: list[Page] = []
@@ -394,7 +395,7 @@ def build_pages(
 
     overview_page = Page(
         path=page_path(root, overview_output),
-        title="JVM API Lifecycle",
+        title=overview_title,
         description="Generated lifecycle timeline and reference pages for local Javadoc/Scaladoc artifacts",
         blocks=[
             Paragraph("This page is generated from supplied local Javadoc/Scaladoc jars."),

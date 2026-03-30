@@ -196,6 +196,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional label describing the selected version set",
     )
     build_jvm_docs.add_argument(
+        "--overview-title",
+        default="JVM API Lifecycle",
+        help="Title to use for the generated overview page.",
+    )
+    build_jvm_docs.add_argument(
         "--docs-json",
         help="Optional docs.json file to update with the generated overview page",
     )
@@ -283,6 +288,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 report,
                 overview_output=overview_file,
                 details_dir=details_dir,
+                overview_title=args.overview_title,
             )
             write_pages(pages, output_root)
             if args.docs_json:
