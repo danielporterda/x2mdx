@@ -309,6 +309,12 @@ class JvmDocsTests(unittest.TestCase):
         self.assertIn("`com.example.Foo`", java_package_text)
         self.assertIn("`com.example.Bar`", java_package_text)
         self.assertIn("newMethod()", java_package_text)
+        self.assertIn("**Signature**", java_package_text)
+        self.assertIn("**Summary**", java_package_text)
+        self.assertIn("**Members**", java_package_text)
+        self.assertNotIn("### Signature", java_package_text)
+        self.assertNotIn("### Summary", java_package_text)
+        self.assertNotIn("### Members", java_package_text)
         self.assertEqual(
             docs_payload["navigation"]["dropdowns"][0]["pages"],
             ["reference/jvm-api/index"],

@@ -286,13 +286,13 @@ def build_package_rows_and_pages(
             if symbol.latest_signature:
                 blocks.extend(
                     [
-                        Heading(3, "Signature"),
+                        Paragraph("**Signature**"),
                         RawMarkdown(f"```text\n{symbol.latest_signature}\n```"),
                     ]
                 )
             if symbol.latest_summary:
-                blocks.extend([Heading(3, "Summary"), Paragraph(md_text(symbol.latest_summary))])
-            blocks.append(Heading(3, "Members"))
+                blocks.extend([Paragraph("**Summary**"), Paragraph(md_text(symbol.latest_summary))])
+            blocks.append(Paragraph("**Members**"))
             if entry["member_rows"]:
                 blocks.append(
                     Table(
