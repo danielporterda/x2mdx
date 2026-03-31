@@ -156,6 +156,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Filename for the overview page inside the output directory",
     )
     build_lifecycle.add_argument(
+        "--spec-dir-name",
+        default="specs",
+        help="Directory name for per-spec pages inside the output directory.",
+    )
+    build_lifecycle.add_argument(
         "--overview-title",
         default="OpenAPI Lifecycle Overview",
         help="Title to use for the generated overview page.",
@@ -398,6 +403,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 build_pages(
                     report,
                     overview_name=args.overview_name,
+                    spec_dir_name=args.spec_dir_name,
                     overview_title=args.overview_title,
                 ),
                 Path(args.output_dir),

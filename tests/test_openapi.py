@@ -444,12 +444,21 @@ class OpenApiLifecycleTests(unittest.TestCase):
                     r"^utility\.yaml$",
                     "--output-dir",
                     str(out_dir),
+                    "--overview-name",
+                    "apps-apis.mdx",
+                    "--overview-title",
+                    "Apps API Specs",
+                    "--spec-dir-name",
+                    "apps-api-specs",
                 ]
             ),
             0,
         )
-        self.assertTrue((out_dir / "overview.mdx").exists())
-        self.assertTrue((out_dir / "specs" / "utility-yaml.mdx").exists())
+        overview = out_dir / "apps-apis.mdx"
+        spec_page = out_dir / "apps-api-specs" / "utility-yaml.mdx"
+        self.assertTrue(overview.exists())
+        self.assertTrue(spec_page.exists())
+        self.assertIn("Apps API Specs", overview.read_text(encoding="utf-8"))
 
     def test_cli_build_api_pages_from_manifest_writes_single_file_and_updates_docs_json(self) -> None:
         manifest_path = self._write_manifest(
