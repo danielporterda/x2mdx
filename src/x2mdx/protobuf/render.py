@@ -414,7 +414,7 @@ def render_overview_page(
         )
         for package in packages:
             package_path = package_page_map[package["package"]]
-            link = relative_page_link(overview_path, package_path)
+            link = package_path.relative_to(output_dir.parent).with_suffix("").as_posix()
             overview_lines.append(
                 "| "
                 + " | ".join(

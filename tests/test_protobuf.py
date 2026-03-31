@@ -179,6 +179,7 @@ class ProtobufTests(unittest.TestCase):
         self.assertIn("Canton Protobuf History", overview_text)
         self.assertIn("Package Reference", overview_text)
         self.assertIn("com.example.v1", overview_text)
+        self.assertIn("(protobuf-history/packages/com-example-v1)", overview_text)
         self.assertIn("### Service `ExampleService`", package_text)
         self.assertIn("**Endpoint `ExampleService.GetFoo`**", package_text)
         self.assertIn("rpc ExampleService.GetFoo", package_text)
