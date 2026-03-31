@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 from pathlib import Path
+import shutil
 
 
 def add_openapi_config_args(parser: argparse.ArgumentParser) -> None:
@@ -424,6 +425,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             report = build_jvm_doc_report_from_manifest_args(args)
             overview_file = Path(args.overview_file)
             details_dir = Path(args.details_dir)
+            if overview_file.exists():
+                overview_file.unlink()
+            if details_dir.exists():
+                shutil.rmtree(details_dir)
             output_root, pages = build_pages(
                 report,
                 overview_output=overview_file,

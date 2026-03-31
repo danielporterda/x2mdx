@@ -292,16 +292,23 @@ class JvmDocsTests(unittest.TestCase):
         self.assertTrue(overview.exists())
         self.assertTrue((details_dir / "bindings-java.mdx").exists())
         self.assertTrue((details_dir / "bindings-scala-2-13.mdx").exists())
-        self.assertTrue(list((details_dir / "bindings-java-types").glob("*.mdx")))
-        self.assertTrue(list((details_dir / "bindings-scala-2-13-types").glob("*.mdx")))
+        java_package_pages = list((details_dir / "bindings-java-packages").glob("*.mdx"))
+        scala_package_pages = list((details_dir / "bindings-scala-2-13-packages").glob("*.mdx"))
+        self.assertTrue(java_package_pages)
+        self.assertTrue(scala_package_pages)
 
         overview_text = overview.read_text(encoding="utf-8")
         java_text = (details_dir / "bindings-java.mdx").read_text(encoding="utf-8")
+        java_package_text = java_package_pages[0].read_text(encoding="utf-8")
         docs_payload = json.loads(docs_json.read_text(encoding="utf-8"))
 
         self.assertIn("Custom JVM Docs", overview_text)
         self.assertIn("details/bindings-java", overview_text)
-        self.assertIn("Changed Symbols", java_text)
+        self.assertIn("Package Reference", java_text)
+        self.assertIn("com.example", java_package_text)
+        self.assertIn("`com.example.Foo`", java_package_text)
+        self.assertIn("`com.example.Bar`", java_package_text)
+        self.assertIn("newMethod()", java_package_text)
         self.assertEqual(
             docs_payload["navigation"]["dropdowns"][0]["pages"],
             ["reference/jvm-api/index"],

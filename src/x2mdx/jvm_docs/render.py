@@ -8,6 +8,7 @@ import os
 import re
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 from x2mdx.jvm_docs.models import JvmDocArtifactLifecycle, JvmDocLifecycleReport, JvmDocSymbolLifecycle
 from x2mdx.output import BulletList, Heading, Page, Paragraph, RawMarkdown, Table
@@ -101,13 +102,31 @@ def scala_member_owner_and_label(symbol: JvmDocSymbolLifecycle) -> tuple[str, st
     return owner, label
 
 
-def build_type_rows_and_pages(
+def package_name_for_symbol(symbol: JvmDocSymbolLifecycle) -> str:
+    doc_path = symbol.latest_doc_path.strip("/")
+    package_path = Path(doc_path).parent.as_posix().strip(".")
+    if package_path and package_path != ".":
+        return package_path.replace("/", ".")
+    if symbol.kind == "type" and "." in symbol.symbol:
+        return symbol.symbol.rsplit(".", 1)[0]
+    if symbol.kind == "member":
+        if symbol.language == "java":
+            owner = java_member_owner(symbol)
+        else:
+            owner, _ = scala_member_owner_and_label(symbol)
+        if "." in owner:
+            return owner.rsplit(".", 1)[0]
+    return "(root package)"
+
+
+def type_anchor(symbol: JvmDocSymbolLifecycle) -> str:
+    token = hashlib.sha1(symbol.symbol.encode("utf-8")).hexdigest()[:10]
+    return f"type-{token}"
+
+
+def build_type_entries(
     artifact: JvmDocArtifactLifecycle,
-    *,
-    root: Path,
-    details_dir: Path,
-    artifact_page_path: Path,
-) -> tuple[list[dict[str, str]], list[Page]]:
+) -> list[dict[str, Any]]:
     type_symbols = sorted((symbol for symbol in artifact.symbols if symbol.kind == "type"), key=lambda symbol: symbol.symbol)
     member_symbols = [symbol for symbol in artifact.symbols if symbol.kind == "member"]
     type_by_symbol = {symbol.symbol: symbol for symbol in type_symbols}
@@ -149,14 +168,9 @@ def build_type_rows_and_pages(
         if member.removed_version is not None:
             type_flags[best_match.symbol_key]["removed"] = True
 
-    rows: list[dict[str, str]] = []
-    pages: list[Page] = []
-    type_pages_dir = details_dir / f"{slugify(artifact.artifact)}-types"
+    type_entries: list[dict[str, Any]] = []
 
     for type_symbol in type_symbols:
-        token = hashlib.sha1(type_symbol.symbol.encode("utf-8")).hexdigest()[:10]
-        file_name = f"{slugify(type_symbol.symbol.rsplit('.', 1)[-1])}-{token}.mdx"
-        type_page_path = type_pages_dir / file_name
         upstream = latest_doc_link(type_symbol)
         type_members = sorted(members_by_type.get(type_symbol.symbol_key, []), key=lambda symbol: symbol.symbol)
         flags = type_flags[type_symbol.symbol_key]
@@ -178,61 +192,133 @@ def build_type_rows_and_pages(
                 ]
             )
 
-        blocks = [
-            Paragraph(f"Back to [artifact page]({relative_page_link(type_page_path, artifact_page_path)})."),
-            Heading(2, "Type"),
+        type_entries.append(
+            {
+                "anchor": type_anchor(type_symbol),
+                "upstream": f"[Open]({upstream})" if upstream else "-",
+                "type": f"`{md_code(type_symbol.symbol)}`",
+                "type_text": type_symbol.symbol,
+                "summary": md_text(type_symbol.latest_summary or ""),
+                "introduced": format_lifecycle_value(type_symbol.introduced_version),
+                "deprecated": format_lifecycle_value(type_symbol.deprecated_version),
+                "removed": format_lifecycle_value(type_symbol.removed_version),
+                "package": package_name_for_symbol(type_symbol),
+                "symbol": type_symbol,
+                "member_rows": member_rows,
+                "has_deprecated": "true" if flags["deprecated"] else "false",
+                "has_removed": "true" if flags["removed"] else "false",
+            }
+        )
+
+    return type_entries
+
+
+def build_package_rows_and_pages(
+    artifact: JvmDocArtifactLifecycle,
+    *,
+    root: Path,
+    details_dir: Path,
+    artifact_page_path: Path,
+) -> tuple[list[dict[str, str]], list[Page]]:
+    type_entries = build_type_entries(artifact)
+    package_pages_dir = details_dir / f"{slugify(artifact.artifact)}-packages"
+    package_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for entry in type_entries:
+        package_groups[str(entry["package"])].append(entry)
+
+    rows: list[dict[str, str]] = []
+    pages: list[Page] = []
+
+    for package_name in sorted(package_groups):
+        package_entries = sorted(package_groups[package_name], key=lambda item: str(item["type_text"]))
+        token = hashlib.sha1(package_name.encode("utf-8")).hexdigest()[:10]
+        package_page_path = package_pages_dir / f"{slugify(package_name)}-{token}.mdx"
+
+        introduced_count = sum(1 for entry in package_entries if entry["introduced"] != format_lifecycle_value(artifact.versions[0]))
+        deprecated_count = sum(1 for entry in package_entries if entry["has_deprecated"] == "true")
+        removed_count = sum(1 for entry in package_entries if entry["has_removed"] == "true")
+
+        blocks: list[Any] = [
+            Paragraph(f"Back to [artifact page]({relative_page_link(package_page_path, artifact_page_path)})."),
+            Heading(2, "Package"),
             BulletList(
                 items=[
                     f"Artifact: `{md_code(f'{artifact.group}:{artifact.artifact}')}`",
                     f"Language: `{md_code(artifact.language)}`",
-                    f"Introduced: {format_lifecycle_value(type_symbol.introduced_version)}",
-                    f"Deprecated: {format_lifecycle_value(type_symbol.deprecated_version)}",
-                    f"Removed: {format_lifecycle_value(type_symbol.removed_version)}",
+                    f"Package: `{md_code(package_name)}`",
+                    f"Types in package: `{len(package_entries)}`",
                 ]
             ),
+            Heading(2, "Type Reference"),
+            Table(
+                headers=["Type", "Upstream", "Summary", "Introduced", "Deprecated", "Removed"],
+                rows=[
+                    [
+                        f"[`{md_code(str(entry['type_text']))}`](#{entry['anchor']})",
+                        str(entry["upstream"]),
+                        str(entry["summary"]),
+                        str(entry["introduced"]),
+                        str(entry["deprecated"]),
+                        str(entry["removed"]),
+                    ]
+                    for entry in package_entries
+                ],
+            ),
         ]
-        if upstream:
-            blocks.append(Paragraph(f"Upstream docs: [Open]({upstream})"))
-        if type_symbol.latest_signature:
+
+        for entry in package_entries:
+            symbol = entry["symbol"]
             blocks.extend(
                 [
-                    Heading(2, "Signature"),
-                    RawMarkdown(f"```text\n{type_symbol.latest_signature}\n```"),
+                    RawMarkdown(f'<a id="{entry["anchor"]}"></a>'),
+                    Heading(2, f"`{md_code(symbol.symbol)}`"),
+                    BulletList(
+                        items=[
+                            f"Introduced: {entry['introduced']}",
+                            f"Deprecated: {entry['deprecated']}",
+                            f"Removed: {entry['removed']}",
+                        ]
+                    ),
                 ]
             )
-        if type_symbol.latest_summary:
-            blocks.extend([Heading(2, "Summary"), Paragraph(md_text(type_symbol.latest_summary))])
-        blocks.append(Heading(2, "Members"))
-        if member_rows:
-            blocks.append(
-                Table(
-                    headers=["Docs", "Member", "Introduced", "Deprecated", "Removed"],
-                    rows=member_rows,
+            if entry["upstream"] != "-":
+                blocks.append(Paragraph(f"Upstream docs: {entry['upstream']}"))
+            if symbol.latest_signature:
+                blocks.extend(
+                    [
+                        Heading(3, "Signature"),
+                        RawMarkdown(f"```text\n{symbol.latest_signature}\n```"),
+                    ]
                 )
-            )
-        else:
-            blocks.append(Paragraph("No members found for this type in the configured artifacts."))
+            if symbol.latest_summary:
+                blocks.extend([Heading(3, "Summary"), Paragraph(md_text(symbol.latest_summary))])
+            blocks.append(Heading(3, "Members"))
+            if entry["member_rows"]:
+                blocks.append(
+                    Table(
+                        headers=["Docs", "Member", "Introduced", "Deprecated", "Removed"],
+                        rows=entry["member_rows"],
+                    )
+                )
+            else:
+                blocks.append(Paragraph("No members found for this type in the configured artifacts."))
 
         pages.append(
             Page(
-                path=page_path(root, type_page_path),
-                title=type_symbol.symbol,
-                description="Generated type reference page from local Javadoc/Scaladoc snapshots",
+                path=page_path(root, package_page_path),
+                title=package_name,
+                description="Generated package reference page from local Javadoc/Scaladoc snapshots",
                 blocks=blocks,
             )
         )
         rows.append(
             {
-                "local": f"[Open]({relative_page_link(artifact_page_path, type_page_path)})",
-                "upstream": f"[Open]({upstream})" if upstream else "-",
-                "type": f"`{md_code(type_symbol.symbol)}`",
-                "summary": md_text(type_symbol.latest_summary or ""),
-                "introduced": format_lifecycle_value(type_symbol.introduced_version),
-                "deprecated": format_lifecycle_value(type_symbol.deprecated_version),
-                "removed": format_lifecycle_value(type_symbol.removed_version),
-                "type_symbol_key": type_symbol.symbol_key,
-                "has_deprecated": "true" if flags["deprecated"] else "false",
-                "has_removed": "true" if flags["removed"] else "false",
+                "local": f"[Open]({relative_page_link(artifact_page_path, package_page_path)})",
+                "package": f"`{md_code(package_name)}`",
+                "types": f"`{len(package_entries)}`",
+                "introduced": f"`{introduced_count}`",
+                "deprecated": f"`{deprecated_count}`",
+                "removed": f"`{removed_count}`",
             }
         )
 
@@ -248,7 +334,7 @@ def build_artifact_page(
 ) -> tuple[Page, list[Page]]:
     artifact_slug = slugify(artifact.artifact)
     artifact_page_path = details_dir / f"{artifact_slug}.mdx"
-    type_rows, type_pages = build_type_rows_and_pages(
+    package_rows, package_pages = build_package_rows_and_pages(
         artifact,
         root=root,
         details_dir=details_dir,
@@ -290,16 +376,16 @@ def build_artifact_page(
                 f"Removed in range: `{change_summary['removed']}`",
             ]
         ),
-        Heading(2, "Type Reference"),
+        Heading(2, "Package Reference"),
         Table(
-            headers=["Local Page", "Upstream", "Type", "Summary", "Introduced", "Deprecated", "Removed"],
+            headers=["Local Page", "Package", "Types", "Introduced", "Deprecated", "Removed"],
             rows=[
-                [row["local"], row["upstream"], row["type"], row["summary"], row["introduced"], row["deprecated"], row["removed"]]
-                for row in type_rows
+                [row["local"], row["package"], row["types"], row["introduced"], row["deprecated"], row["removed"]]
+                for row in package_rows
             ],
         )
-        if type_rows
-        else Paragraph("No type symbols were found for this artifact."),
+        if package_rows
+        else Paragraph("No package-level symbols were found for this artifact."),
         Heading(2, "Changed Symbols"),
         Table(
             headers=["Docs", "Symbol", "Kind", "Introduced", "Deprecated", "Removed"],
@@ -352,7 +438,7 @@ def build_artifact_page(
         description="Generated lifecycle timeline and type index from local Javadoc/Scaladoc snapshots",
         blocks=blocks,
     )
-    return artifact_page, type_pages
+    return artifact_page, package_pages
 
 
 def build_pages(
