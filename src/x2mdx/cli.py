@@ -321,7 +321,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     build_protobuf = protobuf_subparsers.add_parser(
         "build-api-pages-from-manifest",
-        help="Build protobuf history and endpoint pages directly from local descriptor-image snapshots",
+        help="Build protobuf history and package pages directly from local descriptor-image snapshots",
     )
     build_protobuf.add_argument(
         "--manifest",
@@ -468,7 +468,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             from x2mdx.render import write_pages
 
             report = build_protobuf_report_from_manifest_args(args)
-            output_root, pages = build_pages(report, output_dir=Path(args.output_dir))
+            output_dir = Path(args.output_dir)
+            if output_dir.exists():
+                shutil.rmtree(output_dir)
+            output_root, pages = build_pages(report, output_dir=output_dir)
             write_pages(pages, output_root)
             return 0
 

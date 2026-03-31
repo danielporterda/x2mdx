@@ -146,9 +146,12 @@ class ProtobufTests(unittest.TestCase):
             "1.1.0",
         )
 
-    def test_cli_builds_overview_and_endpoint_pages(self) -> None:
+    def test_cli_builds_overview_and_package_pages(self) -> None:
         manifest_path = self._write_manifest()
         output_dir = self.root / "out" / "protobuf-history"
+        stale_endpoint_file = output_dir / "endpoints" / "stale" / "index.mdx"
+        stale_endpoint_file.parent.mkdir(parents=True, exist_ok=True)
+        stale_endpoint_file.write_text("stale\n", encoding="utf-8")
 
         result = cli_main(
             [
@@ -167,19 +170,18 @@ class ProtobufTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         overview_text = (output_dir / "index.mdx").read_text(encoding="utf-8")
-        endpoint_text = (
+        package_text = (
             output_dir
-            / "endpoints"
-            / "com"
-            / "example"
-            / "v1"
-            / "exampleservice"
-            / "getfoo"
-            / "index.mdx"
+            / "packages"
+            / "com-example-v1.mdx"
         ).read_text(encoding="utf-8")
 
         self.assertIn("Canton Protobuf History", overview_text)
-        self.assertIn("GetBar", overview_text)
-        self.assertIn("rpc ExampleService.GetFoo", endpoint_text)
-        self.assertIn("FooResponseV2", endpoint_text)
-
+        self.assertIn("Package Reference", overview_text)
+        self.assertIn("com.example.v1", overview_text)
+        self.assertIn("### Service `ExampleService`", package_text)
+        self.assertIn("**Endpoint `ExampleService.GetFoo`**", package_text)
+        self.assertIn("rpc ExampleService.GetFoo", package_text)
+        self.assertIn("## Type Reference", package_text)
+        self.assertIn("**Message `com.example.v1.FooResponseV2`**", package_text)
+        self.assertFalse(stale_endpoint_file.exists())
