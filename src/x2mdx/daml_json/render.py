@@ -117,6 +117,14 @@ def module_display_name(module_name: str) -> str:
     return ".".join(normalized)
 
 
+def normalize_type_lit(value: Any) -> str:
+    text = str(value)
+    match = re.fullmatch(r'(["\'])([A-Za-z_][A-Za-z0-9_]*)\1', text)
+    if match:
+        return match.group(2)
+    return text
+
+
 def as_union(node: dict[str, Any]) -> tuple[str, Any]:
     if len(node) != 1:
         raise ValueError(f"Expected tagged union object, got keys={list(node.keys())}")
@@ -143,7 +151,7 @@ def render_type(ty: Any, prec: int = 0) -> str:
         items = [render_type(part, 0) for part in payload]
         return items[0] if len(items) == 1 else f"({', '.join(items)})"
     if tag == "TypeLit":
-        return str(payload)
+        return normalize_type_lit(payload)
     return str(ty)
 
 
@@ -174,6 +182,17 @@ def render_instance(inst: dict[str, Any]) -> str:
     return f"instance {render_context(inst.get('id_context', []))}{render_type(inst['id_type'])}"
 
 
+def render_warn_blocks(warns: Any) -> list[str]:
+    warning_messages = extract_tagged_warning_messages(warns, "WarnData")
+    deprecation_messages = extract_tagged_warning_messages(warns, "DeprecatedData")
+    blocks: list[str] = []
+    for message in warning_messages:
+        blocks.append("\n".join(["<Warning>", message, "</Warning>"]))
+    for message in deprecation_messages:
+        blocks.append("\n".join(["<Warning>", f"Deprecated: {message}", "</Warning>"]))
+    return blocks
+
+
 def render_function(fn: dict[str, Any]) -> str:
     name = str(fn["fct_name"])
     anchor = fn.get("fct_anchor")
@@ -186,6 +205,114 @@ def render_function(fn: dict[str, Any]) -> str:
     descr = render_doc_blocks(fn.get("fct_descr"))
     if descr:
         parts.append(descr)
+    return "\n\n".join(parts)
+
+
+def render_choice(choice: dict[str, Any]) -> str:
+    name = str(choice.get("cd_name", ""))
+    anchor = choice.get("cd_anchor")
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    parts.append(f"#### Choice `{name}`")
+    desc = render_doc_blocks(choice.get("cd_descr"))
+    if desc:
+        parts.append(desc)
+    parts.extend(render_warn_blocks(choice.get("cd_warns")))
+    controllers = choice.get("cd_controller") or []
+    if controllers:
+        parts.append("Controllers: " + ", ".join(f"`{item}`" for item in controllers))
+    choice_type = choice.get("cd_type")
+    if choice_type:
+        parts.append(f"Returns: `{render_type(choice_type)}`")
+    fields = choice.get("cd_fields") or []
+    if fields:
+        parts.append("Arguments:")
+        parts.append(render_fields_table(fields))
+    return "\n\n".join(parts)
+
+
+def render_template(template: dict[str, Any]) -> str:
+    name = str(template.get("td_name", ""))
+    anchor = template.get("td_anchor")
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    parts.append(f"### Template `{name}`")
+    desc = render_doc_blocks(template.get("td_descr"))
+    if desc:
+        parts.append(desc)
+    parts.extend(render_warn_blocks(template.get("td_warns")))
+    signatory = template.get("td_signatory") or []
+    if signatory:
+        parts.append("Signatories: " + ", ".join(f"`{item}`" for item in signatory))
+    payload = template.get("td_payload") or []
+    if payload:
+        parts.append("Payload:")
+        parts.append(render_fields_table(payload))
+    interface_instances = template.get("td_interfaceInstances") or []
+    if interface_instances:
+        lines = ["Interface Instances:"]
+        lines.extend(
+            f"- `{render_type(item.get('ii_interface'))}` for `{render_type(item.get('ii_template'))}`"
+            for item in interface_instances
+        )
+        parts.append("\n".join(lines))
+    choices = template.get("td_choices") or []
+    if choices:
+        parts.append("Choices:")
+        parts.append("\n\n".join(render_choice(choice) for choice in choices))
+    return "\n\n".join(parts)
+
+
+def render_interface_method(method: dict[str, Any]) -> str:
+    name = str(method.get("mtd_name", ""))
+    anchor = method.get("mtd_anchor")
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    parts.append(f"#### Method `{name}`")
+    desc = render_doc_blocks(method.get("mtd_descr"))
+    if desc:
+        parts.append(desc)
+    parts.extend(render_warn_blocks(method.get("mtd_warns")))
+    method_type = method.get("mtd_type")
+    if method_type:
+        parts.append(f"Type: `{render_type(method_type)}`")
+    return "\n\n".join(parts)
+
+
+def render_interface(interface: dict[str, Any]) -> str:
+    name = str(interface.get("if_name", ""))
+    anchor = interface.get("if_anchor")
+    parts: list[str] = []
+    if anchor:
+        parts.append(f'<a id="{anchor}"></a>')
+    parts.append(f"### Interface `{name}`")
+    desc = render_doc_blocks(interface.get("if_descr"))
+    if desc:
+        parts.append(desc)
+    parts.extend(render_warn_blocks(interface.get("if_warns")))
+    viewtype = interface.get("if_viewtype")
+    if isinstance(viewtype, dict):
+        raw_view = viewtype.get("unInterfaceViewtypeDoc", viewtype)
+        parts.append(f"View Type: `{render_type(raw_view)}`")
+    choices = interface.get("if_choices") or []
+    if choices:
+        parts.append("Choices:")
+        parts.append("\n\n".join(render_choice(choice) for choice in choices))
+    methods = interface.get("if_methods") or []
+    if methods:
+        parts.append("Methods:")
+        parts.append("\n\n".join(render_interface_method(method) for method in methods))
+    interface_instances = interface.get("if_interfaceInstances") or []
+    if interface_instances:
+        lines = ["Interface Instances:"]
+        lines.extend(
+            f"- `{render_type(item.get('ii_interface'))}` for `{render_type(item.get('ii_template'))}`"
+            for item in interface_instances
+        )
+        parts.append("\n".join(lines))
     return "\n\n".join(parts)
 
 
@@ -250,6 +377,51 @@ def render_constructor(constructor: dict[str, Any]) -> str:
 
 
 def render_adt(adt_union: dict[str, Any]) -> str:
+    if "ADTDoc" in adt_union and isinstance(adt_union["ADTDoc"], dict):
+        adt = adt_union["ADTDoc"]
+        name = str(adt["ad_name"])
+        anchor = adt.get("ad_anchor")
+        parts: list[str] = []
+        if anchor:
+            parts.append(f'<a id="{anchor}"></a>')
+        args = " ".join(adt.get("ad_args", []))
+        header = f"data {name}"
+        if args:
+            header = f"{header} {args}"
+        parts.append(f"### `{header}`")
+        desc = render_doc_blocks(adt.get("ad_descr"))
+        if desc:
+            parts.append(desc)
+        parts.extend(render_warn_blocks(adt.get("ad_warns")))
+        constrs = adt.get("ad_constrs", [])
+        if constrs:
+            parts.append("Constructors:")
+            parts.append("\n".join(render_constructor(constructor) for constructor in constrs))
+        instances = adt.get("ad_instances", [])
+        if instances:
+            parts.append("Instances:")
+            parts.append("\n".join(f"- `{render_instance(instance)}`" for instance in instances))
+        return "\n\n".join(parts)
+
+    if "TypeSynDoc" in adt_union and isinstance(adt_union["TypeSynDoc"], dict):
+        adt = adt_union["TypeSynDoc"]
+        name = str(adt["ad_name"])
+        anchor = adt.get("ad_anchor")
+        rhs = render_type(adt.get("ad_rhs"))
+        parts: list[str] = []
+        if anchor:
+            parts.append(f'<a id="{anchor}"></a>')
+        parts.append(f"### `type {name} = {rhs}`")
+        desc = render_doc_blocks(adt.get("ad_descr"))
+        if desc:
+            parts.append(desc)
+        parts.extend(render_warn_blocks(adt.get("ad_warns")))
+        instances = adt.get("ad_instances", [])
+        if instances:
+            parts.append("Instances:")
+            parts.append("\n".join(f"- `{render_instance(instance)}`" for instance in instances))
+        return "\n\n".join(parts)
+
     tag, adt = as_union(adt_union)
     name = str(adt["ad_name"])
     anchor = adt.get("ad_anchor")
@@ -393,13 +565,9 @@ def render_module_body(
     if module_doc.get("md_functions"):
         sections.append(("Functions", [render_function(item) for item in module_doc["md_functions"]]))
     if module_doc.get("md_interfaces"):
-        sections.append(
-            ("Interfaces", [f"```json\n{json.dumps(item, indent=2)}\n```" for item in module_doc["md_interfaces"]])
-        )
+        sections.append(("Interfaces", [render_interface(item) for item in module_doc["md_interfaces"]]))
     if module_doc.get("md_templates"):
-        sections.append(
-            ("Templates", [f"```json\n{json.dumps(item, indent=2)}\n```" for item in module_doc["md_templates"]])
-        )
+        sections.append(("Templates", [render_template(item) for item in module_doc["md_templates"]]))
 
     orphan_instances = [item for item in module_doc.get("md_instances", []) if item.get("id_isOrphan")]
     if orphan_instances:

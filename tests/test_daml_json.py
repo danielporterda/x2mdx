@@ -39,6 +39,74 @@ def module_doc(
     }
 
 
+def utilities_style_module(name: str) -> dict[str, object]:
+    return {
+        "md_name": name,
+        "md_descr": f"{name} docs",
+        "md_warn": [],
+        "md_adts": [
+            {
+                "ADTDoc": {
+                    "ad_anchor": "type-claim",
+                    "ad_name": "Claim",
+                    "ad_args": [],
+                    "ad_descr": [["Claim record docs"]],
+                    "ad_warns": [],
+                    "ad_constrs": [
+                        {
+                            "RecordC": {
+                                "ac_anchor": "constr-claim",
+                                "ac_name": "Claim",
+                                "ac_descr": [],
+                                "ac_fields": [
+                                    {
+                                        "fd_name": "subject",
+                                        "fd_type": {"TypeApp": [{}, "Text", []]},
+                                        "fd_descr": ["Subject text"],
+                                    }
+                                ],
+                            }
+                        }
+                    ],
+                    "ad_instances": [],
+                }
+            }
+        ],
+        "md_classes": [],
+        "md_interfaces": [],
+        "md_templates": [
+            {
+                "td_anchor": "template-credential",
+                "td_name": "Credential",
+                "td_descr": [["Credential template docs"]],
+                "td_warns": [],
+                "td_signatory": ["issuer", "holder"],
+                "td_payload": [
+                    {
+                        "fd_name": "issuer",
+                        "fd_type": {"TypeApp": [{}, "Party", []]},
+                        "fd_descr": ["Issuer party"],
+                    }
+                ],
+                "td_interfaceInstances": [],
+                "td_choices": [
+                    {
+                        "cd_anchor": "choice-get",
+                        "cd_name": "Get",
+                        "cd_controller": ["actor"],
+                        "cd_descr": [["Fetch the credential"]],
+                        "cd_fields": [],
+                        "cd_type": {"TypeApp": [{}, "CredentialResult", []]},
+                        "cd_warns": [],
+                    }
+                ],
+            }
+        ],
+        "md_instances": [],
+        "md_functions": [],
+    }
+
+
 class DamlJsonTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -128,3 +196,44 @@ class DamlJsonTests(unittest.TestCase):
         self.assertIn("removed in `1.1.0`", index_text)
         self.assertIn("Deprecated since: `1.1.0`", list_text)
         self.assertIn("historical reference", legacy_text)
+
+    def test_cli_renders_utilities_style_adts_and_templates(self) -> None:
+        snapshot = self._write_json(
+            "snapshots/current/modules.json",
+            [utilities_style_module("Utility.Credential.V0.Credential")],
+        )
+        manifest_path = self._write_json(
+            "utilities-manifest.json",
+            {
+                "source": "unit test utilities docs",
+                "publish_version": "0.13.0-pre",
+                "versions": [
+                    {"version": "0.13.0-pre", "json_path": str(snapshot)},
+                ],
+            },
+        )
+        output_dir = self.root / "out" / "credential-model"
+
+        result = cli_main(
+            [
+                "daml-json",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--output-dir",
+                str(output_dir),
+                "--overview-title",
+                "Utility.Credential",
+                "--source-name",
+                "unit test utilities docs",
+                "--version-filter",
+                "current",
+            ]
+        )
+
+        self.assertEqual(result, 0)
+        module_text = (output_dir / "utility-credential-v0-credential.mdx").read_text(encoding="utf-8")
+        self.assertIn("### `data Claim`", module_text)
+        self.assertIn("### Template `Credential`", module_text)
+        self.assertIn("#### Choice `Get`", module_text)
+        self.assertNotIn('"ADTDoc"', module_text)
