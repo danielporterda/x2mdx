@@ -120,8 +120,7 @@ def package_name_for_symbol(symbol: JvmDocSymbolLifecycle) -> str:
 
 
 def type_anchor(symbol: JvmDocSymbolLifecycle) -> str:
-    token = hashlib.sha1(symbol.symbol.encode("utf-8")).hexdigest()[:10]
-    return f"type-{token}"
+    return f"type-{slugify(symbol.symbol)}"
 
 
 def build_type_entries(
@@ -231,8 +230,7 @@ def build_package_rows_and_pages(
 
     for package_name in sorted(package_groups):
         package_entries = sorted(package_groups[package_name], key=lambda item: str(item["type_text"]))
-        token = hashlib.sha1(package_name.encode("utf-8")).hexdigest()[:10]
-        package_page_path = package_pages_dir / f"{slugify(package_name)}-{token}.mdx"
+        package_page_path = package_pages_dir / f"{slugify(package_name)}.mdx"
 
         introduced_count = sum(1 for entry in package_entries if entry["introduced"] != format_lifecycle_value(artifact.versions[0]))
         deprecated_count = sum(1 for entry in package_entries if entry["has_deprecated"] == "true")

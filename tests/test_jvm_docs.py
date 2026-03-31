@@ -296,10 +296,12 @@ class JvmDocsTests(unittest.TestCase):
         scala_package_pages = list((details_dir / "bindings-scala-2-13-packages").glob("*.mdx"))
         self.assertTrue(java_package_pages)
         self.assertTrue(scala_package_pages)
+        self.assertTrue((details_dir / "bindings-java-packages" / "com-example.mdx").exists())
+        self.assertTrue((details_dir / "bindings-scala-2-13-packages" / "com-example-scala.mdx").exists())
 
         overview_text = overview.read_text(encoding="utf-8")
         java_text = (details_dir / "bindings-java.mdx").read_text(encoding="utf-8")
-        java_package_text = java_package_pages[0].read_text(encoding="utf-8")
+        java_package_text = (details_dir / "bindings-java-packages" / "com-example.mdx").read_text(encoding="utf-8")
         docs_payload = json.loads(docs_json.read_text(encoding="utf-8"))
 
         self.assertIn("Custom JVM Docs", overview_text)
@@ -308,6 +310,7 @@ class JvmDocsTests(unittest.TestCase):
         self.assertIn("com.example", java_package_text)
         self.assertIn("`com.example.Foo`", java_package_text)
         self.assertIn("`com.example.Bar`", java_package_text)
+        self.assertIn("#type-com-example-foo", java_package_text)
         self.assertIn("newMethod()", java_package_text)
         self.assertIn("**Signature**", java_package_text)
         self.assertIn("**Summary**", java_package_text)
