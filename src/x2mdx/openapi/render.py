@@ -568,6 +568,7 @@ def build_overview_page(
     report: OpenApiLifecycleReport,
     spec_pages: list[Page],
     overview_name: str,
+    overview_title: str,
 ) -> Page:
     spec_page_map = {
         spec.spec_id: page
@@ -591,7 +592,7 @@ def build_overview_page(
 
     return Page(
         path=overview_name,
-        title="OpenAPI Lifecycle Overview",
+        title=overview_title,
         description="Generated OpenAPI lifecycle reference",
         blocks=[
             Paragraph("This section is generated from supplied versioned OpenAPI artifacts."),
@@ -620,9 +621,14 @@ def build_overview_page(
     )
 
 
-def build_pages(report: OpenApiLifecycleReport, overview_name: str = "overview.mdx", spec_dir_name: str = "specs") -> list[Page]:
+def build_pages(
+    report: OpenApiLifecycleReport,
+    overview_name: str = "overview.mdx",
+    spec_dir_name: str = "specs",
+    overview_title: str = "OpenAPI Lifecycle Overview",
+) -> list[Page]:
     spec_pages = [build_spec_page(spec, spec_dir_name) for spec in sorted(report.specs, key=lambda item: item.spec_id)]
-    overview_page = build_overview_page(report, spec_pages, overview_name)
+    overview_page = build_overview_page(report, spec_pages, overview_name, overview_title)
     return [overview_page, *spec_pages]
 
 

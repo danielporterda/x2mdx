@@ -245,7 +245,7 @@ class OpenApiLifecycleTests(unittest.TestCase):
             version_filter="unit test versions",
         )
         round_tripped = report_from_json_data(report_to_json_data(report))
-        pages = build_pages(round_tripped)
+        pages = build_pages(round_tripped, overview_title="Utility Apps API Specs")
 
         out_dir = self.root / "out"
         written = write_pages(pages, out_dir)
@@ -257,7 +257,7 @@ class OpenApiLifecycleTests(unittest.TestCase):
         overview = (out_dir / "overview.mdx").read_text(encoding="utf-8")
         spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
 
-        self.assertIn("OpenAPI Lifecycle Overview", overview)
+        self.assertIn("Utility Apps API Specs", overview)
         self.assertIn("[Open](./specs/utility-yaml)", overview)
         self.assertIn("Version Change Timeline", spec_page)
         self.assertIn("Endpoint Diff Summary", spec_page)

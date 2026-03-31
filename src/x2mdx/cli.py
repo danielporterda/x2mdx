@@ -156,6 +156,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Filename for the overview page inside the output directory",
     )
     build_lifecycle.add_argument(
+        "--overview-title",
+        default="OpenAPI Lifecycle Overview",
+        help="Title to use for the generated overview page.",
+    )
+    build_lifecycle.add_argument(
         "--fixture-root",
         help="Directory to resolve manifest fixture paths from; defaults to the manifest directory",
     )
@@ -265,7 +270,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     build_daml_json = daml_json_subparsers.add_parser(
         "build-api-pages-from-manifest",
-        help="Build Daml Standard Library MDX pages directly from local docs JSON snapshots",
+        help="Build Daml docs MDX pages directly from local docs JSON snapshots",
     )
     build_daml_json.add_argument(
         "--manifest",
@@ -298,6 +303,11 @@ def build_parser() -> argparse.ArgumentParser:
     build_daml_json.add_argument(
         "--version-filter",
         help="Optional label describing the selected version set.",
+    )
+    build_daml_json.add_argument(
+        "--overview-title",
+        default="Daml Standard Library",
+        help="Title to use for the generated overview page.",
     )
 
     protobuf = subparsers.add_parser("protobuf", help="Descriptor-backed protobuf commands")
@@ -384,7 +394,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                     )
                 return 0
 
-            write_pages(build_pages(report, overview_name=args.overview_name), Path(args.output_dir))
+            write_pages(
+                build_pages(
+                    report,
+                    overview_name=args.overview_name,
+                    overview_title=args.overview_title,
+                ),
+                Path(args.output_dir),
+            )
             return 0
 
     if args.command == "jvm-docs":
@@ -426,7 +443,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             from x2mdx.render import write_pages
 
             report = build_daml_doc_report_from_manifest_args(args)
-            output_root, pages = build_pages(report, output_dir=Path(args.output_dir))
+            output_root, pages = build_pages(
+                report,
+                output_dir=Path(args.output_dir),
+                overview_title=args.overview_title,
+            )
             write_pages(pages, output_root)
             return 0
 

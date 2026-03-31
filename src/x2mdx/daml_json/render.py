@@ -414,7 +414,12 @@ def render_module_body(
     return "\n\n".join(body_parts).rstrip()
 
 
-def build_pages(report: DamlDocsReport, *, output_dir: Path) -> tuple[Path, list[Page]]:
+def build_pages(
+    report: DamlDocsReport,
+    *,
+    output_dir: Path,
+    overview_title: str = "Daml Standard Library",
+) -> tuple[Path, list[Page]]:
     root = output_dir.parent
     pages: list[Page] = []
     module_entries: list[tuple[str, str, str]] = []
@@ -449,7 +454,7 @@ def build_pages(report: DamlDocsReport, *, output_dir: Path) -> tuple[Path, list
         )
 
     index_lines = [
-        "# Daml Standard Library",
+        f"# {overview_title}",
         "",
         "This page is generated from versioned Daml docs JSON snapshots.",
         "",
@@ -478,8 +483,8 @@ def build_pages(report: DamlDocsReport, *, output_dir: Path) -> tuple[Path, list
         0,
         Page(
             path=(output_dir / "index.mdx").relative_to(root).as_posix(),
-            title="Daml Standard Library",
-            description="Reference documentation for Daml Standard Library modules.",
+            title=overview_title,
+            description=f"Reference documentation for {overview_title} modules.",
             blocks=[RawMarkdown("\n".join(index_lines).rstrip())],
         ),
     )

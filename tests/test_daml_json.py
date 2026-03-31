@@ -110,6 +110,8 @@ class DamlJsonTests(unittest.TestCase):
                 str(manifest_path),
                 "--output-dir",
                 str(output_dir),
+                "--overview-title",
+                "Utility Credential API",
                 "--source-name",
                 "unit test daml docs",
                 "--version-filter",
@@ -122,8 +124,7 @@ class DamlJsonTests(unittest.TestCase):
         list_text = (output_dir / "da-list.mdx").read_text(encoding="utf-8")
         legacy_text = (output_dir / "da-legacy.mdx").read_text(encoding="utf-8")
 
-        self.assertIn("Daml Standard Library", index_text)
+        self.assertIn("Utility Credential API", index_text)
         self.assertIn("removed in `1.1.0`", index_text)
         self.assertIn("Deprecated since: `1.1.0`", list_text)
         self.assertIn("historical reference", legacy_text)
-
