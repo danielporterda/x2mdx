@@ -385,7 +385,7 @@ class OpenApiLifecycleTests(unittest.TestCase):
             result = cli_main(["list-formats"])
 
         self.assertEqual(result, 0)
-        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\ndaml-json\nprotobuf\n")
+        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\ndaml-json\nprotobuf\ntypedoc\n")
 
     def test_cli_build_api_pages_from_manifest_writes_mdx_pages(self) -> None:
         manifest_path = self._write_manifest(

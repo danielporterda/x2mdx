@@ -124,6 +124,26 @@ def build_protobuf_report_from_manifest_args(args: argparse.Namespace):
     )
 
 
+def build_typedoc_report_from_manifest_args(args: argparse.Namespace):
+    from x2mdx.typedoc.lifecycle import build_typedoc_report_from_sources
+    from x2mdx.typedoc.snapshots import load_typedoc_sources
+
+    manifest_path = Path(args.manifest)
+    include_versions = set(args.version) if args.version else None
+    fixture_root = Path(args.fixture_root) if args.fixture_root else None
+    sources = load_typedoc_sources(
+        manifest_path,
+        fixture_root=fixture_root,
+        include_versions=include_versions,
+    )
+    return build_typedoc_report_from_sources(
+        sources,
+        source_name=args.source_name or sources.source or str(manifest_path),
+        version_filter=args.version_filter or ("selected manifest versions" if include_versions else "manifest versions"),
+        publish_version=args.publish_version,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="x2mdx")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -356,6 +376,56 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional label describing the selected version set.",
     )
 
+    typedoc = subparsers.add_parser("typedoc", help="TypeDoc-based TypeScript bindings commands")
+    typedoc_subparsers = typedoc.add_subparsers(dest="typedoc_command", required=True)
+
+    build_typedoc = typedoc_subparsers.add_parser(
+        "build-api-pages-from-manifest",
+        help="Build TypeScript bindings MDX directly from local TypeDoc JSON snapshots",
+    )
+    build_typedoc.add_argument(
+        "--manifest",
+        required=True,
+        help="Path to a JSON/YAML manifest that lists local TypeDoc JSON snapshots",
+    )
+    build_typedoc.add_argument(
+        "--output-file",
+        required=True,
+        help="Exact MDX file path to write for the generated TypeScript bindings page",
+    )
+    build_typedoc.add_argument(
+        "--fixture-root",
+        help="Directory to resolve manifest JSON paths from; defaults to the manifest directory",
+    )
+    build_typedoc.add_argument(
+        "--version",
+        action="append",
+        default=[],
+        help="Version to include from the manifest. Repeat to include multiple versions.",
+    )
+    build_typedoc.add_argument(
+        "--publish-version",
+        help="Version whose bindings surface should be published; defaults to the manifest or latest selected version.",
+    )
+    build_typedoc.add_argument(
+        "--source-name",
+        help="Optional source label to record in the generated page.",
+    )
+    build_typedoc.add_argument(
+        "--version-filter",
+        help="Optional label describing the selected version set.",
+    )
+    build_typedoc.add_argument(
+        "--page-title",
+        default="TypeScript/JavaScript",
+        help="Title to use for the generated page.",
+    )
+    build_typedoc.add_argument(
+        "--page-description",
+        default="TypeScript and JavaScript language bindings for Canton.",
+        help="Description to use for the generated page.",
+    )
+
     return parser
 
 
@@ -368,6 +438,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("jvm-docs")
         print("daml-json")
         print("protobuf")
+        print("typedoc")
         return 0
 
     if args.command == "openapi":
@@ -478,6 +549,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                 shutil.rmtree(output_dir)
             output_root, pages = build_pages(report, output_dir=output_dir)
             write_pages(pages, output_root)
+            return 0
+
+    if args.command == "typedoc":
+        if args.typedoc_command == "build-api-pages-from-manifest":
+            from x2mdx.render import write_page
+            from x2mdx.typedoc.render import build_page
+
+            report = build_typedoc_report_from_manifest_args(args)
+            output_file = Path(args.output_file)
+            page = build_page(
+                report,
+                output_path=output_file.name,
+                page_title=args.page_title,
+                page_description=args.page_description,
+            )
+            write_page(page, output_file)
             return 0
 
     parser.error("unknown command")

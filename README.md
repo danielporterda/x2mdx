@@ -13,6 +13,7 @@ Current implementation priority:
 - `JVM docs (Javadoc/Scaladoc) -> MDX`
 - `DAML JSON -> MDX`
 - `protobuf descriptor images -> MDX`
+- `TypeDoc JSON -> MDX`
 
 The tool is designed around:
 
@@ -29,6 +30,7 @@ x2mdx openapi build-api-pages-from-manifest --manifest fixtures/manifest.json --
 x2mdx jvm-docs build-api-pages-from-manifest --manifest fixtures/jvm-docs.json --overview-file ./out/jvm/index.mdx --details-dir ./out/jvm/details
 x2mdx daml-json build-api-pages-from-manifest --manifest fixtures/daml.json --output-dir ./out/daml
 x2mdx protobuf build-api-pages-from-manifest --manifest fixtures/protobuf.json --output-dir ./out/protobuf
+x2mdx typedoc build-api-pages-from-manifest --manifest fixtures/typedoc.json --output-file ./out/typescript.mdx
 ```
 
 ## OpenAPI Build Flags
@@ -116,6 +118,19 @@ The intended split is:
 
 - downstream docs repos clone/fetch the source repo, materialize descriptor images, and write the manifest
 - `x2mdx` parses those supplied local descriptor artifacts and renders MDX
+
+## TypeDoc Docs
+
+`typedoc build-api-pages-from-manifest` consumes a local manifest of versioned TypeDoc JSON snapshots and renders:
+
+- one generated MDX page for the selected package surface
+- version-aware lifecycle metadata for introduced, changed, and removed exports
+- grouped export reference sections based on the latest published snapshot
+
+The intended split is:
+
+- downstream docs repos fetch published npm tarballs or other package artifacts and run TypeDoc locally
+- `x2mdx` consumes those supplied local TypeDoc JSON snapshots and renders MDX
 
 ## Running In `digital-asset/docs`
 
