@@ -645,7 +645,8 @@ def build_pages(
                 status_suffix = f" - removed in `{removed_in}`"
             else:
                 status_suffix = " - removed"
-        index_lines.append(f"- [{display_name}](./{target}){status_suffix}")
+        module_link = (output_dir / target).relative_to(root).with_suffix("").as_posix()
+        index_lines.append(f"- [{display_name}]({module_link}){status_suffix}")
 
     pages.insert(
         0,
