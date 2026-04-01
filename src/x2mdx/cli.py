@@ -315,6 +315,10 @@ def build_parser() -> argparse.ArgumentParser:
         default="Daml Standard Library",
         help="Title to use for the generated overview page.",
     )
+    build_daml_json.add_argument(
+        "--link-prefix",
+        help="Optional root-relative URL prefix to use for overview-page module links.",
+    )
 
     protobuf = subparsers.add_parser("protobuf", help="Descriptor-backed protobuf commands")
     protobuf_subparsers = protobuf.add_subparsers(dest="protobuf_command", required=True)
@@ -458,6 +462,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 report,
                 output_dir=Path(args.output_dir),
                 overview_title=args.overview_title,
+                link_prefix=args.link_prefix,
             )
             write_pages(pages, output_root)
             return 0

@@ -462,6 +462,13 @@ def module_file_name(module_name: str) -> str:
     return f"{slugify(module_name)}.mdx"
 
 
+def normalize_link_prefix(link_prefix: str) -> str:
+    trimmed = link_prefix.strip()
+    if not trimmed:
+        raise ValueError("link_prefix must not be empty")
+    return "/" + trimmed.strip("/")
+
+
 def render_module_body(
     module_doc: dict[str, Any],
     *,
@@ -587,10 +594,12 @@ def build_pages(
     *,
     output_dir: Path,
     overview_title: str = "Daml Standard Library",
+    link_prefix: str | None = None,
 ) -> tuple[Path, list[Page]]:
     root = output_dir.parent
     pages: list[Page] = []
     module_entries: list[tuple[str, str, str]] = []
+    normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
     modules_sorted = sorted(
         report.modules,
         key=lambda module: module_display_name(str(module.get("md_name", ""))).lower(),
@@ -645,7 +654,10 @@ def build_pages(
                 status_suffix = f" - removed in `{removed_in}`"
             else:
                 status_suffix = " - removed"
-        module_link = (output_dir / target).relative_to(root).with_suffix("").as_posix()
+        if normalized_link_prefix:
+            module_link = f"{normalized_link_prefix}/{target}"
+        else:
+            module_link = (output_dir / target).relative_to(root).with_suffix("").as_posix()
         index_lines.append(f"- [{display_name}]({module_link}){status_suffix}")
 
     pages.insert(

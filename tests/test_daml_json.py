@@ -238,3 +238,30 @@ class DamlJsonTests(unittest.TestCase):
         self.assertIn("### Template `Credential`", module_text)
         self.assertIn("#### Choice `Get`", module_text)
         self.assertNotIn('"ADTDoc"', module_text)
+
+    def test_cli_uses_root_relative_link_prefix_for_overview_links(self) -> None:
+        manifest_path = self._write_manifest()
+        output_dir = self.root / "out" / "daml-standard-library"
+
+        result = cli_main(
+            [
+                "daml-json",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--output-dir",
+                str(output_dir),
+                "--overview-title",
+                "Utility Credential API",
+                "--source-name",
+                "unit test daml docs",
+                "--version-filter",
+                "unit test versions",
+                "--link-prefix",
+                "/appdev/reference/daml-standard-library",
+            ]
+        )
+
+        self.assertEqual(result, 0)
+        index_text = (output_dir / "index.mdx").read_text(encoding="utf-8")
+        self.assertIn("[DA.List](/appdev/reference/daml-standard-library/da-list)", index_text)
