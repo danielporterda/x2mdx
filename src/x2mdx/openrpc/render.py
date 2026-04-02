@@ -45,13 +45,24 @@ def spec_page_link(spec: OpenRpcSpecLifecycle, *, spec_dir_name: str) -> str:
     return f"{spec_dir_name}/{Path(spec_page_name(spec)).with_suffix('').as_posix()}"
 
 
+def normalize_link_prefix(link_prefix: str) -> str:
+    trimmed = link_prefix.strip()
+    if not trimmed:
+        raise ValueError("link_prefix must not be empty")
+    if trimmed == "/":
+        return ""
+    return "/" + trimmed.strip("/")
+
+
 def build_overview_page(
     report: OpenRpcReport,
     *,
     overview_name: str,
     spec_dir_name: str,
     overview_title: str,
+    link_prefix: str | None = None,
 ) -> Page:
+    normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
     lines = [
         f"# {overview_title}",
         "",
@@ -69,11 +80,14 @@ def build_overview_page(
         "| --- | --- | --- | --- |",
     ]
     for spec in report.specs:
+        spec_link = spec_page_link(spec, spec_dir_name=spec_dir_name)
+        if normalized_link_prefix:
+            spec_link = f"{normalized_link_prefix}/{spec_link}"
         lines.append(
             "| "
             + " | ".join(
                 [
-                    f"[`{escape_md_cell(spec.display_name)}`]({spec_page_link(spec, spec_dir_name=spec_dir_name)})",
+                    f"[`{escape_md_cell(spec.display_name)}`]({spec_link})",
                     escape_md_cell(spec.info_title or "-"),
                     md_code(str(len(spec.methods))),
                     ", ".join(md_code(version) for version in spec.changed_in_versions) if spec.changed_in_versions else "-",
@@ -136,11 +150,16 @@ def build_spec_page(
     *,
     overview_name: str,
     spec_dir_name: str,
+    link_prefix: str | None = None,
 ) -> Page:
+    normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
+    overview_link = f"../{Path(overview_name).with_suffix('').as_posix()}"
+    if normalized_link_prefix is not None:
+        overview_link = normalized_link_prefix or "/"
     lines = [
         f"# {spec.display_name}",
         "",
-        f"[Back to overview](../{Path(overview_name).with_suffix('').as_posix()})",
+        f"[Back to overview]({overview_link})",
         "",
     ]
     if spec.info_description:
@@ -289,10 +308,24 @@ def build_pages(
     overview_name: str = "index.mdx",
     spec_dir_name: str = "specs",
     overview_title: str = "Wallet Gateway OpenRPC",
+    link_prefix: str | None = None,
 ) -> tuple[Path, list[Page]]:
-    pages = [build_overview_page(report, overview_name=overview_name, spec_dir_name=spec_dir_name, overview_title=overview_title)]
+    pages = [
+        build_overview_page(
+            report,
+            overview_name=overview_name,
+            spec_dir_name=spec_dir_name,
+            overview_title=overview_title,
+            link_prefix=link_prefix,
+        )
+    ]
     pages.extend(
-        build_spec_page(spec, overview_name=overview_name, spec_dir_name=spec_dir_name)
+        build_spec_page(
+            spec,
+            overview_name=overview_name,
+            spec_dir_name=spec_dir_name,
+            link_prefix=link_prefix,
+        )
         for spec in report.specs
     )
     return output_dir, pages

@@ -590,6 +590,10 @@ def build_parser() -> argparse.ArgumentParser:
         default="Wallet Gateway OpenRPC",
         help="Title to use for the generated overview page.",
     )
+    build_openrpc.add_argument(
+        "--link-prefix",
+        help="Optional root-relative URL prefix to use for overview/spec links.",
+    )
 
     return parser
 
@@ -781,6 +785,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 overview_name=args.overview_name,
                 spec_dir_name=args.spec_dir_name,
                 overview_title=args.overview_title,
+                link_prefix=args.link_prefix,
             )
             write_pages(pages, output_root)
             return 0

@@ -372,3 +372,28 @@ class OpenRpcTests(unittest.TestCase):
         self.assertIn("Result Example", dapp_page)
         self.assertIn("required fields", remote_page)
 
+    def test_cli_uses_root_relative_link_prefix_for_overview_and_spec_links(self) -> None:
+        manifest_path = self._write_manifest()
+        output_dir = self.root / "out"
+
+        exit_code = cli_main(
+            [
+                "openrpc",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--output-dir",
+                str(output_dir),
+                "--overview-title",
+                "Wallet Gateway OpenRPC",
+                "--link-prefix",
+                "/reference/wallet-gateway-json-rpc",
+            ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        overview = (output_dir / "index.mdx").read_text(encoding="utf-8")
+        spec_page = (output_dir / "specs" / "dapp-api.mdx").read_text(encoding="utf-8")
+
+        self.assertIn("[`Dapp API`](/reference/wallet-gateway-json-rpc/specs/dapp-api)", overview)
+        self.assertIn("[Back to overview](/reference/wallet-gateway-json-rpc)", spec_page)
