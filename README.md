@@ -15,6 +15,7 @@ Current implementation priority:
 - `protobuf descriptor images -> MDX`
 - `TypeDoc JSON -> MDX`
 - `AsyncAPI -> MDX`
+- `OpenRPC -> MDX`
 
 The tool is designed around:
 
@@ -33,6 +34,7 @@ x2mdx daml-json build-api-pages-from-manifest --manifest fixtures/daml.json --ou
 x2mdx protobuf build-api-pages-from-manifest --manifest fixtures/protobuf.json --output-dir ./out/protobuf
 x2mdx typedoc build-api-pages-from-manifest --manifest fixtures/typedoc.json --output-file ./out/typescript.mdx
 x2mdx asyncapi build-api-pages-from-manifest --manifest fixtures/asyncapi.json --output-file ./out/asyncapi.mdx
+x2mdx openrpc build-api-pages-from-manifest --manifest fixtures/openrpc.json --output-dir ./out/openrpc
 ```
 
 ## OpenAPI Build Flags
@@ -146,6 +148,19 @@ The intended split is:
 
 - downstream docs repos fetch or materialize local `asyncapi.yaml` snapshots and write the manifest
 - `x2mdx` consumes those supplied local AsyncAPI snapshots and renders MDX
+
+## OpenRPC Docs
+
+`openrpc build-api-pages-from-manifest` consumes a local manifest of versioned OpenRPC snapshots and renders:
+
+- one overview page for the selected OpenRPC surfaces
+- one page per spec in the selected publish version
+- version-aware lifecycle metadata for introduced, changed, and removed JSON-RPC methods
+
+The intended split is:
+
+- downstream docs repos fetch or materialize local OpenRPC JSON snapshots and write the manifest
+- `x2mdx` consumes those supplied local OpenRPC snapshots and renders MDX
 
 ## Running In `digital-asset/docs`
 

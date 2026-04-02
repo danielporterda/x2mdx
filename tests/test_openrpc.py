@@ -1,0 +1,374 @@
+from __future__ import annotations
+
+import io
+import json
+import tempfile
+import textwrap
+import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+
+from x2mdx.cli import main as cli_main
+from x2mdx.openrpc.lifecycle import build_openrpc_report_from_sources, parse_openrpc
+from x2mdx.openrpc.models import OpenRpcSourceSnapshot
+
+
+def write_text(path: Path, contents: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(textwrap.dedent(contents).lstrip(), encoding="utf-8")
+
+
+class OpenRpcTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def _snapshot(self, *, version: str, spec_id: str, display_name: str, source_path: str, contents: str) -> OpenRpcSourceSnapshot:
+        return OpenRpcSourceSnapshot(
+            version=version,
+            spec_id=spec_id,
+            display_name=display_name,
+            source_path=source_path,
+            document=parse_openrpc(textwrap.dedent(contents).lstrip()),
+        )
+
+    def _write_manifest(self) -> Path:
+        fixture_root = self.root / "fixtures"
+        dapp_v1 = """
+            {
+              "openrpc": "1.2.6",
+              "info": {"title": "Dapp API", "version": "1.0.0"},
+              "methods": [
+                {
+                  "name": "status",
+                  "description": "Return provider status.",
+                  "params": [],
+                  "result": {
+                    "name": "result",
+                    "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                  }
+                }
+              ],
+              "components": {
+                "schemas": {
+                  "StatusEvent": {
+                    "type": "object",
+                    "required": ["connected"],
+                    "properties": {
+                      "connected": {"type": "boolean"}
+                    }
+                  }
+                }
+              }
+            }
+        """
+        dapp_v2 = """
+            {
+              "openrpc": "1.2.6",
+              "info": {"title": "Dapp API", "version": "1.1.0"},
+              "methods": [
+                {
+                  "name": "status",
+                  "description": "Return wallet provider status.",
+                  "params": [],
+                  "result": {
+                    "name": "result",
+                    "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                  }
+                },
+                {
+                  "name": "connect",
+                  "description": "Connect to a provider.",
+                  "params": [],
+                  "result": {
+                    "name": "result",
+                    "schema": {"type": "string"}
+                  }
+                }
+              ],
+              "components": {
+                "schemas": {
+                  "StatusEvent": {
+                    "type": "object",
+                    "required": ["connected", "network"],
+                    "properties": {
+                      "connected": {"type": "boolean"},
+                      "network": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+        """
+        remote_v1 = """
+            {
+              "openrpc": "1.2.6",
+              "info": {"title": "Remote dApp API", "version": "1.0.0"},
+              "methods": [
+                {
+                  "name": "status",
+                  "description": "Return remote status.",
+                  "params": [],
+                  "result": {
+                    "name": "result",
+                    "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                  }
+                }
+              ],
+              "components": {"schemas": {}}
+            }
+        """
+        remote_v2 = """
+            {
+              "openrpc": "1.2.6",
+              "info": {"title": "Remote dApp API", "version": "1.1.0"},
+              "methods": [
+                {
+                  "name": "status",
+                  "description": "Return remote status.",
+                  "params": [],
+                  "result": {
+                    "name": "result",
+                    "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                  }
+                },
+                {
+                  "name": "prepareExecute",
+                  "description": "Prepare a transaction.",
+                  "params": [
+                    {
+                      "name": "params",
+                      "schema": {
+                        "type": "object",
+                        "required": ["txId"],
+                        "properties": {
+                          "txId": {"type": "string"}
+                        }
+                      }
+                    }
+                  ],
+                  "result": {
+                    "name": "result",
+                    "schema": {"type": "string"}
+                  }
+                }
+              ],
+              "components": {"schemas": {}}
+            }
+        """
+
+        versions = {
+            "1.0.0": {
+                "dapp-api": ("Dapp API", "api-specs/openrpc-dapp-api.json", dapp_v1),
+                "remote-dapp-api": ("Remote dApp API", "api-specs/openrpc-dapp-remote-api.json", remote_v1),
+            },
+            "1.1.0": {
+                "dapp-api": ("Dapp API", "api-specs/openrpc-dapp-api.json", dapp_v2),
+                "remote-dapp-api": ("Remote dApp API", "api-specs/openrpc-dapp-remote-api.json", remote_v2),
+            },
+        }
+
+        manifest = {
+            "source": "openrpc test fixtures",
+            "publish_version": "1.1.0",
+            "specs": [],
+        }
+
+        for spec_id, display_name, source_path in [
+            ("dapp-api", "Dapp API", "api-specs/openrpc-dapp-api.json"),
+            ("remote-dapp-api", "Remote dApp API", "api-specs/openrpc-dapp-remote-api.json"),
+        ]:
+            spec_entry = {
+                "spec_id": spec_id,
+                "display_name": display_name,
+                "source_path": source_path,
+                "versions": [],
+            }
+            for version in ["1.0.0", "1.1.0"]:
+                _display_name, _source_path, contents = versions[version][spec_id]
+                relative_path = Path(version) / f"{spec_id}.json"
+                write_text(fixture_root / relative_path, contents)
+                spec_entry["versions"].append(
+                    {
+                        "version": version,
+                        "fixture_path": relative_path.as_posix(),
+                    }
+                )
+            manifest["specs"].append(spec_entry)
+
+        manifest_path = fixture_root / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return manifest_path
+
+    def test_build_report_tracks_method_changes_across_specs_and_versions(self) -> None:
+        report = build_openrpc_report_from_sources(
+            [
+                self._snapshot(
+                    version="1.0.0",
+                    spec_id="dapp-api",
+                    display_name="Dapp API",
+                    source_path="api-specs/openrpc-dapp-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Dapp API", "version": "1.0.0"},
+                          "methods": [
+                            {
+                              "name": "status",
+                              "description": "Return provider status.",
+                              "params": [],
+                              "result": {
+                                "name": "result",
+                                "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                              }
+                            }
+                          ],
+                          "components": {
+                            "schemas": {
+                              "StatusEvent": {
+                                "type": "object",
+                                "required": ["connected"],
+                                "properties": {"connected": {"type": "boolean"}}
+                              }
+                            }
+                          }
+                        }
+                    """,
+                ),
+                self._snapshot(
+                    version="1.0.0",
+                    spec_id="remote-dapp-api",
+                    display_name="Remote dApp API",
+                    source_path="api-specs/openrpc-dapp-remote-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Remote dApp API", "version": "1.0.0"},
+                          "methods": [
+                            {
+                              "name": "status",
+                              "description": "Return remote status.",
+                              "params": [],
+                              "result": {
+                                "name": "result",
+                                "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                              }
+                            }
+                          ],
+                          "components": {"schemas": {}}
+                        }
+                    """,
+                ),
+                self._snapshot(
+                    version="1.1.0",
+                    spec_id="dapp-api",
+                    display_name="Dapp API",
+                    source_path="api-specs/openrpc-dapp-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Dapp API", "version": "1.1.0"},
+                          "methods": [
+                            {
+                              "name": "status",
+                              "description": "Return wallet provider status.",
+                              "params": [],
+                              "result": {
+                                "name": "result",
+                                "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                              }
+                            },
+                            {
+                              "name": "connect",
+                              "description": "Connect to a provider.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            }
+                          ],
+                          "components": {
+                            "schemas": {
+                              "StatusEvent": {
+                                "type": "object",
+                                "required": ["connected", "network"],
+                                "properties": {
+                                  "connected": {"type": "boolean"},
+                                  "network": {"type": "string"}
+                                }
+                              }
+                            }
+                          }
+                        }
+                    """,
+                ),
+                self._snapshot(
+                    version="1.1.0",
+                    spec_id="remote-dapp-api",
+                    display_name="Remote dApp API",
+                    source_path="api-specs/openrpc-dapp-remote-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Remote dApp API", "version": "1.1.0"},
+                          "methods": [
+                            {
+                              "name": "status",
+                              "description": "Return remote status.",
+                              "params": [],
+                              "result": {
+                                "name": "result",
+                                "schema": {"$ref": "api-specs/openrpc-dapp-api.json#/components/schemas/StatusEvent"}
+                              }
+                            }
+                          ],
+                          "components": {"schemas": {}}
+                        }
+                    """,
+                ),
+            ],
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        self.assertEqual(report.versions, ["1.0.0", "1.1.0"])
+        specs = {spec.spec_id: spec for spec in report.specs}
+
+        dapp_methods = {method.method: method for method in specs["dapp-api"].methods}
+        self.assertEqual(dapp_methods["status"].changed_in_versions, ["1.1.0"])
+        self.assertEqual(dapp_methods["connect"].introduced_version, "1.1.0")
+
+        remote_methods = {method.method: method for method in specs["remote-dapp-api"].methods}
+        self.assertEqual(remote_methods["status"].changed_in_versions, ["1.1.0"])
+        self.assertIn("result updated (required fields)", remote_methods["status"].change_details[0]["changes"])
+
+    def test_cli_builds_openrpc_pages(self) -> None:
+        manifest_path = self._write_manifest()
+        output_dir = self.root / "out"
+
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            exit_code = cli_main(
+                [
+                    "openrpc",
+                    "build-api-pages-from-manifest",
+                    "--manifest",
+                    str(manifest_path),
+                    "--output-dir",
+                    str(output_dir),
+                    "--overview-title",
+                    "Wallet Gateway OpenRPC",
+                ]
+            )
+
+        self.assertEqual(exit_code, 0, stdout.getvalue())
+        overview = (output_dir / "index.mdx").read_text(encoding="utf-8")
+        dapp_page = (output_dir / "specs" / "dapp-api.mdx").read_text(encoding="utf-8")
+        remote_page = (output_dir / "specs" / "remote-dapp-api.mdx").read_text(encoding="utf-8")
+
+        self.assertIn("Wallet Gateway OpenRPC", overview)
+        self.assertIn("Method Diff Summary", dapp_page)
+        self.assertIn("Result Example", dapp_page)
+        self.assertIn("required fields", remote_page)
+

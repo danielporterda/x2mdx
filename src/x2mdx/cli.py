@@ -164,6 +164,26 @@ def build_asyncapi_report_from_manifest_args(args: argparse.Namespace):
     )
 
 
+def build_openrpc_report_from_manifest_args(args: argparse.Namespace):
+    from x2mdx.openrpc.lifecycle import build_openrpc_report_from_sources
+    from x2mdx.openrpc.snapshots import load_openrpc_source_snapshots
+
+    manifest_path = Path(args.manifest)
+    include_versions = set(args.version) if args.version else None
+    fixture_root = Path(args.fixture_root) if args.fixture_root else None
+    sources = load_openrpc_source_snapshots(
+        manifest_path,
+        fixture_root=fixture_root,
+        include_versions=include_versions,
+    )
+    return build_openrpc_report_from_sources(
+        sources,
+        source_name=args.source_name or str(manifest_path),
+        version_filter=args.version_filter or ("selected manifest versions" if include_versions else "manifest versions"),
+        publish_version=args.publish_version,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="x2mdx")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -516,6 +536,61 @@ def build_parser() -> argparse.ArgumentParser:
         help="Group label path under the selected dropdown/version where the page should be inserted. Repeat for nested groups.",
     )
 
+    openrpc = subparsers.add_parser("openrpc", help="OpenRPC JSON-RPC commands")
+    openrpc_subparsers = openrpc.add_subparsers(dest="openrpc_command", required=True)
+
+    build_openrpc = openrpc_subparsers.add_parser(
+        "build-api-pages-from-manifest",
+        help="Build OpenRPC MDX pages directly from local OpenRPC snapshots",
+    )
+    build_openrpc.add_argument(
+        "--manifest",
+        required=True,
+        help="Path to a JSON/YAML manifest that lists local OpenRPC snapshots",
+    )
+    build_openrpc.add_argument(
+        "--output-dir",
+        required=True,
+        help="Directory where generated MDX pages should be written",
+    )
+    build_openrpc.add_argument(
+        "--fixture-root",
+        help="Directory to resolve manifest fixture paths from; defaults to the manifest directory",
+    )
+    build_openrpc.add_argument(
+        "--version",
+        action="append",
+        default=[],
+        help="Version to include from the manifest. Repeat to include multiple versions.",
+    )
+    build_openrpc.add_argument(
+        "--publish-version",
+        help="Version whose OpenRPC surface should be published; defaults to the manifest or latest selected version.",
+    )
+    build_openrpc.add_argument(
+        "--source-name",
+        help="Optional source label to record in the report",
+    )
+    build_openrpc.add_argument(
+        "--version-filter",
+        help="Optional label describing the selected version set.",
+    )
+    build_openrpc.add_argument(
+        "--overview-name",
+        default="index.mdx",
+        help="Filename for the overview page inside the output directory",
+    )
+    build_openrpc.add_argument(
+        "--spec-dir-name",
+        default="specs",
+        help="Directory name for per-spec pages inside the output directory.",
+    )
+    build_openrpc.add_argument(
+        "--overview-title",
+        default="Wallet Gateway OpenRPC",
+        help="Title to use for the generated overview page.",
+    )
+
     return parser
 
 
@@ -530,6 +605,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("protobuf")
         print("typedoc")
         print("asyncapi")
+        print("openrpc")
         return 0
 
     if args.command == "openapi":
@@ -688,6 +764,25 @@ def main(argv: Sequence[str] | None = None) -> int:
                         groups=args.nav_group,
                     ),
                 )
+            return 0
+
+    if args.command == "openrpc":
+        if args.openrpc_command == "build-api-pages-from-manifest":
+            from x2mdx.openrpc.render import build_pages
+            from x2mdx.render import write_pages
+
+            report = build_openrpc_report_from_manifest_args(args)
+            output_dir = Path(args.output_dir)
+            if output_dir.exists():
+                shutil.rmtree(output_dir)
+            output_root, pages = build_pages(
+                report,
+                output_dir=output_dir,
+                overview_name=args.overview_name,
+                spec_dir_name=args.spec_dir_name,
+                overview_title=args.overview_title,
+            )
+            write_pages(pages, output_root)
             return 0
 
     parser.error("unknown command")
