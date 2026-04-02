@@ -9,6 +9,7 @@ from tests.harness.ledger_api_openapi import load_manifest, load_published_ledge
 from x2mdx.openapi.lifecycle import build_openapi_lifecycle_report_from_snapshots
 from x2mdx.openapi.models import OpenApiLifecycleConfig
 from x2mdx.openapi.render import build_pages
+from x2mdx.render import render_page
 
 
 class PublishedLedgerApiFixtureTests(unittest.TestCase):
@@ -44,7 +45,7 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
         overview = next(page for page in pages if page.path == "overview.mdx")
         self.assertEqual(overview.title, "OpenAPI Lifecycle Overview")
         spec_page = next(page for page in pages if page.path == "specs/json-ledger-api-openapi-yaml.mdx")
-        self.assertTrue(any(getattr(block, "text", "") == "Endpoint Diff Summary" for block in spec_page.blocks))
+        self.assertIn("Endpoint Diff Summary", render_page(spec_page))
 
     def test_cli_build_api_pages_from_manifest_writes_mdx_pages(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -1,0 +1,29 @@
+{% macro anchor_heading(anchor_id, level, text) -%}
+{{ anchor(anchor_id) }}
+
+{{ heading(level, text) }}
+{%- endmacro %}
+
+{% macro bullet_section(title, items, level=2) -%}
+{{ heading(level, title) }}
+
+{{ bullet_list(items) }}
+{%- endmacro %}
+
+{% macro table_section(title, headers, rows, level=2) -%}
+{{ heading(level, title) }}
+
+{{ table(headers, rows) }}
+{%- endmacro %}
+
+{% macro warning(text) -%}
+{{ admonition("Warning", text) }}
+{%- endmacro %}
+
+{% macro accordion(title, items) -%}
+{{ accordion_list(title, items) }}
+{%- endmacro %}
+
+{% macro card_group(cards, cols=2) -%}
+{{ render_card_group(cards, cols) }}
+{%- endmacro %}

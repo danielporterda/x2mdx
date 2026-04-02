@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
-from x2mdx.output import Heading, Page, RawMarkdown, Table
+from x2mdx.output import Page
+from x2mdx.templating import markdown_page
 
 
 def escape_md_cell(text: str) -> str:
@@ -22,6 +24,78 @@ def render_change_summary(change_details: list[dict[str, object]]) -> str:
     return "<br/>".join(parts) if parts else "-"
 
 
+def _type_parameter_rows(items: list[dict[str, Any]]) -> list[list[str]]:
+    return [
+        [
+            f"`{escape_md_cell(item['name'])}`",
+            f"`{escape_md_cell(item['constraint'])}`" if item["constraint"] else "-",
+            f"`{escape_md_cell(item['default'])}`" if item["default"] else "-",
+            escape_md_cell(item["description"]) if item["description"] else "-",
+        ]
+        for item in items
+    ]
+
+
+def _signature_docs(signature_docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "declaration": str(signature["declaration"]),
+            "summary": signature["summary"],
+            "type_parameter_rows": _type_parameter_rows(signature["type_parameters"]),
+            "parameter_rows": [
+                [
+                    f"`{escape_md_cell(item['name'])}`",
+                    f"`{escape_md_cell(item['type'])}`",
+                    item["required"],
+                    escape_md_cell(item["description"]) if item["description"] else "-",
+                ]
+                for item in signature["parameters"]
+            ],
+            "returns": str(signature["returns"]),
+        }
+        for signature in signature_docs
+    ]
+
+
+def _export_context(export: dict[str, Any]) -> dict[str, Any]:
+    lifecycle_bits = [
+        f"Kind: `{export['kind_label']}`",
+        f"Introduced: `{export['introduced_in']}`",
+    ]
+    if export["change_details"]:
+        lifecycle_bits.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in export["change_details"]))
+    if export["removed_in"]:
+        lifecycle_bits.append(f"Removed in: `{export['removed_in']}`")
+        lifecycle_bits.append("Shown for historical reference.")
+    if export["source_location"]:
+        lifecycle_bits.append(f"Source: `{export['source_location']}`")
+
+    return {
+        "anchor": str(export["anchor"]),
+        "name": str(export["name"]),
+        "lifecycle_bits": lifecycle_bits,
+        "change_rows": [
+            [
+                f"`{escape_md_cell(str(entry['version']))}`",
+                escape_md_cell("; ".join(str(change) for change in entry["changes"])),
+            ]
+            for entry in export["change_details"]
+        ],
+        "signature": export["signature"],
+        "summary": export["summary"],
+        "type_parameter_rows": _type_parameter_rows(export["type_parameters"]),
+        "signature_docs": _signature_docs(export["signature_docs"]),
+        "member_rows": [
+            [
+                f"`{escape_md_cell(item['name'])}`",
+                f"`{escape_md_cell(item['type'])}`",
+                escape_md_cell(item["summary"]) if item["summary"] else "-",
+            ]
+            for item in export["members"]
+        ],
+    }
+
+
 def build_page(
     report,
     *,
@@ -29,157 +103,37 @@ def build_page(
     page_title: str,
     page_description: str,
 ) -> Page:
-    blocks: list[object] = [
-        RawMarkdown(
-            "\n".join(
-                [
-                    f"Generated from published `{report.package_name}` TypeDoc snapshots.",
-                    "",
-                    f"- Publish version: `{report.publish_version}`",
-                    f"- Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
-                    f"- Source: `{report.source_name}`",
-                    f"- Version filter: `{report.version_filter}`",
-                ]
-            )
-        ),
-        Heading(level=2, text="Export Diff Summary"),
-        Table(
-            headers=["Export", "Kind", "Introduced", "Changes", "Removed"],
-            rows=[
-                [
-                    f"[`{escape_md_cell(export['name'])}`](#{export['anchor']})",
-                    escape_md_cell(export["kind_label"]),
-                    f"`{export['introduced_in']}`",
-                    escape_md_cell(render_change_summary(export["change_details"])),
-                    f"`{export['removed_in']}`" if export["removed_in"] else "-",
-                ]
-                for export in report.exports
-            ],
-        ),
-    ]
-
     exports_by_group: dict[str, list[dict[str, object]]] = defaultdict(list)
     for export in report.exports:
         exports_by_group[export["group"]].append(export)
 
+    grouped_exports = []
     for group_title in report.export_groups:
         exports = exports_by_group.get(group_title)
-        if not exports:
-            continue
-        blocks.append(Heading(level=2, text=group_title))
-        for export in exports:
-            blocks.append(RawMarkdown(f'<a id="{export["anchor"]}"></a>'))
-            blocks.append(Heading(level=3, text=str(export["name"])))
-            lifecycle_bits = [
-                f"Kind: `{export['kind_label']}`",
-                f"Introduced: `{export['introduced_in']}`",
-            ]
-            if export["change_details"]:
-                lifecycle_bits.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in export["change_details"]))
-            if export["removed_in"]:
-                lifecycle_bits.append(f"Removed in: `{export['removed_in']}`")
-                lifecycle_bits.append("Shown for historical reference.")
-            if export["source_location"]:
-                lifecycle_bits.append(f"Source: `{export['source_location']}`")
-            blocks.append(RawMarkdown("\n".join(f"- {item}" for item in lifecycle_bits)))
+        if exports:
+            grouped_exports.append({"title": group_title, "exports": [_export_context(export) for export in exports]})
 
-            if export["change_details"]:
-                blocks.append(RawMarkdown("**Version Changes**"))
-                blocks.append(
-                    Table(
-                        headers=["Version", "Changes"],
-                        rows=[
-                            [
-                                f"`{escape_md_cell(str(entry['version']))}`",
-                                escape_md_cell("; ".join(str(change) for change in entry["changes"])),
-                            ]
-                            for entry in export["change_details"]
-                        ],
-                    )
-                )
-
-            if export["signature"]:
-                blocks.append(RawMarkdown(f"**Signature**\n\n```ts\n{export['signature']}\n```"))
-            if export["summary"]:
-                blocks.append(RawMarkdown(str(export["summary"])))
-
-            if export["type_parameters"]:
-                blocks.append(RawMarkdown("**Type Parameters**"))
-                blocks.append(
-                    Table(
-                        headers=["Name", "Constraint", "Default", "Description"],
-                        rows=[
-                            [
-                                f"`{escape_md_cell(item['name'])}`",
-                                f"`{escape_md_cell(item['constraint'])}`" if item["constraint"] else "-",
-                                f"`{escape_md_cell(item['default'])}`" if item["default"] else "-",
-                                escape_md_cell(item["description"]) if item["description"] else "-",
-                            ]
-                            for item in export["type_parameters"]
-                        ],
-                    )
-                )
-
-            signature_docs = export["signature_docs"]
-            if signature_docs:
-                blocks.append(RawMarkdown("**Call Signatures**"))
-                for index, signature in enumerate(signature_docs, start=1):
-                    if len(signature_docs) > 1:
-                        blocks.append(RawMarkdown(f"Overload {index}:"))
-                    blocks.append(RawMarkdown(f"```ts\n{signature['declaration']}\n```"))
-                    if signature["summary"]:
-                        blocks.append(RawMarkdown(signature["summary"]))
-                    if signature["type_parameters"]:
-                        blocks.append(
-                            Table(
-                                headers=["Type Parameter", "Constraint", "Default", "Description"],
-                                rows=[
-                                    [
-                                        f"`{escape_md_cell(item['name'])}`",
-                                        f"`{escape_md_cell(item['constraint'])}`" if item["constraint"] else "-",
-                                        f"`{escape_md_cell(item['default'])}`" if item["default"] else "-",
-                                        escape_md_cell(item["description"]) if item["description"] else "-",
-                                    ]
-                                    for item in signature["type_parameters"]
-                                ],
-                            )
-                        )
-                    if signature["parameters"]:
-                        blocks.append(
-                            Table(
-                                headers=["Parameter", "Type", "Required", "Description"],
-                                rows=[
-                                    [
-                                        f"`{escape_md_cell(item['name'])}`",
-                                        f"`{escape_md_cell(item['type'])}`",
-                                        item["required"],
-                                        escape_md_cell(item["description"]) if item["description"] else "-",
-                                    ]
-                                    for item in signature["parameters"]
-                                ],
-                            )
-                        )
-                    blocks.append(RawMarkdown(f"Returns: `{signature['returns']}`"))
-
-            if export["members"]:
-                blocks.append(RawMarkdown("**Members**"))
-                blocks.append(
-                    Table(
-                        headers=["Member", "Type", "Description"],
-                        rows=[
-                            [
-                                f"`{escape_md_cell(item['name'])}`",
-                                f"`{escape_md_cell(item['type'])}`",
-                                escape_md_cell(item["summary"]) if item["summary"] else "-",
-                            ]
-                            for item in export["members"]
-                        ],
-                    )
-                )
-
-    return Page(
+    return markdown_page(
         path=output_path,
         title=page_title,
         description=page_description,
-        blocks=blocks,
+        template_name="typedoc/page.md.j2",
+        report=report,
+        source_items=[
+            f"Publish version: `{report.publish_version}`",
+            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
+            f"Source: `{report.source_name}`",
+            f"Version filter: `{report.version_filter}`",
+        ],
+        export_summary_rows=[
+            [
+                f"[`{escape_md_cell(export['name'])}`](#{export['anchor']})",
+                escape_md_cell(export["kind_label"]),
+                f"`{export['introduced_in']}`",
+                escape_md_cell(render_change_summary(export["change_details"])),
+                f"`{export['removed_in']}`" if export["removed_in"] else "-",
+            ]
+            for export in report.exports
+        ],
+        grouped_exports=grouped_exports,
     )

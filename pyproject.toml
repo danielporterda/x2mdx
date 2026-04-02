@@ -9,6 +9,7 @@ description = "Convert reference-doc source artifacts into MDX"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+  "Jinja2>=3.1",
   "PyYAML>=6.0",
   "protobuf>=5.0",
 ]
@@ -26,6 +27,9 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"x2mdx" = ["templates/**/*.j2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

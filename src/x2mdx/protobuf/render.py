@@ -8,7 +8,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from x2mdx.output import Page, RawMarkdown
+from x2mdx.output import Page
+from x2mdx.templating import markdown_page
 
 PACKAGE_GROUP_ORDER = [
     "Ledger API",
@@ -345,24 +346,17 @@ def render_overview_page(
 ) -> Page:
     latest = report["latestSnapshot"]
 
-    release_rows = [
-        "| Version | Endpoints +/~/- | Messages +/~/- | Enums +/~/- | Files +/~/- |",
-        "| --- | --- | --- | --- | --- |",
-    ]
+    release_rows: list[list[str]] = []
     for release in report["releases"]:
         counts = release["changes"]["counts"]
         release_rows.append(
-            "| "
-            + " | ".join(
-                [
-                    f"`{release['version']}`",
-                    f"`{counts['endpoints']['added']}/{counts['endpoints']['modified']}/{counts['endpoints']['removed']}`",
-                    f"`{counts['messages']['added']}/{counts['messages']['modified']}/{counts['messages']['removed']}`",
-                    f"`{counts['enums']['added']}/{counts['enums']['modified']}/{counts['enums']['removed']}`",
-                    f"`{counts['files']['added']}/{counts['files']['modified']}/{counts['files']['removed']}`",
-                ]
-            )
-            + " |"
+            [
+                f"`{release['version']}`",
+                f"`{counts['endpoints']['added']}/{counts['endpoints']['modified']}/{counts['endpoints']['removed']}`",
+                f"`{counts['messages']['added']}/{counts['messages']['modified']}/{counts['messages']['removed']}`",
+                f"`{counts['enums']['added']}/{counts['enums']['modified']}/{counts['enums']['removed']}`",
+                f"`{counts['files']['added']}/{counts['files']['modified']}/{counts['files']['removed']}`",
+            ]
         )
 
     package_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -373,76 +367,47 @@ def render_overview_page(
         )
         package_groups[label].append(package)
 
-    overview_lines = [
-        "# Canton Protobuf History",
-        "",
-        "This page is generated from local descriptor-image snapshots with source info.",
-        "",
-        "## Source",
-        "",
-        f"- Source name: `{report['sourceName']}`",
-        f"- Version filter: `{report['versionFilter']}`",
-        f"- Latest release: `{report['latestRelease']}`",
-        f"- Source repo: `{report['repo'].get('remote') or '-'}`",
-        f"- Generated at: `{report['generatedAt']}`",
-        "",
-        "## Latest Snapshot",
-        "",
-        f"- Packages: `{latest['stats']['packages']}`",
-        f"- Services: `{latest['stats']['services']}`",
-        f"- Endpoints: `{latest['stats']['endpoints']}`",
-        f"- Messages: `{latest['stats']['messages']}`",
-        f"- Enums: `{latest['stats']['enums']}`",
-        "",
-        "## Package Reference",
-        "",
-        "Packages are grouped by API area. Each package page contains its services, endpoint history, and shared type reference.",
-    ]
-
+    grouped_packages: list[dict[str, Any]] = []
     for label in PACKAGE_GROUP_ORDER:
         packages = package_groups.get(label, [])
         if not packages:
             continue
-        overview_lines.extend(
-            [
-                "",
-                f"### {label}",
-                "",
-                "| Package | Services | Endpoints | Messages | Enums |",
-                "| --- | --- | --- | --- | --- |",
-            ]
-        )
+        rows: list[list[str]] = []
         for package in packages:
             package_path = package_page_map[package["package"]]
             link = package_path.relative_to(output_dir.parent).with_suffix("").as_posix()
-            overview_lines.append(
-                "| "
-                + " | ".join(
-                    [
-                        f"[`{escape_md(package['package'])}`]({link})",
-                        f"`{package['serviceCount']}`",
-                        f"`{package['endpointCount']}`",
-                        f"`{package['messageCount']}`",
-                        f"`{package['enumCount']}`",
-                    ]
-                )
-                + " |"
+            rows.append(
+                [
+                    f"[`{escape_md(package['package'])}`]({link})",
+                    f"`{package['serviceCount']}`",
+                    f"`{package['endpointCount']}`",
+                    f"`{package['messageCount']}`",
+                    f"`{package['enumCount']}`",
+                ]
             )
+        grouped_packages.append({"label": label, "rows": rows})
 
-    overview_lines.extend(
-        [
-            "",
-            "## Release Summary",
-            "",
-            *release_rows,
-        ]
-    )
-
-    return Page(
+    return markdown_page(
         path=overview_path.relative_to(output_dir.parent).as_posix(),
         title="Canton Protobuf History",
         description="Descriptor-backed protobuf API history grouped by package.",
-        blocks=[RawMarkdown("\n".join(overview_lines).rstrip())],
+        template_name="protobuf/overview.md.j2",
+        source_items=[
+            f"Source name: `{report['sourceName']}`",
+            f"Version filter: `{report['versionFilter']}`",
+            f"Latest release: `{report['latestRelease']}`",
+            f"Source repo: `{report['repo'].get('remote') or '-'}`",
+            f"Generated at: `{report['generatedAt']}`",
+        ],
+        snapshot_items=[
+            f"Packages: `{latest['stats']['packages']}`",
+            f"Services: `{latest['stats']['services']}`",
+            f"Endpoints: `{latest['stats']['endpoints']}`",
+            f"Messages: `{latest['stats']['messages']}`",
+            f"Enums: `{latest['stats']['enums']}`",
+        ],
+        package_groups=grouped_packages,
+        release_rows=release_rows,
     )
 
 
@@ -490,142 +455,70 @@ def render_package_page(
     package_messages = [ctx["messages"][message_id] for message_id in package_doc["messageIds"] if message_id in ctx["messages"]]
     package_enums = [ctx["enums"][enum_id] for enum_id in package_doc["enumIds"] if enum_id in ctx["enums"]]
 
-    lines = [
-        f"# Package `{package_doc['package']}`",
-        "",
-        f"[Back to Canton Protobuf History]({relative_page_link(package_path, overview_path)})",
-        "",
-        "## Snapshot",
-        "",
-        f"- Current files: `{package_doc['fileCount']}`",
-        f"- Current services: `{package_doc['serviceCount']}`",
-        f"- Current endpoints: `{package_doc['endpointCount']}`",
-        f"- Current messages: `{package_doc['messageCount']}`",
-        f"- Current enums: `{package_doc['enumCount']}`",
-        f"- Lifecycle endpoints tracked: `{len(package_entries)}`",
-    ]
-
-    if package_files:
-        lines.extend(
+    service_contexts: list[dict[str, Any]] = []
+    service_rows: list[list[str]] = []
+    for service in sorted(service_buckets.values(), key=lambda item: item["name"]):
+        service_rows.append(
             [
-                "",
-                "## Source Files",
-                "",
-                "| File | Services | Messages | Enums | Source |",
-                "| --- | --- | --- | --- | --- |",
+                f"[`{escape_md(service['name'])}`](#{service_anchor(service['id'])})",
+                f"`{len(service['endpointIds'])}`",
+                md_link("file", service.get("sourceUrl")),
+                escape_md_cell(compact_text(service.get("description", ""))),
             ]
         )
-        for file_doc in package_files:
-            lines.append(
-                "| "
-                + " | ".join(
+        service_contexts.append(
+            {
+                "anchor": service_anchor(service["id"]),
+                "heading": f"Service `{service['name']}`",
+                "summary_items": [
+                    f"Source: {md_link(service['file'], service.get('sourceUrl'))}",
+                    f"Endpoints tracked: `{len(service['endpointIds'])}`",
+                ],
+                "description": render_description(service.get("description", "")),
+                "endpoint_rows": [
                     [
-                        escape_md_cell(file_doc["repoPath"]),
-                        f"`{len(file_doc['serviceIds'])}`",
-                        f"`{len(file_doc['messageIds'])}`",
-                        f"`{len(file_doc['enumIds'])}`",
-                        md_link("file", file_doc.get("sourceUrl")),
+                        f"[`{escape_md(endpoint_docs[endpoint_id]['name'])}`](#{endpoint_anchor(endpoint_id)})",
+                        f"`{lifecycle_map[endpoint_id]['introducedIn']}`",
+                        f"`{lifecycle_map[endpoint_id]['lastChangedIn']}`",
+                        f"`{lifecycle_map[endpoint_id]['removedIn'] or ''}`",
+                        render_type_link(endpoint_docs[endpoint_id]["requestType"], from_path=package_path, type_page_map=type_page_map),
+                        render_type_link(endpoint_docs[endpoint_id]["responseType"], from_path=package_path, type_page_map=type_page_map),
+                        md_link("file", endpoint_docs[endpoint_id].get("sourceUrl")),
                     ]
-                )
-                + " |"
-            )
-
-    if service_buckets:
-        lines.extend(
-            [
-                "",
-                "## Services",
-                "",
-                "| Service | Endpoints | Source | Description |",
-                "| --- | --- | --- | --- |",
-            ]
+                    for endpoint_id in sorted(service["endpointIds"])
+                ],
+                "endpoint_details": [
+                    {
+                        "anchor": endpoint_anchor(endpoint_id),
+                        "title": f"{endpoint_docs[endpoint_id]['service']}.{endpoint_docs[endpoint_id]['name']}",
+                        "summary_items": [
+                            f"Introduced in: `{lifecycle_map[endpoint_id]['introducedIn']}`",
+                            f"Last changed in: `{lifecycle_map[endpoint_id]['lastChangedIn']}`",
+                            f"Removed in: `{lifecycle_map[endpoint_id]['removedIn'] or '-'}`",
+                            f"Status: `{'current' if lifecycle_map[endpoint_id]['current'] else 'removed'}`",
+                            f"Source: {md_link(endpoint_docs[endpoint_id]['file'], endpoint_docs[endpoint_id].get('sourceUrl'))}",
+                        ],
+                        "signature": f"rpc {render_endpoint_signature(endpoint_docs[endpoint_id])};",
+                        "description": render_description(endpoint_docs[endpoint_id]["description"]),
+                        "history_table": render_history_table(lifecycle_map[endpoint_id]),
+                        "request_type": render_type_link(
+                            endpoint_docs[endpoint_id]["requestType"],
+                            from_path=package_path,
+                            type_page_map=type_page_map,
+                        ),
+                        "response_type": render_type_link(
+                            endpoint_docs[endpoint_id]["responseType"],
+                            from_path=package_path,
+                            type_page_map=type_page_map,
+                        ),
+                    }
+                    for endpoint_id in sorted(service["endpointIds"])
+                ],
+            }
         )
-        for service in sorted(service_buckets.values(), key=lambda item: item["name"]):
-            lines.append(
-                "| "
-                + " | ".join(
-                    [
-                        f"[`{escape_md(service['name'])}`](#{service_anchor(service['id'])})",
-                        f"`{len(service['endpointIds'])}`",
-                        md_link("file", service.get("sourceUrl")),
-                        escape_md_cell(compact_text(service.get("description", ""))),
-                    ]
-                )
-                + " |"
-            )
 
-        for service in sorted(service_buckets.values(), key=lambda item: item["name"]):
-            lines.extend(
-                [
-                    "",
-                    f'<a id="{service_anchor(service["id"])}"></a>',
-                    f"### Service `{service['name']}`",
-                    "",
-                    f"- Source: {md_link(service['file'], service.get('sourceUrl'))}",
-                    f"- Endpoints tracked: `{len(service['endpointIds'])}`",
-                    "",
-                    render_description(service.get("description", "")),
-                    "",
-                    "| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |",
-                    "| --- | --- | --- | --- | --- | --- | --- |",
-                ]
-            )
-            for endpoint_id in sorted(service["endpointIds"]):
-                entry = lifecycle_map[endpoint_id]
-                endpoint = endpoint_docs[endpoint_id]
-                lines.append(
-                    "| "
-                    + " | ".join(
-                        [
-                            f"[`{escape_md(endpoint['name'])}`](#{endpoint_anchor(endpoint_id)})",
-                            f"`{entry['introducedIn']}`",
-                            f"`{entry['lastChangedIn']}`",
-                            f"`{entry['removedIn'] or ''}`",
-                            render_type_link(endpoint["requestType"], from_path=package_path, type_page_map=type_page_map),
-                            render_type_link(endpoint["responseType"], from_path=package_path, type_page_map=type_page_map),
-                            md_link("file", endpoint.get("sourceUrl")),
-                        ]
-                    )
-                    + " |"
-                )
-
-            for endpoint_id in sorted(service["endpointIds"]):
-                entry = lifecycle_map[endpoint_id]
-                endpoint = endpoint_docs[endpoint_id]
-                lines.extend(
-                    [
-                        "",
-                        f'<a id="{endpoint_anchor(endpoint_id)}"></a>',
-                        f"**Endpoint `{endpoint['service']}.{endpoint['name']}`**",
-                        "",
-                        f"- Introduced in: `{entry['introducedIn']}`",
-                        f"- Last changed in: `{entry['lastChangedIn']}`",
-                        f"- Removed in: `{entry['removedIn'] or '-'}`",
-                        f"- Status: `{'current' if entry['current'] else 'removed'}`",
-                        f"- Source: {md_link(endpoint['file'], endpoint.get('sourceUrl'))}",
-                        "",
-                        "**Signature**",
-                        "",
-                        f"```protobuf\nrpc {render_endpoint_signature(endpoint)};\n```",
-                        "",
-                        render_description(endpoint["description"]),
-                        "",
-                        "**History**",
-                        "",
-                        render_history_table(entry),
-                        "",
-                        "**Request Type**",
-                        "",
-                        f"- {render_type_link(endpoint['requestType'], from_path=package_path, type_page_map=type_page_map)}",
-                        "",
-                        "**Response Type**",
-                        "",
-                        f"- {render_type_link(endpoint['responseType'], from_path=package_path, type_page_map=type_page_map)}",
-                    ]
-                )
-
+    type_reference_blocks: list[str] = []
     if package_messages or package_enums:
-        lines.extend(["", "## Type Reference"])
         seen: set[str] = set()
         for message in package_messages:
             block_lines = render_message_block(
@@ -636,7 +529,7 @@ def render_package_page(
                 seen=seen,
             )
             if block_lines:
-                lines.extend(["", *block_lines])
+                type_reference_blocks.append("\n".join(block_lines))
         for enum_doc in package_enums:
             block_lines = render_enum_block(
                 enum_doc,
@@ -646,13 +539,36 @@ def render_package_page(
                 seen=seen,
             )
             if block_lines:
-                lines.extend(["", *block_lines])
+                type_reference_blocks.append("\n".join(block_lines))
 
-    return Page(
+    return markdown_page(
         path=package_path.relative_to(overview_path.parent.parent).as_posix(),
         title=package_doc["package"],
         description=f"Descriptor-backed protobuf API history for package {package_doc['package']}.",
-        blocks=[RawMarkdown("\n".join(lines).rstrip())],
+        template_name="protobuf/package.md.j2",
+        package_title=f"Package `{package_doc['package']}`",
+        overview_link=relative_page_link(package_path, overview_path),
+        snapshot_items=[
+            f"Current files: `{package_doc['fileCount']}`",
+            f"Current services: `{package_doc['serviceCount']}`",
+            f"Current endpoints: `{package_doc['endpointCount']}`",
+            f"Current messages: `{package_doc['messageCount']}`",
+            f"Current enums: `{package_doc['enumCount']}`",
+            f"Lifecycle endpoints tracked: `{len(package_entries)}`",
+        ],
+        source_file_rows=[
+            [
+                escape_md_cell(file_doc["repoPath"]),
+                f"`{len(file_doc['serviceIds'])}`",
+                f"`{len(file_doc['messageIds'])}`",
+                f"`{len(file_doc['enumIds'])}`",
+                md_link("file", file_doc.get("sourceUrl")),
+            ]
+            for file_doc in package_files
+        ],
+        service_rows=service_rows,
+        services=service_contexts,
+        type_reference_blocks=type_reference_blocks,
     )
 
 

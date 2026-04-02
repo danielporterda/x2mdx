@@ -1,0 +1,25 @@
+{{ heading(1, "Canton Protobuf History") }}
+
+{{ paragraph("This page is generated from local descriptor-image snapshots with source info.") }}
+
+{{ heading(2, "Source") }}
+
+{{ bullet_list(source_items) }}
+
+{{ heading(2, "Latest Snapshot") }}
+
+{{ bullet_list(snapshot_items) }}
+
+{{ heading(2, "Package Reference") }}
+
+{{ paragraph("Packages are grouped by API area. Each package page contains its services, endpoint history, and shared type reference.") }}
+{% for group in package_groups %}
+
+{{ heading(3, group.label) }}
+
+{{ table(["Package", "Services", "Endpoints", "Messages", "Enums"], group.rows) }}
+{% endfor %}
+
+{{ heading(2, "Release Summary") }}
+
+{{ table(["Version", "Endpoints +/~/-", "Messages +/~/-", "Enums +/~/-", "Files +/~/-"], release_rows) }}

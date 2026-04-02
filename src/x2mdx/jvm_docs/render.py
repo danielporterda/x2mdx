@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from x2mdx.jvm_docs.models import JvmDocArtifactLifecycle, JvmDocLifecycleReport, JvmDocSymbolLifecycle
-from x2mdx.output import BulletList, Heading, Page, Paragraph, RawMarkdown, Table
+from x2mdx.output import Page
+from x2mdx.templating import markdown_page
 
 
 def slugify(value: str) -> str:
@@ -236,21 +237,20 @@ def build_package_rows_and_pages(
         deprecated_count = sum(1 for entry in package_entries if entry["has_deprecated"] == "true")
         removed_count = sum(1 for entry in package_entries if entry["has_removed"] == "true")
 
-        blocks: list[Any] = [
-            Paragraph(f"Back to [artifact page]({relative_page_link(package_page_path, artifact_page_path)})."),
-            Heading(2, "Package"),
-            BulletList(
-                items=[
+        pages.append(
+            markdown_page(
+                path=page_path(root, package_page_path),
+                title=package_name,
+                description="Generated package reference page from local Javadoc/Scaladoc snapshots",
+                template_name="jvm_docs/package.md.j2",
+                artifact_link=relative_page_link(package_page_path, artifact_page_path),
+                package_items=[
                     f"Artifact: `{md_code(f'{artifact.group}:{artifact.artifact}')}`",
                     f"Language: `{md_code(artifact.language)}`",
                     f"Package: `{md_code(package_name)}`",
                     f"Types in package: `{len(package_entries)}`",
-                ]
-            ),
-            Heading(2, "Type Reference"),
-            Table(
-                headers=["Type", "Upstream", "Summary", "Introduced", "Deprecated", "Removed"],
-                rows=[
+                ],
+                package_rows=[
                     [
                         f"[`{md_code(str(entry['type_text']))}`](#{entry['anchor']})",
                         str(entry["upstream"]),
@@ -261,52 +261,22 @@ def build_package_rows_and_pages(
                     ]
                     for entry in package_entries
                 ],
-            ),
-        ]
-
-        for entry in package_entries:
-            symbol = entry["symbol"]
-            blocks.extend(
-                [
-                    RawMarkdown(f'<a id="{entry["anchor"]}"></a>'),
-                    Heading(2, f"`{md_code(symbol.symbol)}`"),
-                    BulletList(
-                        items=[
+                package_entries=[
+                    {
+                        "anchor": str(entry["anchor"]),
+                        "heading": f"`{md_code(entry['symbol'].symbol)}`",
+                        "lifecycle_items": [
                             f"Introduced: {entry['introduced']}",
                             f"Deprecated: {entry['deprecated']}",
                             f"Removed: {entry['removed']}",
-                        ]
-                    ),
-                ]
-            )
-            if entry["upstream"] != "-":
-                blocks.append(Paragraph(f"Upstream docs: {entry['upstream']}"))
-            if symbol.latest_signature:
-                blocks.extend(
-                    [
-                        Paragraph("**Signature**"),
-                        RawMarkdown(f"```text\n{symbol.latest_signature}\n```"),
-                    ]
-                )
-            if symbol.latest_summary:
-                blocks.extend([Paragraph("**Summary**"), Paragraph(md_text(symbol.latest_summary))])
-            blocks.append(Paragraph("**Members**"))
-            if entry["member_rows"]:
-                blocks.append(
-                    Table(
-                        headers=["Docs", "Member", "Introduced", "Deprecated", "Removed"],
-                        rows=entry["member_rows"],
-                    )
-                )
-            else:
-                blocks.append(Paragraph("No members found for this type in the configured artifacts."))
-
-        pages.append(
-            Page(
-                path=page_path(root, package_page_path),
-                title=package_name,
-                description="Generated package reference page from local Javadoc/Scaladoc snapshots",
-                blocks=blocks,
+                        ],
+                        "upstream": str(entry["upstream"]),
+                        "signature": entry["symbol"].latest_signature or "",
+                        "summary": md_text(entry["symbol"].latest_summary) if entry["symbol"].latest_summary else "",
+                        "member_rows": entry["member_rows"],
+                    }
+                    for entry in package_entries
+                ],
             )
         )
         rows.append(
@@ -352,89 +322,49 @@ def build_artifact_page(
         for symbol in changed_symbols(artifact)
     ]
 
-    blocks = [
-        Paragraph(f"Back to [overview]({relative_page_link(artifact_page_path, overview_output)})."),
-        Heading(2, "Artifact"),
-        BulletList(
-            items=[
-                f"Group: `{md_code(artifact.group)}`",
-                f"Artifact: `{md_code(artifact.artifact)}`",
-                f"Language: `{md_code(artifact.language)}`",
-                f"Versions: `{md_code(', '.join(artifact.versions))}`",
-                f"Total symbols tracked: `{artifact.symbol_count}`",
-                f"Types: `{artifact.type_count}`",
-                f"Members: `{artifact.member_count}`",
-            ]
-        ),
-        Heading(2, "Lifecycle Summary"),
-        BulletList(
-            items=[
-                f"Introduced in range: `{change_summary['introduced']}`",
-                f"Deprecated in range: `{change_summary['deprecated']}`",
-                f"Removed in range: `{change_summary['removed']}`",
-            ]
-        ),
-        Heading(2, "Package Reference"),
-        Table(
-            headers=["Local Page", "Package", "Types", "Introduced", "Deprecated", "Removed"],
-            rows=[
-                [row["local"], row["package"], row["types"], row["introduced"], row["deprecated"], row["removed"]]
-                for row in package_rows
-            ],
-        )
-        if package_rows
-        else Paragraph("No package-level symbols were found for this artifact."),
-        Heading(2, "Changed Symbols"),
-        Table(
-            headers=["Docs", "Symbol", "Kind", "Introduced", "Deprecated", "Removed"],
-            rows=changed_rows,
-        )
-        if changed_rows
-        else Paragraph("No lifecycle changes were detected in the configured version range."),
-    ]
-
     deprecations = [symbol for symbol in changed_symbols(artifact) if symbol.deprecated_version]
-    if deprecations:
-        blocks.extend(
-            [
-                Heading(2, "Deprecation Notes"),
-                Table(
-                    headers=["Symbol", "Deprecated", "Note"],
-                    rows=[
-                        [
-                            f"`{md_code(symbol.symbol)}`",
-                            format_lifecycle_value(symbol.deprecated_version),
-                            md_text(symbol.deprecation_note or "-"),
-                        ]
-                        for symbol in deprecations
-                    ],
-                ),
-            ]
-        )
 
-    if artifact.failures:
-        blocks.extend(
-            [
-                Heading(2, "Input Failures"),
-                Table(
-                    headers=["Version", "Jar", "Error"],
-                    rows=[
-                        [
-                            f"`{md_code(failure.get('version', '-'))}`",
-                            f"`{md_code(failure.get('jar_path', '-'))}`",
-                            md_text(failure.get("error", "-")),
-                        ]
-                        for failure in artifact.failures
-                    ],
-                ),
-            ]
-        )
-
-    artifact_page = Page(
+    artifact_page = markdown_page(
         path=page_path(root, artifact_page_path),
         title=f"{artifact.artifact} lifecycle",
         description="Generated lifecycle timeline and type index from local Javadoc/Scaladoc snapshots",
-        blocks=blocks,
+        template_name="jvm_docs/artifact.md.j2",
+        overview_link=relative_page_link(artifact_page_path, overview_output),
+        artifact_items=[
+            f"Group: `{md_code(artifact.group)}`",
+            f"Artifact: `{md_code(artifact.artifact)}`",
+            f"Language: `{md_code(artifact.language)}`",
+            f"Versions: `{md_code(', '.join(artifact.versions))}`",
+            f"Total symbols tracked: `{artifact.symbol_count}`",
+            f"Types: `{artifact.type_count}`",
+            f"Members: `{artifact.member_count}`",
+        ],
+        lifecycle_items=[
+            f"Introduced in range: `{change_summary['introduced']}`",
+            f"Deprecated in range: `{change_summary['deprecated']}`",
+            f"Removed in range: `{change_summary['removed']}`",
+        ],
+        package_rows=[
+            [row["local"], row["package"], row["types"], row["introduced"], row["deprecated"], row["removed"]]
+            for row in package_rows
+        ],
+        changed_rows=changed_rows,
+        deprecation_rows=[
+            [
+                f"`{md_code(symbol.symbol)}`",
+                format_lifecycle_value(symbol.deprecated_version),
+                md_text(symbol.deprecation_note or "-"),
+            ]
+            for symbol in deprecations
+        ],
+        failure_rows=[
+            [
+                f"`{md_code(failure.get('version', '-'))}`",
+                f"`{md_code(failure.get('jar_path', '-'))}`",
+                md_text(failure.get("error", "-")),
+            ]
+            for failure in artifact.failures
+        ],
     )
     return artifact_page, package_pages
 
@@ -477,31 +407,21 @@ def build_pages(
             ]
         )
 
-    overview_page = Page(
+    overview_page = markdown_page(
         path=page_path(root, overview_output),
         title=overview_title,
         description="Generated lifecycle timeline and reference pages for local Javadoc/Scaladoc artifacts",
-        blocks=[
-            Paragraph("This page is generated from supplied local Javadoc/Scaladoc jars."),
-            Heading(2, "Source"),
-            BulletList(
-                items=[
-                    f"Generated at (UTC): `{md_code(report.generated_at_utc)}`",
-                    f"Source name: `{md_code(report.source_name)}`",
-                    f"Version filter: `{md_code(report.version_filter)}`",
-                    f"Artifacts: `{report.summary['artifact_count']}`",
-                    f"Types: `{report.summary['type_count']}`",
-                    f"Members: `{report.summary['member_count']}`",
-                ]
-            ),
-            Heading(2, "Artifacts"),
-            Table(
-                headers=["Details", "Artifact", "Language", "Versions", "Symbols", "Introduced", "Deprecated", "Removed"],
-                rows=overview_rows,
-            ),
-            Heading(2, "Notes"),
-            BulletList(items=[md_text(note) for note in report.notes]),
+        template_name="jvm_docs/overview.md.j2",
+        source_items=[
+            f"Generated at (UTC): `{md_code(report.generated_at_utc)}`",
+            f"Source name: `{md_code(report.source_name)}`",
+            f"Version filter: `{md_code(report.version_filter)}`",
+            f"Artifacts: `{report.summary['artifact_count']}`",
+            f"Types: `{report.summary['type_count']}`",
+            f"Members: `{report.summary['member_count']}`",
         ],
+        overview_rows=overview_rows,
+        notes=[md_text(note) for note in report.notes],
     )
 
     pages.append(overview_page)

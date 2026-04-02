@@ -1,0 +1,63 @@
+{{ paragraph("Generated from published `" ~ report.package_name ~ "` TypeDoc snapshots.") }}
+
+{{ bullet_list(source_items) }}
+
+{{ heading(2, "Export Diff Summary") }}
+
+{{ table(["Export", "Kind", "Introduced", "Changes", "Removed"], export_summary_rows) }}
+{% for group in grouped_exports %}
+
+{{ heading(2, group.title) }}
+{% for export in group.exports %}
+
+{{ anchor(export.anchor) }}
+
+{{ heading(3, export.name) }}
+
+{{ bullet_list(export.lifecycle_bits) }}
+{% if export.change_rows %}
+**Version Changes**
+
+{{ table(["Version", "Changes"], export.change_rows) }}
+{% endif %}
+{% if export.signature %}
+**Signature**
+
+{{ code_block("ts", export.signature) }}
+{% endif %}
+{% if export.summary %}
+{{ paragraph(export.summary) }}
+{% endif %}
+{% if export.type_parameter_rows %}
+**Type Parameters**
+
+{{ table(["Name", "Constraint", "Default", "Description"], export.type_parameter_rows) }}
+{% endif %}
+{% if export.signature_docs %}
+**Call Signatures**
+{% for signature in export.signature_docs %}
+{% if export.signature_docs|length > 1 %}
+
+{{ paragraph("Overload " ~ loop.index ~ ":") }}
+{% endif %}
+
+{{ code_block("ts", signature.declaration) }}
+{% if signature.summary %}
+{{ paragraph(signature.summary) }}
+{% endif %}
+{% if signature.type_parameter_rows %}
+{{ table(["Type Parameter", "Constraint", "Default", "Description"], signature.type_parameter_rows) }}
+{% endif %}
+{% if signature.parameter_rows %}
+{{ table(["Parameter", "Type", "Required", "Description"], signature.parameter_rows) }}
+{% endif %}
+{{ paragraph("Returns: `" ~ signature.returns ~ "`") }}
+{% endfor %}
+{% endif %}
+{% if export.member_rows %}
+**Members**
+
+{{ table(["Member", "Type", "Description"], export.member_rows) }}
+{% endif %}
+{% endfor %}
+{% endfor %}

@@ -1,0 +1,35 @@
+{% import "shared/macros.md.j2" as shared %}
+{{ paragraph("Back to [artifact page](" ~ artifact_link ~ ").") }}
+
+{{ shared.bullet_section("Package", package_items) }}
+
+{{ heading(2, "Type Reference") }}
+
+{{ table(["Type", "Upstream", "Summary", "Introduced", "Deprecated", "Removed"], package_rows) }}
+{% for entry in package_entries %}
+
+{{ anchor(entry.anchor) }}
+
+{{ heading(2, entry.heading) }}
+
+{{ bullet_list(entry.lifecycle_items) }}
+{% if entry.upstream != "-" %}
+{{ paragraph("Upstream docs: " ~ entry.upstream) }}
+{% endif %}
+{% if entry.signature %}
+{{ paragraph("**Signature**") }}
+
+{{ code_block("text", entry.signature) }}
+{% endif %}
+{% if entry.summary %}
+{{ paragraph("**Summary**") }}
+
+{{ paragraph(entry.summary) }}
+{% endif %}
+{{ paragraph("**Members**") }}
+{% if entry.member_rows %}
+{{ table(["Docs", "Member", "Introduced", "Deprecated", "Removed"], entry.member_rows) }}
+{% else %}
+{{ paragraph("No members found for this type in the configured artifacts.") }}
+{% endif %}
+{% endfor %}

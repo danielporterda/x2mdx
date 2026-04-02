@@ -1,0 +1,8 @@
+{% import "shared/macros.md.j2" as shared %}
+{{ heading(1, overview_title) }}
+
+{{ paragraph("This page is generated from versioned Daml docs JSON snapshots.") }}
+
+{{ shared.bullet_section("Source", source_items) }}
+
+{{ shared.bullet_section("Modules", module_links) }}
