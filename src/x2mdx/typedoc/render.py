@@ -12,6 +12,16 @@ def escape_md_cell(text: str) -> str:
     return text.replace("|", r"\|").replace("\n", "<br/>")
 
 
+def render_change_summary(change_details: list[dict[str, object]]) -> str:
+    parts: list[str] = []
+    for entry in change_details:
+        version = str(entry["version"])
+        changes = entry["changes"] if isinstance(entry.get("changes"), list) else []
+        rendered_changes = "; ".join(str(change) for change in changes) if changes else "details updated"
+        parts.append(f"`{version}`: {rendered_changes}")
+    return "<br/>".join(parts) if parts else "-"
+
+
 def build_page(
     report,
     *,
@@ -34,13 +44,13 @@ def build_page(
         ),
         Heading(level=2, text="Export Diff Summary"),
         Table(
-            headers=["Export", "Kind", "Introduced", "Changed In", "Removed"],
+            headers=["Export", "Kind", "Introduced", "Changes", "Removed"],
             rows=[
                 [
                     f"[`{escape_md_cell(export['name'])}`](#{export['anchor']})",
                     escape_md_cell(export["kind_label"]),
                     f"`{export['introduced_in']}`",
-                    ", ".join(f"`{version}`" for version in export["changed_in"]) if export["changed_in"] else "-",
+                    escape_md_cell(render_change_summary(export["change_details"])),
                     f"`{export['removed_in']}`" if export["removed_in"] else "-",
                 ]
                 for export in report.exports
@@ -64,14 +74,29 @@ def build_page(
                 f"Kind: `{export['kind_label']}`",
                 f"Introduced: `{export['introduced_in']}`",
             ]
-            if export["changed_in"]:
-                lifecycle_bits.append("Changed in: " + ", ".join(f"`{version}`" for version in export["changed_in"]))
+            if export["change_details"]:
+                lifecycle_bits.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in export["change_details"]))
             if export["removed_in"]:
                 lifecycle_bits.append(f"Removed in: `{export['removed_in']}`")
                 lifecycle_bits.append("Shown for historical reference.")
             if export["source_location"]:
                 lifecycle_bits.append(f"Source: `{export['source_location']}`")
             blocks.append(RawMarkdown("\n".join(f"- {item}" for item in lifecycle_bits)))
+
+            if export["change_details"]:
+                blocks.append(RawMarkdown("**Version Changes**"))
+                blocks.append(
+                    Table(
+                        headers=["Version", "Changes"],
+                        rows=[
+                            [
+                                f"`{escape_md_cell(str(entry['version']))}`",
+                                escape_md_cell("; ".join(str(change) for change in entry["changes"])),
+                            ]
+                            for entry in export["change_details"]
+                        ],
+                    )
+                )
 
             if export["signature"]:
                 blocks.append(RawMarkdown(f"**Signature**\n\n```ts\n{export['signature']}\n```"))

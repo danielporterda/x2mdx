@@ -237,10 +237,26 @@ class TypeDocTests(unittest.TestCase):
         self.assertEqual(report.package_name, "@daml/types")
         self.assertEqual(report.publish_version, "1.1.0")
         self.assertEqual(exports[("Widget", "Interface")]["changed_in"], ["1.1.0"])
+        self.assertEqual(
+            exports[("Widget", "Interface")]["change_details"],
+            [
+                {
+                    "version": "1.1.0",
+                    "changes": [
+                        "summary updated",
+                        "members added: `kind`",
+                    ],
+                }
+            ],
+        )
         self.assertEqual(exports[("Thing", "Type Alias")]["status"], "removed")
         self.assertEqual(exports[("Thing", "Type Alias")]["removed_in"], "1.1.0")
         self.assertEqual(exports[("Thing", "Variable")]["status"], "active")
         self.assertEqual(exports[("createHelper", "Function")]["introduced_in"], "1.1.0")
+        self.assertEqual(
+            exports[("makeWidget", "Function")]["change_details"],
+            [{"version": "1.1.0", "changes": ["call signatures updated"]}],
+        )
 
     def test_cli_builds_single_page_and_filters_internal_members(self) -> None:
         manifest_path = self._write_manifest()
@@ -267,9 +283,12 @@ class TypeDocTests(unittest.TestCase):
         self.assertIn("Export Diff Summary", text)
         self.assertIn("[`Thing`](#type-alias-thing)", text)
         self.assertIn("[`Thing`](#variable-thing)", text)
+        self.assertIn("`1.1.0`: summary updated; members added: `kind`", text)
         self.assertIn("Removed in: `1.1.0`", text)
         self.assertIn("Shown for historical reference.", text)
         self.assertIn("Widget interface updated.", text)
+        self.assertIn("**Version Changes**", text)
+        self.assertIn("call signatures updated", text)
         self.assertIn("`kind`", text)
         self.assertNotIn("internalOnly", text)
         self.assertNotIn("`debug`", text)

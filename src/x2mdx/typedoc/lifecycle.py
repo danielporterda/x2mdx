@@ -255,6 +255,90 @@ def build_member_docs(children: list[dict[str, Any]]) -> list[dict[str, str]]:
     return member_docs
 
 
+def render_name_list(names: list[str]) -> str:
+    return ", ".join(f"`{name}`" for name in names)
+
+
+def strip_named_item(item: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in item.items() if key != "name"}
+
+
+def describe_named_item_changes(
+    previous_items: list[dict[str, Any]],
+    current_items: list[dict[str, Any]],
+    *,
+    singular_label: str,
+    plural_label: str,
+) -> list[str]:
+    previous_by_name = {str(item["name"]): item for item in previous_items}
+    current_by_name = {str(item["name"]): item for item in current_items}
+
+    added = sorted(name for name in current_by_name if name not in previous_by_name)
+    removed = sorted(name for name in previous_by_name if name not in current_by_name)
+    updated = sorted(
+        name
+        for name in previous_by_name.keys() & current_by_name.keys()
+        if strip_named_item(previous_by_name[name]) != strip_named_item(current_by_name[name])
+    )
+
+    changes: list[str] = []
+    if len(added) == 1 and len(removed) == 1 and not updated:
+        removed_name = removed[0]
+        added_name = added[0]
+        if strip_named_item(previous_by_name[removed_name]) == strip_named_item(current_by_name[added_name]):
+            changes.append(f"{singular_label} renamed: `{removed_name}` -> `{added_name}`")
+            return changes
+
+    if added:
+        changes.append(f"{plural_label} added: {render_name_list(added)}")
+    if removed:
+        changes.append(f"{plural_label} removed: {render_name_list(removed)}")
+    if updated:
+        changes.append(f"{plural_label} updated: {render_name_list(updated)}")
+    return changes
+
+
+def describe_signature_changes(previous_export: dict[str, Any], current_export: dict[str, Any]) -> list[str]:
+    previous_declarations = [signature["declaration"] for signature in previous_export["signature_docs"]]
+    current_declarations = [signature["declaration"] for signature in current_export["signature_docs"]]
+    if previous_declarations != current_declarations:
+        return ["call signatures updated"]
+    if previous_export["signature_docs"] != current_export["signature_docs"]:
+        return ["call signature details updated"]
+    return []
+
+
+def describe_export_changes(previous_export: dict[str, Any], current_export: dict[str, Any]) -> list[str]:
+    changes: list[str] = []
+    if previous_export["summary"] != current_export["summary"]:
+        changes.append("summary updated")
+    if (
+        previous_export["signature"] != current_export["signature"]
+        and not previous_export["signature_docs"]
+        and not current_export["signature_docs"]
+    ):
+        changes.append("signature updated")
+
+    changes.extend(
+        describe_named_item_changes(
+            previous_export["type_parameters"],
+            current_export["type_parameters"],
+            singular_label="type parameter",
+            plural_label="type parameters",
+        )
+    )
+    changes.extend(describe_signature_changes(previous_export, current_export))
+    changes.extend(
+        describe_named_item_changes(
+            previous_export["members"],
+            current_export["members"],
+            singular_label="member",
+            plural_label="members",
+        )
+    )
+    return changes
+
+
 def extract_type_parameter_docs(
     node: dict[str, Any],
     *,
@@ -463,6 +547,7 @@ def build_typedoc_report_from_sources(
                     "docs": {},
                     "fingerprints": {},
                     "changed_in": [],
+                    "change_details": [],
                 },
             )
             history["versions"].append(snapshot.version)
@@ -471,7 +556,14 @@ def build_typedoc_report_from_sources(
             if previous_version is not None:
                 previous_fingerprint = history["fingerprints"].get(previous_version)
                 if previous_fingerprint != export_doc["fingerprint"]:
+                    changes = describe_export_changes(history["docs"][previous_version], export_doc)
                     history["changed_in"].append(snapshot.version)
+                    history["change_details"].append(
+                        {
+                            "version": snapshot.version,
+                            "changes": changes or ["details updated"],
+                        }
+                    )
             history["fingerprints"][snapshot.version] = export_doc["fingerprint"]
 
     publish_exports = snapshot_exports[selected_publish_version]
@@ -484,6 +576,7 @@ def build_typedoc_report_from_sources(
             {
                 "introduced_in": history["versions"][0],
                 "changed_in": list(history["changed_in"]),
+                "change_details": list(history["change_details"]),
                 "removed_in": None,
                 "last_seen_in": history["versions"][-1],
                 "status": "active",
@@ -507,6 +600,7 @@ def build_typedoc_report_from_sources(
             {
                 "introduced_in": history["versions"][0],
                 "changed_in": list(history["changed_in"]),
+                "change_details": list(history["change_details"]),
                 "removed_in": removed_in,
                 "last_seen_in": last_seen_in,
                 "status": "removed",
@@ -541,4 +635,3 @@ def build_typedoc_report_from_sources(
         export_groups=publish_groups,
         exports=merged_exports,
     )
-
