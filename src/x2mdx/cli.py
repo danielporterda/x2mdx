@@ -144,6 +144,26 @@ def build_typedoc_report_from_manifest_args(args: argparse.Namespace):
     )
 
 
+def build_asyncapi_report_from_manifest_args(args: argparse.Namespace):
+    from x2mdx.asyncapi.lifecycle import build_asyncapi_report_from_sources
+    from x2mdx.asyncapi.snapshots import load_asyncapi_source_snapshots
+
+    manifest_path = Path(args.manifest)
+    include_versions = set(args.version) if args.version else None
+    fixture_root = Path(args.fixture_root) if args.fixture_root else None
+    sources = load_asyncapi_source_snapshots(
+        manifest_path,
+        fixture_root=fixture_root,
+        include_versions=include_versions,
+    )
+    return build_asyncapi_report_from_sources(
+        sources,
+        source_name=args.source_name or str(manifest_path),
+        version_filter=args.version_filter or ("selected manifest versions" if include_versions else "manifest versions"),
+        publish_version=args.publish_version,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="x2mdx")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -426,6 +446,76 @@ def build_parser() -> argparse.ArgumentParser:
         help="Description to use for the generated page.",
     )
 
+    asyncapi = subparsers.add_parser("asyncapi", help="AsyncAPI websocket commands")
+    asyncapi_subparsers = asyncapi.add_subparsers(dest="asyncapi_command", required=True)
+
+    build_asyncapi = asyncapi_subparsers.add_parser(
+        "build-api-pages-from-manifest",
+        help="Build AsyncAPI MDX directly from local AsyncAPI snapshots",
+    )
+    build_asyncapi.add_argument(
+        "--manifest",
+        required=True,
+        help="Path to a JSON/YAML manifest that lists local AsyncAPI snapshots",
+    )
+    build_asyncapi.add_argument(
+        "--output-file",
+        required=True,
+        help="Exact MDX file path to write for the generated AsyncAPI page",
+    )
+    build_asyncapi.add_argument(
+        "--fixture-root",
+        help="Directory to resolve manifest files from; defaults to the manifest directory",
+    )
+    build_asyncapi.add_argument(
+        "--version",
+        action="append",
+        default=[],
+        help="Version to include from the manifest. Repeat to include multiple versions.",
+    )
+    build_asyncapi.add_argument(
+        "--publish-version",
+        help="Version whose websocket surface should be published; defaults to the manifest or latest selected version.",
+    )
+    build_asyncapi.add_argument(
+        "--source-name",
+        help="Optional source label to record in the generated page.",
+    )
+    build_asyncapi.add_argument(
+        "--version-filter",
+        help="Optional label describing the selected version set.",
+    )
+    build_asyncapi.add_argument(
+        "--page-title",
+        default="AsyncAPI WebSocket Reference",
+        help="Title to use for the generated page.",
+    )
+    build_asyncapi.add_argument(
+        "--page-description",
+        default="WebSocket AsyncAPI reference and version history.",
+        help="Description to use for the generated page.",
+    )
+    build_asyncapi.add_argument(
+        "--docs-json",
+        help="Optional docs.json file to update with the generated page",
+    )
+    build_asyncapi.add_argument(
+        "--nav-dropdown",
+        help="Dropdown label in docs.json where the generated page should be inserted",
+    )
+    build_asyncapi.add_argument(
+        "--nav-version",
+        action="append",
+        default=[],
+        help="Version label under the selected dropdown to update. Repeat to target multiple versions. Defaults to all versions in the dropdown.",
+    )
+    build_asyncapi.add_argument(
+        "--nav-group",
+        action="append",
+        default=[],
+        help="Group label path under the selected dropdown/version where the page should be inserted. Repeat for nested groups.",
+    )
+
     return parser
 
 
@@ -439,6 +529,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("daml-json")
         print("protobuf")
         print("typedoc")
+        print("asyncapi")
         return 0
 
     if args.command == "openapi":
@@ -565,6 +656,38 @@ def main(argv: Sequence[str] | None = None) -> int:
                 page_description=args.page_description,
             )
             write_page(page, output_file)
+            return 0
+
+    if args.command == "asyncapi":
+        if args.asyncapi_command == "build-api-pages-from-manifest":
+            from x2mdx.asyncapi.render import build_page
+            from x2mdx.mintlify import MintlifyNavTarget, update_docs_json_navigation
+            from x2mdx.render import write_page
+
+            if (args.nav_dropdown or args.nav_version or args.nav_group) and not args.docs_json:
+                parser.error("--nav-dropdown/--nav-version/--nav-group require --docs-json")
+            if args.docs_json and not args.nav_dropdown:
+                parser.error("--docs-json requires --nav-dropdown")
+
+            report = build_asyncapi_report_from_manifest_args(args)
+            output_file = Path(args.output_file)
+            page = build_page(
+                report,
+                output_path=output_file.name,
+                page_title=args.page_title,
+                page_description=args.page_description,
+            )
+            write_page(page, output_file)
+            if args.docs_json:
+                update_docs_json_navigation(
+                    Path(args.docs_json),
+                    output_file=output_file,
+                    target=MintlifyNavTarget(
+                        dropdown=args.nav_dropdown,
+                        versions=args.nav_version or None,
+                        groups=args.nav_group,
+                    ),
+                )
             return 0
 
     parser.error("unknown command")

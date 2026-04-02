@@ -329,4 +329,4 @@ class JvmDocsTests(unittest.TestCase):
             result = cli_main(["list-formats"])
 
         self.assertEqual(result, 0)
-        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\ndaml-json\nprotobuf\ntypedoc\n")
+        self.assertEqual(stdout.getvalue(), "openapi\njvm-docs\ndaml-json\nprotobuf\ntypedoc\nasyncapi\n")

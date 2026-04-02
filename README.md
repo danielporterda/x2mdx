@@ -14,6 +14,7 @@ Current implementation priority:
 - `DAML JSON -> MDX`
 - `protobuf descriptor images -> MDX`
 - `TypeDoc JSON -> MDX`
+- `AsyncAPI -> MDX`
 
 The tool is designed around:
 
@@ -31,6 +32,7 @@ x2mdx jvm-docs build-api-pages-from-manifest --manifest fixtures/jvm-docs.json -
 x2mdx daml-json build-api-pages-from-manifest --manifest fixtures/daml.json --output-dir ./out/daml
 x2mdx protobuf build-api-pages-from-manifest --manifest fixtures/protobuf.json --output-dir ./out/protobuf
 x2mdx typedoc build-api-pages-from-manifest --manifest fixtures/typedoc.json --output-file ./out/typescript.mdx
+x2mdx asyncapi build-api-pages-from-manifest --manifest fixtures/asyncapi.json --output-file ./out/asyncapi.mdx
 ```
 
 ## OpenAPI Build Flags
@@ -131,6 +133,19 @@ The intended split is:
 
 - downstream docs repos fetch published npm tarballs or other package artifacts and run TypeDoc locally
 - `x2mdx` consumes those supplied local TypeDoc JSON snapshots and renders MDX
+
+## AsyncAPI Docs
+
+`asyncapi build-api-pages-from-manifest` consumes a local manifest of versioned AsyncAPI snapshots and renders:
+
+- one generated MDX page for the selected websocket surface
+- version-aware lifecycle metadata for introduced, changed, and removed channels
+- per-channel publish/subscribe message details, required fields, and example payloads
+
+The intended split is:
+
+- downstream docs repos fetch or materialize local `asyncapi.yaml` snapshots and write the manifest
+- `x2mdx` consumes those supplied local AsyncAPI snapshots and renders MDX
 
 ## Running In `digital-asset/docs`
 
