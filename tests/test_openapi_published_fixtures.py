@@ -45,7 +45,7 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
         overview = next(page for page in pages if page.path == "overview.mdx")
         self.assertEqual(overview.title, "OpenAPI Lifecycle Overview")
         spec_page = next(page for page in pages if page.path == "specs/json-ledger-api-openapi-yaml.mdx")
-        self.assertIn("Endpoint Diff Summary", render_page(spec_page))
+        self.assertIn("Table of Contents", render_page(spec_page))
 
     def test_cli_build_api_pages_from_manifest_writes_mdx_pages(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -80,7 +80,8 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
             self.assertTrue((output_dir / "overview.mdx").exists())
             self.assertTrue((output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").exists())
             spec_page = (output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").read_text(encoding="utf-8")
-            self.assertIn("Endpoint Diff Summary", spec_page)
+            self.assertIn("Table of Contents", spec_page)
+            self.assertIn("| Name | Summary | Introduced | Changed | Deprecated | Removed |", spec_page)
             self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
             self.assertIn("| `application/json` | `object` | `actAs`, `commandId`, `commands` |", spec_page)
             self.assertIn("**Request Example: `application/json`**", spec_page)

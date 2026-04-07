@@ -198,8 +198,9 @@ def build_type_entries(
                 "upstream": f"[Open]({upstream})" if upstream else "-",
                 "type": f"`{md_code(type_symbol.symbol)}`",
                 "type_text": type_symbol.symbol,
-                "summary": md_text(type_symbol.latest_summary or ""),
+                "summary": md_text(type_symbol.latest_summary) if type_symbol.latest_summary else "-",
                 "introduced": format_lifecycle_value(type_symbol.introduced_version),
+                "changed": "-",
                 "deprecated": format_lifecycle_value(type_symbol.deprecated_version),
                 "removed": format_lifecycle_value(type_symbol.removed_version),
                 "package": package_name_for_symbol(type_symbol),
@@ -253,9 +254,9 @@ def build_package_rows_and_pages(
                 package_rows=[
                     [
                         f"[`{md_code(str(entry['type_text']))}`](#{entry['anchor']})",
-                        str(entry["upstream"]),
                         str(entry["summary"]),
                         str(entry["introduced"]),
+                        str(entry["changed"]),
                         str(entry["deprecated"]),
                         str(entry["removed"]),
                     ]

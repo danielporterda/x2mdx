@@ -17,7 +17,7 @@ MAX_CHANGED_ENTITIES = 300
 MAX_LATEST_OPERATIONS = 300
 MAX_LATEST_COMPONENTS = 400
 MAX_ENDPOINTS = 200
-MAX_ENDPOINT_DIFF_ROWS = 300
+MAX_TABLE_OF_CONTENTS_ROWS = 300
 
 
 def slugify(value: str) -> str:
@@ -218,61 +218,62 @@ def summarize_operation_transition(previous: dict[str, Any] | None, current: dic
     return changes
 
 
-def endpoint_diff_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
-    rows: list[list[str]] = []
-    linkable_endpoints = {endpoint_name(operation) for operation in spec.latest_operation_details}
-    operation_records = [
-        record
+def operation_summary_text(operation: dict[str, Any]) -> str:
+    summary = str(operation.get("summary", "") or "").strip()
+    if summary:
+        return md_text(summary)
+    description = str(operation.get("description", "") or "").strip()
+    if description:
+        return md_text(description)
+    return "-"
+
+
+def operation_change_summary_value(spec: OpenApiSpecLifecycle, lifecycle: OpenApiEntityLifecycle) -> str:
+    if not lifecycle.changed_in_versions:
+        return "-"
+
+    version_summaries: list[str] = []
+    details_by_version = spec.operation_details_by_version
+    for changed_version in lifecycle.changed_in_versions:
+        index = lifecycle.versions_present.index(changed_version)
+        if index == 0:
+            continue
+        previous_version = lifecycle.versions_present[index - 1]
+        previous = details_by_version.get(previous_version, {}).get(lifecycle.entity_key)
+        current = details_by_version.get(changed_version, {}).get(lifecycle.entity_key)
+        changes = compact_change_summary(summarize_operation_transition(previous, current))
+        version_summaries.append(f"{changed_version}: {changes}")
+
+    if not version_summaries:
+        return "-"
+    if len(version_summaries) <= 3:
+        return "; ".join(version_summaries)
+    shown = "; ".join(version_summaries[:3])
+    return f"{shown}; +{len(version_summaries) - 3} more"
+
+
+def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
+    lifecycle_by_key = {
+        record.entity_key: record
         for record in spec.entity_lifecycle
         if record.entity_type == "operation"
-        and (
-            record.introduced_version != spec.introduced_version
-            or record.changed_in_versions
-            or record.removed_version
+    }
+    rows: list[list[str]] = []
+    for operation in spec.latest_operation_details:
+        entity_key = str(operation.get("entity_key", "") or "")
+        lifecycle = lifecycle_by_key.get(entity_key)
+        if lifecycle is None:
+            continue
+        rows.append(
+            [
+                endpoint_anchor_link(endpoint_name(operation)),
+                operation_summary_text(operation),
+                lifecycle_value(lifecycle.introduced_version, "introduced"),
+                operation_change_summary_value(spec, lifecycle),
+                "-",
+                lifecycle_value(lifecycle.removed_version, "removed"),
+            ]
         )
-    ]
-    operation_records.sort(key=lambda record: record.name)
-
-    for record in operation_records:
-        details_by_version = spec.operation_details_by_version
-        if record.introduced_version != spec.introduced_version:
-            current = details_by_version.get(record.introduced_version, {}).get(record.entity_key)
-            rows.append(
-                [
-                    endpoint_anchor_link(record.name) if record.name in linkable_endpoints else md_code(record.name),
-                    md_code(record.introduced_version),
-                    md_code("added"),
-                    compact_change_summary(summarize_operation_transition(None, current)),
-                ]
-            )
-
-        for changed_version in record.changed_in_versions:
-            index = record.versions_present.index(changed_version)
-            if index == 0:
-                continue
-            previous_version = record.versions_present[index - 1]
-            previous = details_by_version.get(previous_version, {}).get(record.entity_key)
-            current = details_by_version.get(changed_version, {}).get(record.entity_key)
-            rows.append(
-                [
-                    endpoint_anchor_link(record.name) if record.name in linkable_endpoints else md_code(record.name),
-                    md_code(changed_version),
-                    md_code("changed"),
-                    compact_change_summary(summarize_operation_transition(previous, current)),
-                ]
-            )
-
-        if record.removed_version:
-            previous = details_by_version.get(record.versions_present[-1], {}).get(record.entity_key)
-            rows.append(
-                [
-                    endpoint_anchor_link(record.name) if record.name in linkable_endpoints else md_code(record.name),
-                    md_code(record.removed_version),
-                    md_code("removed"),
-                    compact_change_summary(summarize_operation_transition(previous, None)),
-                ]
-            )
-
     return rows
 
 
@@ -387,7 +388,7 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
 def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     counts = lifecycle_counts(spec)
     interesting = interesting_entities(spec)
-    endpoint_diffs = endpoint_diff_rows(spec)
+    toc_rows = table_of_contents_rows(spec)
     latest_operations = spec.latest_entities.get("operations", [])
     latest_components = spec.latest_entities.get("components", [])
     latest_paths = spec.latest_entities.get("paths", [])
@@ -395,12 +396,9 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
 
     body = render_template(
         "openapi/spec.md.j2",
-        endpoint_diff_rows=[
-            row
-            for row in endpoint_diffs[:MAX_ENDPOINT_DIFF_ROWS]
-        ],
-        endpoint_diff_total=len(endpoint_diffs),
-        endpoint_diff_limit=MAX_ENDPOINT_DIFF_ROWS,
+        table_of_contents_rows=toc_rows[:MAX_TABLE_OF_CONTENTS_ROWS],
+        table_of_contents_total=len(toc_rows),
+        table_of_contents_limit=MAX_TABLE_OF_CONTENTS_ROWS,
         endpoint_reference=render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS),
         version_timeline_rows=[
             [

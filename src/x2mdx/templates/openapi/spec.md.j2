@@ -1,14 +1,14 @@
 {% import "shared/macros.md.j2" as shared %}
 {{ paragraph("Generated from supplied versioned OpenAPI artifacts.") }}
 
-{{ heading(2, "Endpoint Diff Summary") }}
-{% if endpoint_diff_rows %}
-{{ table(["Endpoint", "Version", "Event", "Changes"], endpoint_diff_rows) }}
-{% if endpoint_diff_total > endpoint_diff_limit %}
-{{ paragraph("_Showing first " ~ endpoint_diff_limit ~ " endpoint diff rows out of " ~ endpoint_diff_total ~ "._") }}
+{{ heading(2, "Table of Contents") }}
+{% if table_of_contents_rows %}
+{{ table(["Name", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], table_of_contents_rows) }}
+{% if table_of_contents_total > table_of_contents_limit %}
+{{ paragraph("_Showing first " ~ table_of_contents_limit ~ " entries out of " ~ table_of_contents_total ~ "._") }}
 {% endif %}
 {% else %}
-{{ paragraph("No endpoint-level diffs in the selected version range.") }}
+{{ paragraph("No endpoints found in the latest version.") }}
 {% endif %}
 
 {{ heading(2, "Endpoint Reference (Latest)") }}

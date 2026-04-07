@@ -308,6 +308,8 @@ class JvmDocsTests(unittest.TestCase):
         self.assertIn("details/bindings-java", overview_text)
         self.assertIn("Package Reference", java_text)
         self.assertIn("com.example", java_package_text)
+        self.assertIn("Table of Contents", java_package_text)
+        self.assertIn("| Name | Summary | Introduced | Changed | Deprecated | Removed |", java_package_text)
         self.assertIn("`com.example.Foo`", java_package_text)
         self.assertIn("`com.example.Bar`", java_package_text)
         self.assertIn("#type-com-example-foo", java_package_text)
