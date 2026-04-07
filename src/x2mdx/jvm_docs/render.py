@@ -103,7 +103,7 @@ def type_label(type_text: str, package_name: str) -> str:
 def summary_preview(text: str, *, max_length: int = 72) -> str:
     normalized = " ".join(str(text).split())
     if not normalized:
-        return "-"
+        return ""
     if len(normalized) <= max_length:
         return md_text(normalized)
     clipped = normalized[: max_length - 3].rsplit(" ", 1)[0].rstrip(" ,.;:-")

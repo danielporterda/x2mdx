@@ -10,7 +10,11 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from x2mdx.cli import main as cli_main
-from x2mdx.jvm_docs.lifecycle import build_jvm_doc_lifecycle_report_from_sources
+from x2mdx.jvm_docs.lifecycle import (
+    build_jvm_doc_lifecycle_report_from_sources,
+    parse_java_type_page,
+    parse_scala_type_page,
+)
 from x2mdx.jvm_docs.snapshots import load_jvm_doc_sources
 
 
@@ -243,6 +247,38 @@ class JvmDocsTests(unittest.TestCase):
         self.assertEqual(scala_symbols["com.example.scala.Baz"].latest_summary, "Baz summary v2.1.0")
         self.assertEqual(scala_symbols["com.example.scala.Qux"].introduced_version, "2.1.0")
         self.assertEqual(scala_symbols["com.example.scala.Baz.stop()"].introduced_version, "2.1.0")
+
+    def test_java_meta_description_fallback_ignores_declaration_text(self) -> None:
+        _, summary = parse_java_type_page(
+            """
+            <html>
+              <head>
+                <meta name="description" content="declaration: package: com.example, class: Foo">
+              </head>
+              <body>
+                <div class="type-signature">public class Foo</div>
+              </body>
+            </html>
+            """
+        )
+
+        self.assertEqual(summary, "")
+
+    def test_scala_meta_description_fallback_ignores_bare_symbol_text(self) -> None:
+        _, summary = parse_scala_type_page(
+            """
+            <html>
+              <head>
+                <meta content="- com.example.scala.PrimitiveInstances" name="description">
+              </head>
+              <body>
+                <h4 id="signature" class="signature">sealed abstract class PrimitiveInstances extends AnyRef</h4>
+              </body>
+            </html>
+            """
+        )
+
+        self.assertEqual(summary, "")
 
     def test_cli_builds_pages_and_updates_docs_json(self) -> None:
         manifest_path = self._write_manifest()

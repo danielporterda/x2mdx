@@ -47,6 +47,19 @@ def strip_html_tags(fragment: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def normalize_type_summary(summary: str) -> str:
+    text = re.sub(r"\s+", " ", summary).strip()
+    if not text:
+        return ""
+    if text.lower().startswith("declaration:"):
+        return ""
+
+    candidate = text[1:].strip() if text.startswith("-") else text
+    if re.fullmatch(r"[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+", candidate):
+        return ""
+    return text
+
+
 def include_name(name: str, prefixes: list[str]) -> bool:
     if not prefixes:
         return True
@@ -418,7 +431,7 @@ def parse_java_type_page(raw_html: str) -> tuple[str, str]:
         if meta_match:
             summary = strip_html_tags(meta_match.group(1))
 
-    return signature, summary
+    return signature, normalize_type_summary(summary)
 
 
 def parse_scala_type_page(raw_html: str) -> tuple[str, str]:
@@ -442,7 +455,7 @@ def parse_scala_type_page(raw_html: str) -> tuple[str, str]:
         if meta_match:
             summary = strip_html_tags(meta_match.group(1))
 
-    return signature, summary
+    return signature, normalize_type_summary(summary)
 
 
 def enrich_type_metadata(
