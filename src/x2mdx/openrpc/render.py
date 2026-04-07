@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Any
 
 from x2mdx.openrpc.models import OpenRpcMethodLifecycle, OpenRpcReport, OpenRpcSpecLifecycle
-from x2mdx.output import Page, RawMarkdown
+from x2mdx.output import Page
+from x2mdx.templating import markdown_page
 
 
 def slugify(value: str) -> str:
@@ -63,86 +63,78 @@ def build_overview_page(
     link_prefix: str | None = None,
 ) -> Page:
     normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
-    lines = [
-        f"# {overview_title}",
-        "",
-        "Generated from versioned OpenRPC snapshots.",
-        "",
-        f"- Publish version: `{report.publish_version}`",
-        f"- Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
-        f"- Source: `{report.source_name}`",
-        f"- Version filter: `{report.version_filter}`",
-        f"- Generated at: `{report.generated_at_utc}`",
-        "",
-        "## Spec Reference",
-        "",
-        "| Spec | Title | Methods | Changed In |",
-        "| --- | --- | --- | --- |",
-    ]
-    for spec in report.specs:
-        spec_link = spec_page_link(spec, spec_dir_name=spec_dir_name)
-        if normalized_link_prefix:
-            spec_link = f"{normalized_link_prefix}/{spec_link}"
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    f"[`{escape_md_cell(spec.display_name)}`]({spec_link})",
-                    escape_md_cell(spec.info_title or "-"),
-                    md_code(str(len(spec.methods))),
-                    ", ".join(md_code(version) for version in spec.changed_in_versions) if spec.changed_in_versions else "-",
-                ]
-            )
-            + " |"
-        )
-
-    return Page(
+    return markdown_page(
         path=overview_name,
         title=overview_title,
         description="Versioned OpenRPC reference docs.",
-        blocks=[RawMarkdown("\n".join(lines))],
+        template_name="openrpc/overview.md.j2",
+        overview_title=overview_title,
+        overview_items=[
+            f"Publish version: `{report.publish_version}`",
+            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
+            f"Source: `{report.source_name}`",
+            f"Version filter: `{report.version_filter}`",
+            f"Generated at: `{report.generated_at_utc}`",
+        ],
+        spec_rows=[
+            [
+                f"[`{escape_md_cell(spec.display_name)}`]("
+                + (
+                    f"{normalized_link_prefix}/{spec_page_link(spec, spec_dir_name=spec_dir_name)}"
+                    if normalized_link_prefix
+                    else spec_page_link(spec, spec_dir_name=spec_dir_name)
+                )
+                + ")",
+                escape_md_cell(spec.info_title or "-"),
+                md_code(str(len(spec.methods))),
+                ", ".join(md_code(version) for version in spec.changed_in_versions) if spec.changed_in_versions else "-",
+            ]
+            for spec in report.specs
+        ],
     )
 
+def _method_context(method: OpenRpcMethodLifecycle) -> dict[str, Any]:
+    latest = method.latest
+    lifecycle_lines = [f"- Introduced: `{method.introduced_version}`"]
+    if method.change_details:
+        lifecycle_lines.append("Changed in: " + ", ".join(md_code(entry["version"]) for entry in method.change_details))
+    if method.removed_version:
+        lifecycle_lines.append(f"Removed in: `{method.removed_version}`")
+        lifecycle_lines.append("Shown for historical reference.")
 
-def render_param_table(params: list[dict[str, Any]]) -> str:
-    if not params:
-        return "_No parameters._"
-    lines = [
-        "| Parameter | Schema | Required Fields | Description |",
-        "| --- | --- | --- | --- |",
-    ]
-    for param in params:
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    md_code(param["name"]),
-                    md_code(param["schema"]),
-                    ", ".join(md_code(field) for field in param["required_fields"]) if param["required_fields"] else "-",
-                    escape_md_cell(param["description"]) if param["description"] else "-",
-                ]
-            )
-            + " |"
-        )
-    return "\n".join(lines)
-
-
-def render_result_table(result: dict[str, Any]) -> str:
-    return "\n".join(
-        [
-            "| Schema | Required Fields | Description |",
-            "| --- | --- | --- |",
-            "| "
-            + " | ".join(
-                [
-                    md_code(result["schema"]),
-                    ", ".join(md_code(field) for field in result["required_fields"]) if result["required_fields"] else "-",
-                    escape_md_cell(result["description"]) if result["description"] else "-",
-                ]
-            )
-            + " |",
-        ]
-    )
+    param_samples = {param["name"]: param["sample"] for param in latest["params"] if param["sample"] is not None}
+    return {
+        "anchor": method.anchor,
+        "heading_text": md_code(method.method),
+        "lifecycle_text": "\n".join(lifecycle_lines),
+        "summary": latest["summary"],
+        "description": latest["description"],
+        "change_rows": [
+            [
+                md_code(entry["version"]),
+                escape_md_cell("; ".join(str(change) for change in entry["changes"])),
+            ]
+            for entry in method.change_details
+        ],
+        "parameter_rows": [
+            [
+                md_code(param["name"]),
+                md_code(param["schema"]),
+                ", ".join(md_code(field) for field in param["required_fields"]) if param["required_fields"] else "-",
+                escape_md_cell(param["description"]) if param["description"] else "-",
+            ]
+            for param in latest["params"]
+        ],
+        "result_row": [
+            md_code(latest["result"]["schema"]),
+            ", ".join(md_code(field) for field in latest["result"]["required_fields"])
+            if latest["result"]["required_fields"]
+            else "-",
+            escape_md_cell(latest["result"]["description"]) if latest["result"]["description"] else "-",
+        ],
+        "param_sample": param_samples or None,
+        "result_sample": latest["result"]["sample"],
+    }
 
 
 def build_spec_page(
@@ -156,148 +148,39 @@ def build_spec_page(
     overview_link = f"../{Path(overview_name).with_suffix('').as_posix()}"
     if normalized_link_prefix is not None:
         overview_link = normalized_link_prefix or "/"
-    lines = [
-        f"# {spec.display_name}",
-        "",
-        f"[Back to overview]({overview_link})",
-        "",
-    ]
-    if spec.info_description:
-        lines.extend([spec.info_description, ""])
-    lines.extend(
-        [
-            f"- Latest source path: `{spec.latest_source_path}`",
-            f"- Publish version: `{spec.latest_version}`",
-            f"- OpenRPC version: `{spec.openrpc_version or '-'}`",
-            f"- Spec info.version: `{spec.info_version or '-'}`",
-            "",
-            "## Version Change Timeline",
-            "",
-            "| Version | Active Methods | Added | Changed | Removed |",
-            "| --- | --- | --- | --- | --- |",
-        ]
-    )
-    for version in spec.versions_present:
-        delta = spec.per_version_method_deltas[version]
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    md_code(version),
-                    str(delta["active_count"]),
-                    str(delta["added_count"]),
-                    str(delta["changed_count"]),
-                    str(delta["removed_count"]),
-                ]
-            )
-            + " |"
-        )
-
-    lines.extend(
-        [
-            "",
-            "## Method Diff Summary",
-            "",
-            "| Method | Introduced | Changes | Removed |",
-            "| --- | --- | --- | --- |",
-        ]
-    )
-    for method in spec.methods:
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    f"[{md_code(method.method)}](#{method.anchor})",
-                    md_code(method.introduced_version),
-                    escape_md_cell(render_change_summary(method.change_details)),
-                    md_code(method.removed_version) if method.removed_version else "-",
-                ]
-            )
-            + " |"
-        )
-
-    lines.extend(["", "## Methods"])
-    for method in spec.methods:
-        latest = method.latest
-        lines.extend(
-            [
-                "",
-                f'<a id="{method.anchor}"></a>',
-                f"### `{method.method}`",
-                "",
-                f"- Introduced: `{method.introduced_version}`",
-            ]
-        )
-        if method.change_details:
-            lines.append("Changed in: " + ", ".join(md_code(entry["version"]) for entry in method.change_details))
-        if method.removed_version:
-            lines.append(f"Removed in: `{method.removed_version}`")
-            lines.append("Shown for historical reference.")
-        if latest["summary"]:
-            lines.extend(["", latest["summary"]])
-        if latest["description"]:
-            lines.extend(["", latest["description"]])
-
-        if method.change_details:
-            lines.extend(
-                [
-                    "",
-                    "**Version Changes**",
-                    "",
-                    "| Version | Changes |",
-                    "| --- | --- |",
-                ]
-            )
-            for entry in method.change_details:
-                lines.append(
-                    "| "
-                    + " | ".join(
-                        [
-                            md_code(entry["version"]),
-                            escape_md_cell("; ".join(str(change) for change in entry["changes"])),
-                        ]
-                    )
-                    + " |"
-                )
-
-        lines.extend(
-            [
-                "",
-                "**Parameters**",
-                "",
-                render_param_table(latest["params"]),
-                "",
-                "**Result**",
-                "",
-                render_result_table(latest["result"]),
-            ]
-        )
-
-        param_samples = {param["name"]: param["sample"] for param in latest["params"] if param["sample"] is not None}
-        if param_samples:
-            lines.extend(
-                [
-                    "",
-                    "**Params Example**",
-                    "",
-                    f"```json\n{json.dumps(param_samples, indent=2)}\n```",
-                ]
-            )
-        if latest["result"]["sample"] is not None:
-            lines.extend(
-                [
-                    "",
-                    "**Result Example**",
-                    "",
-                    f"```json\n{json.dumps(latest['result']['sample'], indent=2)}\n```",
-                ]
-            )
-
-    return Page(
+    return markdown_page(
         path=f"{spec_dir_name}/{Path(spec_page_name(spec)).as_posix()}",
         title=spec.display_name,
         description=spec.info_title or "OpenRPC reference page.",
-        blocks=[RawMarkdown("\n".join(lines).rstrip())],
+        template_name="openrpc/spec.md.j2",
+        spec=spec,
+        overview_link=overview_link,
+        metadata_items=[
+            f"Latest source path: `{spec.latest_source_path}`",
+            f"Publish version: `{spec.latest_version}`",
+            f"OpenRPC version: `{spec.openrpc_version or '-'}`",
+            f"Spec info.version: `{spec.info_version or '-'}`",
+        ],
+        version_timeline_rows=[
+            [
+                md_code(version),
+                str(spec.per_version_method_deltas[version]["active_count"]),
+                str(spec.per_version_method_deltas[version]["added_count"]),
+                str(spec.per_version_method_deltas[version]["changed_count"]),
+                str(spec.per_version_method_deltas[version]["removed_count"]),
+            ]
+            for version in spec.versions_present
+        ],
+        method_summary_rows=[
+            [
+                f"[{md_code(method.method)}](#{method.anchor})",
+                md_code(method.introduced_version),
+                escape_md_cell(render_change_summary(method.change_details)),
+                md_code(method.removed_version) if method.removed_version else "-",
+            ]
+            for method in spec.methods
+        ],
+        methods=[_method_context(method) for method in spec.methods],
     )
 
 

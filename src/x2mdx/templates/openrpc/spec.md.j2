@@ -1,0 +1,64 @@
+{{ heading(1, spec.display_name) }}
+
+[Back to overview]({{ overview_link }})
+{% if spec.info_description %}
+
+{{ paragraph(spec.info_description) }}
+{% endif %}
+
+{{ bullet_list(metadata_items) }}
+
+{{ heading(2, "Version Change Timeline") }}
+
+{{ table(["Version", "Active Methods", "Added", "Changed", "Removed"], version_timeline_rows) }}
+
+{{ heading(2, "Method Diff Summary") }}
+
+{{ table(["Method", "Introduced", "Changes", "Removed"], method_summary_rows) }}
+
+{{ heading(2, "Methods") }}
+{% for method in methods %}
+
+{{ anchor(method.anchor) }}
+{{ heading(3, method.heading_text) }}
+
+{{ paragraph(method.lifecycle_text) }}
+{% if method.summary %}
+
+{{ paragraph(method.summary) }}
+{% endif %}
+{% if method.description %}
+
+{{ paragraph(method.description) }}
+{% endif %}
+{% if method.change_rows %}
+
+**Version Changes**
+
+{{ table(["Version", "Changes"], method.change_rows) }}
+{% endif %}
+
+**Parameters**
+
+{% if method.parameter_rows %}
+{{ table(["Parameter", "Schema", "Required Fields", "Description"], method.parameter_rows) }}
+{% else %}
+_No parameters._
+{% endif %}
+
+**Result**
+
+{{ table(["Schema", "Required Fields", "Description"], [method.result_row]) }}
+{% if method.param_sample is not none %}
+
+**Params Example**
+
+{{ code_block("json", pretty_json(method.param_sample)) }}
+{% endif %}
+{% if method.result_sample is not none %}
+
+**Result Example**
+
+{{ code_block("json", pretty_json(method.result_sample)) }}
+{% endif %}
+{% endfor %}
