@@ -1,11 +1,9 @@
 {% import "shared/macros.md.j2" as shared %}
-{{ paragraph("Back to [artifact page](" ~ artifact_link ~ ").") }}
+{{ heading(2, "Type Reference") }}
 
-{{ shared.bullet_section("Package", package_items) }}
+{{ paragraph(type_reference_legend) }}
 
-{{ heading(2, "Table of Contents") }}
-
-{{ table(["Name", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], package_rows) }}
+{{ table(["TYPE", "STATUS", "SUMMARY"], type_reference_rows) }}
 {% for entry in package_entries %}
 
 {{ anchor(entry.anchor) }}

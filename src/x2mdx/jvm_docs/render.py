@@ -14,6 +14,12 @@ from x2mdx.jvm_docs.models import JvmDocArtifactLifecycle, JvmDocLifecycleReport
 from x2mdx.output import Page
 from x2mdx.templating import markdown_page
 
+STATUS_MARKERS = {
+    "active": "🟢",
+    "deprecated": "🟠",
+    "removed": "🔴",
+}
+
 
 def slugify(value: str) -> str:
     out = value.lower()
@@ -78,6 +84,51 @@ def format_lifecycle_value(value: str | None) -> str:
     return f"`{md_code(value)}`"
 
 
+def compact_version_label(value: str | None) -> str:
+    if not value:
+        return "-"
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", value)
+    if match:
+        return f"v{match.group(1)}.{match.group(2)}"
+    return f"v{value}"
+
+
+def type_label(type_text: str, package_name: str) -> str:
+    prefix = f"{package_name}."
+    if package_name != "(root package)" and type_text.startswith(prefix):
+        return type_text[len(prefix) :]
+    return type_text
+
+
+def summary_preview(text: str, *, max_length: int = 72) -> str:
+    normalized = " ".join(str(text).split())
+    if not normalized:
+        return "-"
+    if len(normalized) <= max_length:
+        return md_text(normalized)
+    clipped = normalized[: max_length - 3].rsplit(" ", 1)[0].rstrip(" ,.;:-")
+    if len(clipped) < max_length // 2:
+        clipped = normalized[: max_length - 3].rstrip(" ,.;:-")
+    return md_text(f"{clipped}...")
+
+
+def status_cell(kind: str, version: str) -> str:
+    parts = [STATUS_MARKERS[kind], f"`{md_code(compact_version_label(version))}`"]
+    if kind != "active":
+        parts.append(kind.capitalize())
+    return " ".join(parts)
+
+
+def status_legend() -> str:
+    return "  ".join(
+        [
+            f'{STATUS_MARKERS["active"]} Active Since',
+            f'{STATUS_MARKERS["deprecated"]} Deprecated',
+            f'{STATUS_MARKERS["removed"]} Removed',
+        ]
+    )
+
+
 def java_member_owner(symbol: JvmDocSymbolLifecycle) -> str:
     if "#" not in symbol.symbol:
         return ""
@@ -127,6 +178,7 @@ def type_anchor(symbol: JvmDocSymbolLifecycle) -> str:
 def build_type_entries(
     artifact: JvmDocArtifactLifecycle,
 ) -> list[dict[str, Any]]:
+    version_index = {version: index for index, version in enumerate(artifact.versions)}
     type_symbols = sorted((symbol for symbol in artifact.symbols if symbol.kind == "type"), key=lambda symbol: symbol.symbol)
     member_symbols = [symbol for symbol in artifact.symbols if symbol.kind == "member"]
     type_by_symbol = {symbol.symbol: symbol for symbol in type_symbols}
@@ -174,6 +226,26 @@ def build_type_entries(
         upstream = latest_doc_link(type_symbol)
         type_members = sorted(members_by_type.get(type_symbol.symbol_key, []), key=lambda symbol: symbol.symbol)
         flags = type_flags[type_symbol.symbol_key]
+        deprecated_versions = [
+            version
+            for version in [type_symbol.deprecated_version, *(member.deprecated_version for member in type_members)]
+            if version
+        ]
+        removed_versions = [
+            version
+            for version in [type_symbol.removed_version, *(member.removed_version for member in type_members)]
+            if version
+        ]
+        deprecated_version = min(deprecated_versions, key=lambda version: version_index[version]) if deprecated_versions else None
+        removed_version = min(removed_versions, key=lambda version: version_index[version]) if removed_versions else None
+        status_kind = "active"
+        status_version = type_symbol.introduced_version
+        if removed_version is not None:
+            status_kind = "removed"
+            status_version = removed_version
+        elif deprecated_version is not None:
+            status_kind = "deprecated"
+            status_version = deprecated_version
 
         member_rows: list[list[str]] = []
         for member in type_members:
@@ -198,11 +270,14 @@ def build_type_entries(
                 "upstream": f"[Open]({upstream})" if upstream else "-",
                 "type": f"`{md_code(type_symbol.symbol)}`",
                 "type_text": type_symbol.symbol,
-                "summary": md_text(type_symbol.latest_summary) if type_symbol.latest_summary else "-",
+                "summary": md_text(type_symbol.latest_summary or ""),
+                "summary_preview": summary_preview(type_symbol.latest_summary or ""),
                 "introduced": format_lifecycle_value(type_symbol.introduced_version),
-                "changed": "-",
                 "deprecated": format_lifecycle_value(type_symbol.deprecated_version),
                 "removed": format_lifecycle_value(type_symbol.removed_version),
+                "status_kind": status_kind,
+                "status_version": status_version,
+                "status_cell": status_cell(status_kind, status_version),
                 "package": package_name_for_symbol(type_symbol),
                 "symbol": type_symbol,
                 "member_rows": member_rows,
@@ -244,21 +319,12 @@ def build_package_rows_and_pages(
                 title=package_name,
                 description="Generated package reference page from local Javadoc/Scaladoc snapshots",
                 template_name="jvm_docs/package.md.j2",
-                artifact_link=relative_page_link(package_page_path, artifact_page_path),
-                package_items=[
-                    f"Artifact: `{md_code(f'{artifact.group}:{artifact.artifact}')}`",
-                    f"Language: `{md_code(artifact.language)}`",
-                    f"Package: `{md_code(package_name)}`",
-                    f"Types in package: `{len(package_entries)}`",
-                ],
-                package_rows=[
+                type_reference_legend=status_legend(),
+                type_reference_rows=[
                     [
-                        f"[`{md_code(str(entry['type_text']))}`](#{entry['anchor']})",
-                        str(entry["summary"]),
-                        str(entry["introduced"]),
-                        str(entry["changed"]),
-                        str(entry["deprecated"]),
-                        str(entry["removed"]),
+                        f"[{md_text(type_label(str(entry['type_text']), package_name))}](#{entry['anchor']})",
+                        str(entry["status_cell"]),
+                        str(entry["summary_preview"]),
                     ]
                     for entry in package_entries
                 ],
