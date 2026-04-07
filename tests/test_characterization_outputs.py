@@ -173,3 +173,60 @@ class CharacterizationOutputTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(actual_file.read_text(encoding="utf-8"), expected_file.read_text(encoding="utf-8"))
+
+    def test_asyncapi_render_matches_characterization_output(self) -> None:
+        fixture_dir = FIXTURE_ROOT / "asyncapi"
+        actual_file = self.root / "asyncapi" / "ledger-api-websocket-reference.mdx"
+        expected_file = fixture_dir / "expected" / "ledger-api-websocket-reference.mdx"
+
+        result = cli_main(
+            [
+                "asyncapi",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(fixture_dir / "input" / "manifest.json"),
+                "--output-file",
+                str(actual_file),
+                "--publish-version",
+                "3.4.12",
+                "--source-name",
+                "splice-wallet-kernel Ledger API AsyncAPI snapshots",
+                "--version-filter",
+                "characterization fixture versions",
+                "--page-title",
+                "JSON Ledger API WebSocket Reference",
+                "--page-description",
+                "Versioned AsyncAPI reference for JSON Ledger API WebSocket endpoints.",
+            ]
+        )
+
+        self.assertEqual(result, 0)
+        self.assertEqual(actual_file.read_text(encoding="utf-8"), expected_file.read_text(encoding="utf-8"))
+
+    def test_openrpc_render_matches_characterization_output(self) -> None:
+        fixture_dir = FIXTURE_ROOT / "openrpc"
+        actual_root = self.root / "openrpc"
+
+        result = cli_main(
+            [
+                "openrpc",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(fixture_dir / "input" / "manifest.json"),
+                "--output-dir",
+                str(actual_root),
+                "--publish-version",
+                "0.21.0",
+                "--source-name",
+                "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
+                "--version-filter",
+                "characterization fixture versions",
+                "--overview-title",
+                "Wallet Gateway JSON-RPC",
+                "--link-prefix",
+                "/reference/wallet-gateway-json-rpc",
+            ]
+        )
+
+        self.assertEqual(result, 0)
+        self.assertTreeEqual(actual_root, fixture_dir / "expected")

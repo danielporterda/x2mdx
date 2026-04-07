@@ -11,7 +11,9 @@ if str(REPO_ROOT) not in sys.path:
 
 from tests.harness.refresh_characterization_daml_json import refresh as refresh_daml_json
 from tests.harness.refresh_characterization_jvm_docs import refresh as refresh_jvm_docs
+from tests.harness.refresh_characterization_asyncapi import refresh as refresh_asyncapi
 from tests.harness.refresh_characterization_openapi import refresh as refresh_openapi
+from tests.harness.refresh_characterization_openrpc import refresh as refresh_openrpc
 from tests.harness.refresh_characterization_protobuf import refresh as refresh_protobuf
 from tests.harness.refresh_characterization_typedoc import refresh as refresh_typedoc
 
@@ -21,7 +23,7 @@ def main() -> int:
     parser.add_argument(
         "--format",
         action="append",
-        choices=["openapi", "jvm-docs", "daml-json", "protobuf", "typedoc"],
+        choices=["openapi", "jvm-docs", "daml-json", "protobuf", "typedoc", "asyncapi", "openrpc"],
         help="Format to refresh. Repeat to refresh multiple formats. Defaults to all.",
     )
     parser.add_argument("--force-download", action="store_true", help="Force jar re-downloads for JVM docs.")
@@ -30,7 +32,7 @@ def main() -> int:
     parser.add_argument("--force-refresh", action="store_true", help="Force descriptor-image refresh for protobuf.")
     args = parser.parse_args()
 
-    selected = set(args.format or ["openapi", "jvm-docs", "daml-json", "protobuf", "typedoc"])
+    selected = set(args.format or ["openapi", "jvm-docs", "daml-json", "protobuf", "typedoc", "asyncapi", "openrpc"])
     if "openapi" in selected:
         refresh_openapi()
     if "jvm-docs" in selected:
@@ -41,6 +43,10 @@ def main() -> int:
         refresh_protobuf(skip_fetch=args.skip_fetch, force_refresh=args.force_refresh)
     if "typedoc" in selected:
         refresh_typedoc(force_regenerate=args.force_regenerate)
+    if "asyncapi" in selected:
+        refresh_asyncapi(skip_fetch=args.skip_fetch)
+    if "openrpc" in selected:
+        refresh_openrpc(skip_fetch=args.skip_fetch)
     return 0
 
 
