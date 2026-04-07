@@ -1,0 +1,62 @@
+{% import "shared/macros.md.j2" as shared %}
+{{ heading(1, package_title) }}
+
+{{ paragraph("[Back to Canton Protobuf History](" ~ overview_link ~ ")") }}
+
+{{ shared.bullet_section("Snapshot", snapshot_items) }}
+{% if source_file_rows %}
+
+{{ heading(2, "Source Files") }}
+
+{{ table(["File", "Services", "Messages", "Enums", "Source"], source_file_rows) }}
+{% endif %}
+{% if services %}
+
+{{ heading(2, "Services") }}
+
+{{ table(["Service", "Endpoints", "Source", "Description"], service_rows) }}
+{% for service in services %}
+
+{{ anchor(service.anchor) }}
+{{ heading(3, service.heading) }}
+
+{{ bullet_list(service.summary_items) }}
+
+{{ paragraph(service.description) }}
+
+{{ table(["Endpoint", "Introduced", "Last Changed", "Removed", "Request", "Response", "Source"], service.endpoint_rows) }}
+{% for endpoint in service.endpoint_details %}
+
+{{ anchor(endpoint.anchor) }}
+{{ paragraph("**Endpoint `" ~ endpoint.title ~ "`**") }}
+
+{{ bullet_list(endpoint.summary_items) }}
+
+{{ paragraph("**Signature**") }}
+
+{{ code_block("protobuf", endpoint.signature) }}
+
+{{ paragraph(endpoint.description) }}
+
+{{ paragraph("**History**") }}
+
+{{ endpoint.history_table }}
+
+{{ paragraph("**Request Type**") }}
+
+{{ bullet_list([endpoint.request_type]) }}
+
+{{ paragraph("**Response Type**") }}
+
+{{ bullet_list([endpoint.response_type]) }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% if type_reference_blocks %}
+
+{{ heading(2, "Type Reference") }}
+{% for block in type_reference_blocks %}
+
+{{ block }}
+{% endfor %}
+{% endif %}

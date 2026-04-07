@@ -1,0 +1,40 @@
+{% for operation in operations %}
+{{ anchor(operation.anchor_id) }}
+
+{{ heading(3, operation.header) }}
+{% if operation.bullet_items %}
+{{ bullet_list(operation.bullet_items) }}
+{% endif %}
+{% if operation.parameter_rows %}
+**Parameters**
+
+{{ table(["Name", "In", "Required", "Schema", "Description"], operation.parameter_rows) }}
+{% endif %}
+{% if operation.request_body %}
+**Request Body**
+
+{{ bullet_list(["Required: " ~ operation.request_body.required]) }}
+{% if operation.request_body.content_rows %}
+{{ table(["Content Type", "Schema", "Required Fields"], operation.request_body.content_rows) }}
+{% else %}
+{{ bullet_list(["Content: " ~ operation.request_body.content]) }}
+{% endif %}
+{% for example in operation.request_body.examples %}
+**Request Example: {{ example.content_type }}**
+
+{{ code_block("json", example.body) }}
+{% endfor %}
+{% endif %}
+{% if operation.response_rows %}
+**Responses**
+
+{{ table(["Code", "Description", "Content Types", "Schemas"], operation.response_rows) }}
+{% endif %}
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}
+{% if total_operations > max_endpoints %}
+
+{{ paragraph("_Showing first " ~ max_endpoints ~ " endpoints out of " ~ total_operations ~ "._") }}
+{% endif %}

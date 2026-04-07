@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from x2mdx.daml_json.models import DamlDocsReport
-from x2mdx.output import Page, RawMarkdown
+from x2mdx.output import Page
+from x2mdx.templating import markdown_page, render_template
 
 EXCLUDED_MODULE_NAMES = frozenset(
     {
@@ -232,7 +233,7 @@ def render_choice(choice: dict[str, Any]) -> str:
     return "\n\n".join(parts)
 
 
-def render_template(template: dict[str, Any]) -> str:
+def render_template_doc(template: dict[str, Any]) -> str:
     name = str(template.get("td_name", ""))
     anchor = template.get("td_anchor")
     parts: list[str] = []
@@ -469,22 +470,16 @@ def normalize_link_prefix(link_prefix: str) -> str:
     return "/" + trimmed.strip("/")
 
 
-def render_module_body(
+def module_template_context(
     module_doc: dict[str, Any],
     *,
     module_deprecation_introduced_in: str | None,
     module_lifecycle: dict[str, str | None] | None,
-) -> str:
+) -> dict[str, Any]:
     name = str(module_doc["md_name"])
     display_name = module_display_name(name)
     anchor = module_doc.get("md_anchor")
-    body_parts: list[str] = []
-    if anchor:
-        body_parts.append(f'<a id="{anchor}"></a>')
-    body_parts.append(f"# {display_name}")
     descr = render_doc_blocks(module_doc.get("md_descr"))
-    if descr:
-        body_parts.append(descr)
 
     module_warnings = extract_tagged_warning_messages(module_doc.get("md_warn"), "WarnData")
     module_deprecations = extract_tagged_warning_messages(module_doc.get("md_warn"), "DeprecatedData")
@@ -519,74 +514,75 @@ def render_module_body(
     if module_deprecations and module_deprecation_introduced_in:
         deprecation_since_line = f"Deprecated since: `{module_deprecation_introduced_in}`"
 
-    body_parts.append("## Module Snapshot")
-    body_parts.append(
-        "\n".join(
-            [
-                "<CardGroup cols={2}>",
-                '<Card title="Lifecycle">',
-                lifecycle,
-                "</Card>",
-                '<Card title="Notices">',
-                f"Status: `{module_status}`",
-                f"Introduced in: `{introduced_in}`",
-                f"Removed in: `{removed_in}`",
-                f"Warnings: `{len(module_warnings)}`",
-                f"Deprecations: `{len(module_deprecations)}`",
-                deprecation_since_line,
-                "</Card>",
-                "</CardGroup>",
-            ]
-        )
-    )
+    primary_warning = ""
     if module_status == "removed":
-        message = (
+        primary_warning = (
             f"This module was removed in `{removed_in}` and is shown here for historical reference."
             if removed_in != "-"
             else "This module is removed and is shown here for historical reference."
         )
-        body_parts.append("\n".join(["<Warning>", message, "</Warning>"]))
     elif module_alpha_warning:
-        body_parts.append("\n".join(["<Warning>", module_alpha_warning, "</Warning>"]))
+        primary_warning = module_alpha_warning
     elif module_deprecation_warning:
-        body_parts.append("\n".join(["<Warning>", module_deprecation_warning, "</Warning>"]))
-    if module_warnings:
-        warning_lines = ["<AccordionGroup>", f'<Accordion title="All warnings ({len(module_warnings)})">']
-        warning_lines.extend(f"- {item}" for item in module_warnings)
-        warning_lines.extend(["</Accordion>", "</AccordionGroup>"])
-        body_parts.append("\n".join(warning_lines))
-    if module_deprecations:
-        deprecation_lines = [
-            "<AccordionGroup>",
-            f'<Accordion title="All deprecations ({len(module_deprecations)})">',
-        ]
-        deprecation_lines.extend(f"- {item}" for item in module_deprecations)
-        deprecation_lines.extend(["</Accordion>", "</AccordionGroup>"])
-        body_parts.append("\n".join(deprecation_lines))
+        primary_warning = module_deprecation_warning
 
-    sections: list[tuple[str, list[str]]] = []
+    sections: list[dict[str, Any]] = []
     if module_doc.get("md_adts"):
-        sections.append(("Data Types", [render_adt(item) for item in module_doc["md_adts"]]))
+        sections.append({"title": "Data Types", "bodies": [render_adt(item) for item in module_doc["md_adts"]]})
     if module_doc.get("md_classes"):
-        sections.append(("Typeclasses", [render_class(item) for item in module_doc["md_classes"]]))
+        sections.append({"title": "Typeclasses", "bodies": [render_class(item) for item in module_doc["md_classes"]]})
     if module_doc.get("md_functions"):
-        sections.append(("Functions", [render_function(item) for item in module_doc["md_functions"]]))
+        sections.append({"title": "Functions", "bodies": [render_function(item) for item in module_doc["md_functions"]]})
     if module_doc.get("md_interfaces"):
-        sections.append(("Interfaces", [render_interface(item) for item in module_doc["md_interfaces"]]))
+        sections.append({"title": "Interfaces", "bodies": [render_interface(item) for item in module_doc["md_interfaces"]]})
     if module_doc.get("md_templates"):
-        sections.append(("Templates", [render_template(item) for item in module_doc["md_templates"]]))
+        sections.append({"title": "Templates", "bodies": [render_template_doc(item) for item in module_doc["md_templates"]]})
 
     orphan_instances = [item for item in module_doc.get("md_instances", []) if item.get("id_isOrphan")]
     if orphan_instances:
-        sections.append(
-            ("Orphan Typeclass Instances", [f"- `{render_instance(item)}`" for item in orphan_instances])
-        )
+        sections.append({"title": "Orphan Typeclass Instances", "bodies": [f"- `{render_instance(item)}`" for item in orphan_instances]})
 
-    for section_name, bodies in sections:
-        body_parts.append(f"## {section_name}")
-        body_parts.append("\n\n".join(bodies))
+    return {
+        "anchor_id": str(anchor) if anchor else "",
+        "module_title": display_name,
+        "module_description": descr,
+        "snapshot_cards": [
+            {"title": "Lifecycle", "body": lifecycle},
+            {
+                "title": "Notices",
+                "body": "\n".join(
+                    [
+                        f"Status: `{module_status}`",
+                        f"Introduced in: `{introduced_in}`",
+                        f"Removed in: `{removed_in}`",
+                        f"Warnings: `{len(module_warnings)}`",
+                        f"Deprecations: `{len(module_deprecations)}`",
+                        deprecation_since_line,
+                    ]
+                ),
+            },
+        ],
+        "primary_warning": primary_warning,
+        "warning_items": module_warnings,
+        "deprecation_items": module_deprecations,
+        "sections": sections,
+    }
 
-    return "\n\n".join(body_parts).rstrip()
+
+def render_module_body(
+    module_doc: dict[str, Any],
+    *,
+    module_deprecation_introduced_in: str | None,
+    module_lifecycle: dict[str, str | None] | None,
+) -> str:
+    return render_template(
+        "daml_json/module.md.j2",
+        **module_template_context(
+            module_doc,
+            module_deprecation_introduced_in=module_deprecation_introduced_in,
+            module_lifecycle=module_lifecycle,
+        ),
+    )
 
 
 def build_pages(
@@ -614,37 +610,20 @@ def build_pages(
         target_ref = module_file_name(name).removesuffix(".mdx")
         module_entries.append((name, display_name, target_ref))
         pages.append(
-            Page(
+            markdown_page(
                 path=target.relative_to(root).as_posix(),
                 title=display_name,
                 description=f"Reference documentation for Daml module {display_name}.",
-                blocks=[
-                    RawMarkdown(
-                        render_module_body(
-                            module,
-                            module_deprecation_introduced_in=report.module_deprecation_first_seen.get(name),
-                            module_lifecycle=report.module_lifecycle.get(name),
-                        )
-                    )
-                ],
+                template_name="daml_json/module.md.j2",
+                **module_template_context(
+                    module,
+                    module_deprecation_introduced_in=report.module_deprecation_first_seen.get(name),
+                    module_lifecycle=report.module_lifecycle.get(name),
+                ),
             )
         )
 
-    index_lines = [
-        f"# {overview_title}",
-        "",
-        "This page is generated from versioned Daml docs JSON snapshots.",
-        "",
-        "## Source",
-        "",
-        f"- Source name: `{report.source_name}`",
-        f"- Version filter: `{report.version_filter}`",
-        f"- Publish version: `{report.publish_version}`",
-        f"- Versions analyzed: `{', '.join(report.versions)}`",
-        "",
-        "## Modules",
-        "",
-    ]
+    module_links: list[str] = []
     for source_name, display_name, target in module_entries:
         status_suffix = ""
         lifecycle = report.module_lifecycle.get(source_name, {})
@@ -658,15 +637,23 @@ def build_pages(
             module_link = f"{normalized_link_prefix}/{target}"
         else:
             module_link = (output_dir / target).relative_to(root).with_suffix("").as_posix()
-        index_lines.append(f"- [{display_name}]({module_link}){status_suffix}")
+        module_links.append(f"[{display_name}]({module_link}){status_suffix}")
 
     pages.insert(
         0,
-        Page(
+        markdown_page(
             path=(output_dir / "index.mdx").relative_to(root).as_posix(),
             title=overview_title,
             description=f"Reference documentation for {overview_title} modules.",
-            blocks=[RawMarkdown("\n".join(index_lines).rstrip())],
+            template_name="daml_json/index.md.j2",
+            overview_title=overview_title,
+            source_items=[
+                f"Source name: `{report.source_name}`",
+                f"Version filter: `{report.version_filter}`",
+                f"Publish version: `{report.publish_version}`",
+                f"Versions analyzed: `{', '.join(report.versions)}`",
+            ],
+            module_links=module_links,
         ),
     )
     return root, pages

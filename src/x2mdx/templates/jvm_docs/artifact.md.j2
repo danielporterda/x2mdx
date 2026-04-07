@@ -1,0 +1,32 @@
+{% import "shared/macros.md.j2" as shared %}
+{{ paragraph("Back to [overview](" ~ overview_link ~ ").") }}
+
+{{ shared.bullet_section("Artifact", artifact_items) }}
+
+{{ shared.bullet_section("Lifecycle Summary", lifecycle_items) }}
+
+{{ heading(2, "Package Reference") }}
+{% if package_rows %}
+{{ table(["Local Page", "Package", "Types", "Introduced", "Deprecated", "Removed"], package_rows) }}
+{% else %}
+{{ paragraph("No package-level symbols were found for this artifact.") }}
+{% endif %}
+
+{{ heading(2, "Changed Symbols") }}
+{% if changed_rows %}
+{{ table(["Docs", "Symbol", "Kind", "Introduced", "Deprecated", "Removed"], changed_rows) }}
+{% else %}
+{{ paragraph("No lifecycle changes were detected in the configured version range.") }}
+{% endif %}
+{% if deprecation_rows %}
+
+{{ heading(2, "Deprecation Notes") }}
+
+{{ table(["Symbol", "Deprecated", "Note"], deprecation_rows) }}
+{% endif %}
+{% if failure_rows %}
+
+{{ heading(2, "Input Failures") }}
+
+{{ table(["Version", "Jar", "Error"], failure_rows) }}
+{% endif %}

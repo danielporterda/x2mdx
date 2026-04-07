@@ -10,7 +10,8 @@ from typing import Any
 
 from x2mdx.mintlify import MintlifyGroup
 from x2mdx.openapi.models import OpenApiEntityLifecycle, OpenApiLifecycleReport, OpenApiSpecLifecycle
-from x2mdx.output import BulletList, Heading, Page, Paragraph, RawMarkdown, Table
+from x2mdx.output import Page, RawMarkdown
+from x2mdx.templating import markdown_page, render_template
 
 MAX_CHANGED_ENTITIES = 300
 MAX_LATEST_OPERATIONS = 300
@@ -295,112 +296,92 @@ def endpoint_anchor_link(endpoint: str) -> str:
     return f"[{md_code(endpoint)}](#{endpoint_anchor_id(endpoint)})"
 
 
+def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
+    endpoint = endpoint_name(operation)
+    parameters = operation.get("parameters", [])
+    request_body = operation.get("request_body", {})
+    responses = operation.get("responses", [])
+
+    request_body_context: dict[str, Any] | None = None
+    if request_body:
+        content_types = request_body.get("content_types", [])
+        schema_by_content_type = request_body.get("schema_by_content_type", {})
+        required_fields_by_content_type = request_body.get("required_fields_by_content_type", {})
+        sample_by_content_type = request_body.get("sample_by_content_type", {})
+        request_body_context = {
+            "required": md_code("yes" if request_body.get("required") else "no"),
+            "content_rows": [
+                [
+                    md_code(content_type),
+                    md_code(schema_by_content_type.get(content_type, "-")),
+                    ", ".join(md_code(field_name) for field_name in required_fields_by_content_type.get(content_type, []))
+                    or "-",
+                ]
+                for content_type in content_types
+            ],
+            "content": md_code("-"),
+            "examples": [
+                {
+                    "content_type": md_code(content_type),
+                    "body": json.dumps(sample_by_content_type[content_type], indent=2),
+                }
+                for content_type in content_types
+                if content_type in sample_by_content_type
+            ],
+        }
+
+    return {
+        "anchor_id": endpoint_anchor_id(endpoint),
+        "header": endpoint_header(operation),
+        "bullet_items": [
+            item
+            for item in [
+                f"Operation ID: {md_code(operation['operation_id'])}" if operation.get("operation_id") else "",
+                f"Summary: {md_text(operation['summary'])}" if operation.get("summary") else "",
+                f"Description: {md_text(operation['description'])}" if operation.get("description") else "",
+                f"Tags: {md_code(', '.join(operation['tags']))}" if operation.get("tags") else "",
+            ]
+            if item
+        ],
+        "parameter_rows": [
+            [
+                md_code(parameter.get("name", "-")),
+                md_code(parameter.get("in", "-")),
+                md_code("yes" if parameter.get("required") else "no"),
+                md_code(parameter.get("schema", "-")),
+                md_text(parameter.get("description", "-") or "-"),
+            ]
+            for parameter in parameters
+        ],
+        "request_body": request_body_context,
+        "response_rows": [
+            [
+                md_code(response.get("code", "-")),
+                md_text(response.get("description", "-") or "-"),
+                md_code(", ".join(response.get("content_types", [])) if response.get("content_types") else "-"),
+                md_code(
+                    ", ".join(
+                        f"{content_type}:{response.get('schema_by_content_type', {}).get(content_type, '-')}"
+                        for content_type in response.get("content_types", [])
+                    )
+                    if response.get("content_types")
+                    else "-"
+                ),
+            ]
+            for response in responses
+        ],
+    }
+
+
 def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: int) -> str:
-    lines: list[str] = []
     if not operations:
         return "No endpoint details available in the latest spec."
-
-    shown = operations[:max_endpoints]
-    for operation in shown:
-        endpoint = endpoint_name(operation)
-        lines.extend(["", f'<a id="{endpoint_anchor_id(endpoint)}"></a>', "", f"### {endpoint_header(operation)}", ""])
-        if operation.get("operation_id"):
-            lines.append(f"- Operation ID: {md_code(operation['operation_id'])}")
-        if operation.get("summary"):
-            lines.append(f"- Summary: {md_text(operation['summary'])}")
-        if operation.get("description"):
-            lines.append(f"- Description: {md_text(operation['description'])}")
-        if operation.get("tags"):
-            lines.append(f"- Tags: {md_code(', '.join(operation['tags']))}")
-
-        parameters = operation.get("parameters", [])
-        if parameters:
-            lines.extend(
-                [
-                    "",
-                    "**Parameters**",
-                    "",
-                    "| Name | In | Required | Schema | Description |",
-                    "| --- | --- | --- | --- | --- |",
-                ]
-            )
-            for parameter in parameters:
-                lines.append(
-                    f"| {md_code(parameter.get('name', '-'))} | {md_code(parameter.get('in', '-'))} | {md_code('yes' if parameter.get('required') else 'no')} | {md_code(parameter.get('schema', '-'))} | {md_text(parameter.get('description', '-') or '-')} |"
-                )
-
-        request_body = operation.get("request_body", {})
-        if request_body:
-            lines.extend(["", "**Request Body**", ""])
-            lines.append(f"- Required: {md_code('yes' if request_body.get('required') else 'no')}")
-            content_types = request_body.get("content_types", [])
-            schema_by_content_type = request_body.get("schema_by_content_type", {})
-            required_fields_by_content_type = request_body.get("required_fields_by_content_type", {})
-            sample_by_content_type = request_body.get("sample_by_content_type", {})
-            if content_types:
-                lines.extend(
-                    [
-                        "",
-                        "| Content Type | Schema | Required Fields |",
-                        "| --- | --- | --- |",
-                    ]
-                )
-                for content_type in content_types:
-                    required_fields = required_fields_by_content_type.get(content_type, [])
-                    required_fields_value = ", ".join(md_code(field_name) for field_name in required_fields) if required_fields else "-"
-                    lines.append(
-                        f"| {md_code(content_type)} | {md_code(schema_by_content_type.get(content_type, '-'))} | {required_fields_value} |"
-                    )
-                for content_type in content_types:
-                    sample = sample_by_content_type.get(content_type)
-                    if sample is None:
-                        continue
-                    lines.extend(
-                        [
-                            "",
-                            f"**Request Example: {md_code(content_type)}**",
-                            "",
-                            "```json",
-                            json.dumps(sample, indent=2),
-                            "```",
-                        ]
-                    )
-            else:
-                lines.append(f"- Content: {md_code('-')}")
-
-        responses = operation.get("responses", [])
-        if responses:
-            lines.extend(
-                [
-                    "",
-                    "**Responses**",
-                    "",
-                    "| Code | Description | Content Types | Schemas |",
-                    "| --- | --- | --- | --- |",
-                ]
-            )
-            for response in responses:
-                content_types = response.get("content_types", [])
-                schema_by_content_type = response.get("schema_by_content_type", {})
-                content_value = ", ".join(content_types) if content_types else "-"
-                schema_value = (
-                    ", ".join(f"{content_type}:{schema_by_content_type.get(content_type, '-')}" for content_type in content_types)
-                    if content_types
-                    else "-"
-                )
-                lines.append(
-                    f"| {md_code(response.get('code', '-'))} | {md_text(response.get('description', '-') or '-')} | {md_code(content_value)} | {md_code(schema_value)} |"
-                )
-
-    if len(operations) > max_endpoints:
-        lines.extend(
-            [
-                "",
-                f"_Showing first {max_endpoints} endpoints out of {len(operations)}._",
-            ]
-        )
-
-    return "\n".join(lines)
+    return render_template(
+        "openapi/endpoint_reference.md.j2",
+        operations=[_endpoint_reference_operation(operation) for operation in operations[:max_endpoints]],
+        max_endpoints=max_endpoints,
+        total_operations=len(operations),
+    )
 
 
 def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
@@ -412,155 +393,83 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     latest_paths = spec.latest_entities.get("paths", [])
     latest_tags = spec.latest_entities.get("tags", [])
 
-    blocks = [
-        Paragraph("Generated from supplied versioned OpenAPI artifacts."),
-        Heading(level=2, text="Endpoint Diff Summary"),
-    ]
-    if not endpoint_diffs:
-        blocks.append(Paragraph("No endpoint-level diffs in the selected version range."))
-    else:
-        blocks.append(
-            Table(
-                headers=["Endpoint", "Version", "Event", "Changes"],
-                rows=endpoint_diffs[:MAX_ENDPOINT_DIFF_ROWS],
-            )
-        )
-        if len(endpoint_diffs) > MAX_ENDPOINT_DIFF_ROWS:
-            blocks.append(
-                Paragraph(
-                    f"_Showing first {MAX_ENDPOINT_DIFF_ROWS} endpoint diff rows out of {len(endpoint_diffs)}._"
-                )
-            )
-    blocks.extend(
-        [
-            Heading(level=2, text="Endpoint Reference (Latest)"),
-            RawMarkdown(render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS)),
-            Heading(level=2, text="Version Change Timeline"),
-            Table(
-                headers=["Version", "Added", "Changed", "Removed"],
-                rows=[
-                    [
-                        md_code(version),
-                        md_code(spec.per_version_entity_deltas.get(version, {}).get("added_count", 0)),
-                        md_code(spec.per_version_entity_deltas.get(version, {}).get("changed_count", 0)),
-                        md_code(spec.per_version_entity_deltas.get(version, {}).get("removed_count", 0)),
-                    ]
-                    for version in spec.versions_present
-                ],
-            ),
-            Heading(level=2, text="Changed Entities"),
-        ]
+    body = render_template(
+        "openapi/spec.md.j2",
+        endpoint_diff_rows=[
+            row
+            for row in endpoint_diffs[:MAX_ENDPOINT_DIFF_ROWS]
+        ],
+        endpoint_diff_total=len(endpoint_diffs),
+        endpoint_diff_limit=MAX_ENDPOINT_DIFF_ROWS,
+        endpoint_reference=render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS),
+        version_timeline_rows=[
+            [
+                md_code(version),
+                md_code(spec.per_version_entity_deltas.get(version, {}).get("added_count", 0)),
+                md_code(spec.per_version_entity_deltas.get(version, {}).get("changed_count", 0)),
+                md_code(spec.per_version_entity_deltas.get(version, {}).get("removed_count", 0)),
+            ]
+            for version in spec.versions_present
+        ],
+        interesting_rows=[
+            [
+                md_code(record.name),
+                md_code(record.entity_type),
+                lifecycle_value(record.introduced_version, "introduced"),
+                changed_versions_value(record.changed_in_versions),
+                lifecycle_value(record.removed_version, "removed"),
+            ]
+            for record in interesting[:MAX_CHANGED_ENTITIES]
+        ],
+        interesting_total=len(interesting),
+        interesting_limit=MAX_CHANGED_ENTITIES,
+        latest_operations_rows=[
+            [
+                md_code(str(record.get("name", ""))),
+                lifecycle_value(str(record.get("introduced_version", "")), "introduced"),
+                changed_versions_value(list(record.get("changed_in_versions", []))),
+                lifecycle_value(record.get("removed_version"), "removed"),
+            ]
+            for record in latest_operations[:MAX_LATEST_OPERATIONS]
+        ],
+        latest_operations_total=len(latest_operations),
+        latest_operations_limit=MAX_LATEST_OPERATIONS,
+        latest_components_rows=[
+            [
+                md_code(str(record.get("name", ""))),
+                lifecycle_value(str(record.get("introduced_version", "")), "introduced"),
+                changed_versions_value(list(record.get("changed_in_versions", []))),
+                lifecycle_value(record.get("removed_version"), "removed"),
+            ]
+            for record in latest_components[:MAX_LATEST_COMPONENTS]
+        ],
+        latest_components_total=len(latest_components),
+        latest_components_limit=MAX_LATEST_COMPONENTS,
+        spec_metadata_items=[
+            f"Canonical spec id: {md_code(spec.spec_id)}",
+            f"Latest source path: {md_code(spec.latest_source_path)}",
+            f"OpenAPI version (latest): {md_code(spec.latest_openapi_version or '-')}",
+            f"Introduced: {lifecycle_value(spec.introduced_version, 'introduced')}",
+            f"Changed in versions: {changed_versions_value(spec.changed_in_versions)}",
+            f"Removed: {lifecycle_value(spec.removed_version, 'removed')}",
+        ],
+        entity_summary_items=[
+            f"Total entities tracked: {md_code(counts['total'])}",
+            f"Entities introduced after spec introduction: {md_code(counts['introduced_later'])}",
+            f"Entities changed at least once: {md_code(counts['changed'])}",
+            f"Entities removed: {md_code(counts['removed'])}",
+            f"Latest operations: {md_code(len(latest_operations))}",
+            f"Latest paths: {md_code(len(latest_paths))}",
+            f"Latest components: {md_code(len(latest_components))}",
+            f"Latest tags: {md_code(len(latest_tags))}",
+        ],
     )
-
-    if not interesting:
-        blocks.append(Paragraph("No entity-level lifecycle changes in the selected version range."))
-    else:
-        blocks.append(
-            Table(
-                headers=["Entity", "Type", "Introduced", "Changed In", "Removed"],
-                rows=[
-                    [
-                        md_code(record.name),
-                        md_code(record.entity_type),
-                        lifecycle_value(record.introduced_version, "introduced"),
-                        changed_versions_value(record.changed_in_versions),
-                        lifecycle_value(record.removed_version, "removed"),
-                    ]
-                    for record in interesting[:MAX_CHANGED_ENTITIES]
-                ],
-            )
-        )
-        if len(interesting) > MAX_CHANGED_ENTITIES:
-            blocks.append(
-                Paragraph(
-                    f"_Showing first {MAX_CHANGED_ENTITIES} rows out of {len(interesting)} changed entities._"
-                )
-            )
-
-    blocks.append(Heading(level=2, text="Latest Operations"))
-    if not latest_operations:
-        blocks.append(Paragraph("No operations in latest version."))
-    else:
-        blocks.append(
-            Table(
-                headers=["Operation", "Introduced", "Changed In", "Removed"],
-                rows=[
-                    [
-                        md_code(str(record.get("name", ""))),
-                        lifecycle_value(str(record.get("introduced_version", "")), "introduced"),
-                        changed_versions_value(list(record.get("changed_in_versions", []))),
-                        lifecycle_value(record.get("removed_version"), "removed"),
-                    ]
-                    for record in latest_operations[:MAX_LATEST_OPERATIONS]
-                ],
-            )
-        )
-        if len(latest_operations) > MAX_LATEST_OPERATIONS:
-            blocks.append(
-                Paragraph(
-                    f"_Showing first {MAX_LATEST_OPERATIONS} operations out of {len(latest_operations)}._"
-                )
-            )
-
-    blocks.append(Heading(level=2, text="Latest Components"))
-    if not latest_components:
-        blocks.append(Paragraph("No components in latest version."))
-    else:
-        blocks.append(
-            Table(
-                headers=["Component", "Introduced", "Changed In", "Removed"],
-                rows=[
-                    [
-                        md_code(str(record.get("name", ""))),
-                        lifecycle_value(str(record.get("introduced_version", "")), "introduced"),
-                        changed_versions_value(list(record.get("changed_in_versions", []))),
-                        lifecycle_value(record.get("removed_version"), "removed"),
-                    ]
-                    for record in latest_components[:MAX_LATEST_COMPONENTS]
-                ],
-            )
-        )
-        if len(latest_components) > MAX_LATEST_COMPONENTS:
-            blocks.append(
-                Paragraph(
-                    f"_Showing first {MAX_LATEST_COMPONENTS} components out of {len(latest_components)}._"
-                )
-            )
-
-    blocks.extend(
-        [
-            Heading(level=2, text="Spec Metadata"),
-            BulletList(
-                items=[
-                    f"Canonical spec id: {md_code(spec.spec_id)}",
-                    f"Latest source path: {md_code(spec.latest_source_path)}",
-                    f"OpenAPI version (latest): {md_code(spec.latest_openapi_version or '-')}",
-                    f"Introduced: {lifecycle_value(spec.introduced_version, 'introduced')}",
-                    f"Changed in versions: {changed_versions_value(spec.changed_in_versions)}",
-                    f"Removed: {lifecycle_value(spec.removed_version, 'removed')}",
-                ]
-            ),
-            Heading(level=2, text="Entity Summary"),
-            BulletList(
-                items=[
-                    f"Total entities tracked: {md_code(counts['total'])}",
-                    f"Entities introduced after spec introduction: {md_code(counts['introduced_later'])}",
-                    f"Entities changed at least once: {md_code(counts['changed'])}",
-                    f"Entities removed: {md_code(counts['removed'])}",
-                    f"Latest operations: {md_code(len(latest_operations))}",
-                    f"Latest paths: {md_code(len(latest_paths))}",
-                    f"Latest components: {md_code(len(latest_components))}",
-                    f"Latest tags: {md_code(len(latest_tags))}",
-                ]
-            ),
-        ]
-    )
-
+    body = body.replace("## Endpoint Reference (Latest)\n\n<a id=", "## Endpoint Reference (Latest)\n\n\n<a id=", 1)
     return Page(
         path=f"{spec_dir_name}/{slugify(spec.spec_id)}.mdx",
         title=spec.display_name,
         description="Generated lifecycle view for an OpenAPI specification",
-        blocks=blocks,
+        blocks=[RawMarkdown(body)],
     )
 
 
@@ -590,34 +499,23 @@ def build_overview_page(
             ]
         )
 
-    return Page(
+    return markdown_page(
         path=overview_name,
         title=overview_title,
         description="Generated OpenAPI lifecycle reference",
-        blocks=[
-            Paragraph("This section is generated from supplied versioned OpenAPI artifacts."),
-            BulletList(
-                items=[
-                    f"Generated at (UTC): {md_code(report.generated_at_utc)}",
-                    f"Source: {md_code(report.source_name)}",
-                    f"Tag filter: {md_code(report.tag_filter)}",
-                ]
-            ),
-            Heading(level=2, text="Summary"),
-            BulletList(
-                items=[
-                    f"Tags scanned: {md_code(report.summary.get('tag_count', 0))}",
-                    f"Specs discovered: {md_code(report.summary.get('spec_count', 0))}",
-                    f"Total entities tracked: {md_code(report.summary.get('total_entities', 0))}",
-                    f"Total entity change events: {md_code(report.summary.get('total_entity_change_events', 0))}",
-                ]
-            ),
-            Heading(level=2, text="Specs"),
-            Table(
-                headers=["Page", "Spec", "Introduced", "Latest", "Removed", "Changed In Versions", "Entities"],
-                rows=rows,
-            ),
+        template_name="openapi/overview.md.j2",
+        source_items=[
+            f"Generated at (UTC): {md_code(report.generated_at_utc)}",
+            f"Source: {md_code(report.source_name)}",
+            f"Tag filter: {md_code(report.tag_filter)}",
         ],
+        summary_items=[
+            f"Tags scanned: {md_code(report.summary.get('tag_count', 0))}",
+            f"Specs discovered: {md_code(report.summary.get('spec_count', 0))}",
+            f"Total entities tracked: {md_code(report.summary.get('total_entities', 0))}",
+            f"Total entity change events: {md_code(report.summary.get('total_entity_change_events', 0))}",
+        ],
+        rows=rows,
     )
 
 
@@ -652,25 +550,18 @@ def build_preview_pages(
     spec_dir_name: str = "specs",
 ) -> list[Page]:
     content_pages = build_pages(report, overview_name=overview_name, spec_dir_name=spec_dir_name)
-    landing_page = Page(
+    landing_page = markdown_page(
         path="index.mdx",
         title="OpenAPI Preview",
         description="Mintlify preview for generated OpenAPI MDX output",
-        blocks=[
-            Paragraph("This preview site is generated by `x2mdx`."),
-            BulletList(
-                items=[
-                    "Use the overview page for the lifecycle summary.",
-                    "Use the spec pages for per-spec entity and endpoint details.",
-                ]
-            ),
-            Heading(level=2, text="Quick Links"),
-            BulletList(
-                items=[
-                    f"[Overview](./{overview_name[:-4]})",
-                    f"[Specs](./{spec_dir_name}/{slugify(report.specs[0].spec_id)})" if report.specs else "No specs generated.",
-                ]
-            ),
+        template_name="openapi/preview.md.j2",
+        notes=[
+            "Use the overview page for the lifecycle summary.",
+            "Use the spec pages for per-spec entity and endpoint details.",
+        ],
+        quick_links=[
+            f"[Overview](./{overview_name[:-4]})",
+            f"[Specs](./{spec_dir_name}/{slugify(report.specs[0].spec_id)})" if report.specs else "No specs generated.",
         ],
     )
     return [landing_page, *content_pages]
