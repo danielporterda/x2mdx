@@ -1,0 +1,50 @@
+{{ paragraph("Generated from AsyncAPI snapshots for `" ~ (report.info_title or "unknown spec") ~ "`.") }}
+
+{{ bullet_list(overview_items) }}
+{% if report.info_description %}
+{{ paragraph(report.info_description) }}
+{% endif %}
+
+{{ heading(2, "Version Change Timeline") }}
+
+{{ table(["Version", "Active Channels", "Added", "Changed", "Removed"], version_timeline_rows) }}
+
+{{ heading(2, "Channel Diff Summary") }}
+
+{{ table(["Channel", "Actions", "Introduced", "Changes", "Removed"], channel_summary_rows) }}
+
+{{ heading(2, "Channels") }}
+{% for channel in channels %}
+
+{{ anchor(channel.anchor) }}
+
+{{ heading(3, channel.name) }}
+
+{{ bullet_list(channel.lifecycle_bits) }}
+{% if channel.description %}
+{{ paragraph(channel.description) }}
+{% endif %}
+{% if channel.change_rows %}
+**Version Changes**
+
+{{ table(["Version", "Changes"], channel.change_rows) }}
+{% endif %}
+{% for action in channel.actions %}
+**{{ action.heading }}**
+{% if action.detail_items %}
+
+{{ bullet_list(action.detail_items) }}
+{% endif %}
+{% if action.description %}
+
+{{ paragraph(action.description) }}
+{% endif %}
+
+{{ table(["Payload Schema", "Required Fields"], [action.payload_row]) }}
+{% if action.sample is not none %}
+**Message Example**
+
+{{ code_block("json", pretty_json(action.sample)) }}
+{% endif %}
+{% endfor %}
+{% endfor %}
