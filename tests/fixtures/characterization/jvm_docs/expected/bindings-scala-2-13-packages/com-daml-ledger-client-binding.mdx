@@ -3,42 +3,35 @@ title: "com.daml.ledger.client.binding"
 description: "Generated package reference page from local Javadoc/Scaladoc snapshots"
 ---
 
-Back to [artifact page](../bindings-scala-2-13).
+## Type Reference
 
-## Package
+🟢 Active Since  🟠 Deprecated  🔴 Removed
 
-- Artifact: `com.daml:bindings-scala_2.13`
-- Language: `scala`
-- Package: `com.daml.ledger.client.binding`
-- Types in package: `23`
-
-## Table of Contents
-
-| Name | Summary | Introduced | Changed | Deprecated | Removed |
-| --- | --- | --- | --- | --- | --- |
-| [`com.daml.ledger.client.binding.Compat`](#type-com-daml-ledger-client-binding-compat) | - com.daml.ledger.client.binding.Compat | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.Contract`](#type-com-daml-ledger-client-binding-contract) | A class representing a Daml contract of specific type (Daml template) with assigned contract ID and agreement text. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.ContractTypeCompanion`](#type-com-daml-ledger-client-binding-contracttypecompanion) | Common superclass of template and interface companions objects. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.CreateEventToContractMappingError`](#type-com-daml-ledger-client-binding-createeventtocontractmappingerror) | - com.daml.ledger.client.binding.CreateEventToContractMappingError | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.DamlCodecs`](#type-com-daml-ledger-client-binding-damlcodecs) | - com.daml.ledger.client.binding.DamlCodecs | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.DecoderTableLookupFailure`](#type-com-daml-ledger-client-binding-decodertablelookupfailure) | - com.daml.ledger.client.binding.DecoderTableLookupFailure | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.DomainCommand`](#type-com-daml-ledger-client-binding-domaincommand) | - com.daml.ledger.client.binding.DomainCommand | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.EnumCompanion`](#type-com-daml-ledger-client-binding-enumcompanion) | - com.daml.ledger.client.binding.EnumCompanion | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.EnumRef`](#type-com-daml-ledger-client-binding-enumref) | - com.daml.ledger.client.binding.EnumRef | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.EventDecoderApi`](#type-com-daml-ledger-client-binding-eventdecoderapi) | - com.daml.ledger.client.binding.EventDecoderApi | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.EventDecoderError`](#type-com-daml-ledger-client-binding-eventdecodererror) | - com.daml.ledger.client.binding.EventDecoderError | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.Interface`](#type-com-daml-ledger-client-binding-interface) | Common superclass of interface marker types. There are no instances of subclasses of this class; it is strictly a marker type to aid in implicit resolution, and only occurs within contract IDs. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.InterfaceCompanion`](#type-com-daml-ledger-client-binding-interfacecompanion) | Common superclass of interface companion objects. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.Primitive`](#type-com-daml-ledger-client-binding-primitive) | A LocalDate in the range [0001-01-01, 9999-12-31] ([Date.MIN, Date.MAX]). This is the range that can be stored as primitive Dates on a ledger, and matches the set of representable dates in the [RFC-3339](https://www.ietf.org/rfc/rfc3339.txt) date-time format. Any LocalDate in that range can be converted to a Date by calling Date.fromLocalDate. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.PrimitiveInstances`](#type-com-daml-ledger-client-binding-primitiveinstances) | - com.daml.ledger.client.binding.PrimitiveInstances | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.Template`](#type-com-daml-ledger-client-binding-template) | Part of a CreateAndExercise command. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.TemplateCompanion`](#type-com-daml-ledger-client-binding-templatecompanion) | Common superclass of template classes' companions. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.Value`](#type-com-daml-ledger-client-binding-value) | Typeclass of "serializable" types as defined by the LF specification. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.ValueDecoder`](#type-com-daml-ledger-client-binding-valuedecoder) | - com.daml.ledger.client.binding.ValueDecoder | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.ValueEncoder`](#type-com-daml-ledger-client-binding-valueencoder) | - com.daml.ledger.client.binding.ValueEncoder | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.ValueRef`](#type-com-daml-ledger-client-binding-valueref) | - com.daml.ledger.client.binding.ValueRef | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.ValueRefCompanion`](#type-com-daml-ledger-client-binding-valuerefcompanion) | Common superclass of record and variant classes' companions. | `2.10.2` | - | - | - |
-| [`com.daml.ledger.client.binding.VoidValueRef`](#type-com-daml-ledger-client-binding-voidvalueref) | - com.daml.ledger.client.binding.VoidValueRef | `2.10.2` | - | - | - |
+| TYPE | STATUS | SUMMARY |
+| --- | --- | --- |
+| [Compat](#type-com-daml-ledger-client-binding-compat) | 🟢 `v2.10` | - com.daml.ledger.client.binding.Compat |
+| [Contract](#type-com-daml-ledger-client-binding-contract) | 🟢 `v2.10` | A class representing a Daml contract of specific type (Daml... |
+| [ContractTypeCompanion](#type-com-daml-ledger-client-binding-contracttypecompanion) | 🟢 `v2.10` | Common superclass of template and interface companions objects. |
+| [CreateEventToContractMappingError](#type-com-daml-ledger-client-binding-createeventtocontractmappingerror) | 🟢 `v2.10` | - com.daml.ledger.client.binding.CreateEventToContractMappingError |
+| [DamlCodecs](#type-com-daml-ledger-client-binding-damlcodecs) | 🟢 `v2.10` | - com.daml.ledger.client.binding.DamlCodecs |
+| [DecoderTableLookupFailure](#type-com-daml-ledger-client-binding-decodertablelookupfailure) | 🟢 `v2.10` | - com.daml.ledger.client.binding.DecoderTableLookupFailure |
+| [DomainCommand](#type-com-daml-ledger-client-binding-domaincommand) | 🟢 `v2.10` | - com.daml.ledger.client.binding.DomainCommand |
+| [EnumCompanion](#type-com-daml-ledger-client-binding-enumcompanion) | 🟢 `v2.10` | - com.daml.ledger.client.binding.EnumCompanion |
+| [EnumRef](#type-com-daml-ledger-client-binding-enumref) | 🟢 `v2.10` | - com.daml.ledger.client.binding.EnumRef |
+| [EventDecoderApi](#type-com-daml-ledger-client-binding-eventdecoderapi) | 🟢 `v2.10` | - com.daml.ledger.client.binding.EventDecoderApi |
+| [EventDecoderError](#type-com-daml-ledger-client-binding-eventdecodererror) | 🟢 `v2.10` | - com.daml.ledger.client.binding.EventDecoderError |
+| [Interface](#type-com-daml-ledger-client-binding-interface) | 🟢 `v2.10` | Common superclass of interface marker types. There are no instances... |
+| [InterfaceCompanion](#type-com-daml-ledger-client-binding-interfacecompanion) | 🟢 `v2.10` | Common superclass of interface companion objects. |
+| [Primitive](#type-com-daml-ledger-client-binding-primitive) | 🟢 `v2.10` | A LocalDate in the range [0001-01-01, 9999-12-31] ([Date.MIN... |
+| [PrimitiveInstances](#type-com-daml-ledger-client-binding-primitiveinstances) | 🟢 `v2.10` | - com.daml.ledger.client.binding.PrimitiveInstances |
+| [Template](#type-com-daml-ledger-client-binding-template) | 🟢 `v2.10` | Part of a CreateAndExercise command. |
+| [TemplateCompanion](#type-com-daml-ledger-client-binding-templatecompanion) | 🟢 `v2.10` | Common superclass of template classes' companions. |
+| [Value](#type-com-daml-ledger-client-binding-value) | 🟢 `v2.10` | Typeclass of "serializable" types as defined by the LF specification. |
+| [ValueDecoder](#type-com-daml-ledger-client-binding-valuedecoder) | 🟢 `v2.10` | - com.daml.ledger.client.binding.ValueDecoder |
+| [ValueEncoder](#type-com-daml-ledger-client-binding-valueencoder) | 🟢 `v2.10` | - com.daml.ledger.client.binding.ValueEncoder |
+| [ValueRef](#type-com-daml-ledger-client-binding-valueref) | 🟢 `v2.10` | - com.daml.ledger.client.binding.ValueRef |
+| [ValueRefCompanion](#type-com-daml-ledger-client-binding-valuerefcompanion) | 🟢 `v2.10` | Common superclass of record and variant classes' companions. |
+| [VoidValueRef](#type-com-daml-ledger-client-binding-voidvalueref) | 🟢 `v2.10` | - com.daml.ledger.client.binding.VoidValueRef |
 
 <a id="type-com-daml-ledger-client-binding-compat"></a>
 
