@@ -252,26 +252,122 @@ def operation_change_summary_value(spec: OpenApiSpecLifecycle, lifecycle: OpenAp
     return f"{shown}; +{len(version_summaries) - 3} more"
 
 
-def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
+def path_name(operation: dict[str, Any]) -> str:
+    return str(operation.get("path", "")).strip()
+
+
+def path_anchor_id(path: str) -> str:
+    return f"path-{slugify(path)}"
+
+
+def path_anchor_link(path: str) -> str:
+    return f"[{md_code(path)}](#{path_anchor_id(path)})"
+
+
+def _latest_operation_groups(
+    spec: OpenApiSpecLifecycle, operations: list[dict[str, Any]] | None = None
+) -> list[dict[str, Any]]:
     lifecycle_by_key = {
         record.entity_key: record
         for record in spec.entity_lifecycle
         if record.entity_type == "operation"
     }
-    rows: list[list[str]] = []
-    for operation in spec.latest_operation_details:
+    grouped_by_path: dict[str, dict[str, Any]] = {}
+    groups: list[dict[str, Any]] = []
+    for operation in operations or spec.latest_operation_details:
+        path = path_name(operation)
+        group = grouped_by_path.get(path)
+        if group is None:
+            group = {
+                "path": path,
+                "path_anchor_id": path_anchor_id(path),
+                "operations": [],
+            }
+            grouped_by_path[path] = group
+            groups.append(group)
         entity_key = str(operation.get("entity_key", "") or "")
-        lifecycle = lifecycle_by_key.get(entity_key)
+        group["operations"].append(
+            {
+                "operation": operation,
+                "lifecycle": lifecycle_by_key.get(entity_key),
+            }
+        )
+    return groups
+
+
+def _earliest_version(spec: OpenApiSpecLifecycle, versions: list[str]) -> str | None:
+    if not versions:
+        return None
+    version_order = {version: index for index, version in enumerate(spec.versions_present)}
+    return min(versions, key=lambda version: version_order.get(version, len(version_order)))
+
+
+def path_summary_text(group_operations: list[dict[str, Any]]) -> str:
+    if not group_operations:
+        return "-"
+    if len(group_operations) == 1:
+        return operation_summary_text(group_operations[0]["operation"])
+
+    parts: list[str] = []
+    for item in group_operations:
+        operation = item["operation"]
+        method = str(operation.get("method", "")).strip().upper() or "METHOD"
+        summary = operation_summary_text(operation)
+        parts.append(method if summary == "-" else f"{method}: {summary}")
+
+    if len(parts) <= 2:
+        return "; ".join(parts)
+    shown = "; ".join(parts[:2])
+    return f"{shown}; +{len(parts) - 2} more"
+
+
+def path_change_summary_value(spec: OpenApiSpecLifecycle, group_operations: list[dict[str, Any]]) -> str:
+    summaries: list[str] = []
+    for item in group_operations:
+        lifecycle = item["lifecycle"]
         if lifecycle is None:
             continue
+        summary = operation_change_summary_value(spec, lifecycle)
+        if summary == "-":
+            continue
+        method = str(item["operation"].get("method", "")).strip().upper() or "METHOD"
+        summaries.append(f"{method} {summary}")
+
+    if not summaries:
+        return "-"
+    if len(summaries) <= 3:
+        return "; ".join(summaries)
+    shown = "; ".join(summaries[:3])
+    return f"{shown}; +{len(summaries) - 3} more"
+
+
+def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for group in _latest_operation_groups(spec):
+        introduced_version = _earliest_version(
+            spec,
+            [
+                str(item["lifecycle"].introduced_version)
+                for item in group["operations"]
+                if item["lifecycle"] is not None and item["lifecycle"].introduced_version
+            ],
+        )
+        removed_version = _earliest_version(
+            spec,
+            [
+                str(item["lifecycle"].removed_version)
+                for item in group["operations"]
+                if item["lifecycle"] is not None and item["lifecycle"].removed_version
+            ],
+        )
         rows.append(
             [
-                endpoint_anchor_link(endpoint_name(operation)),
-                operation_summary_text(operation),
-                lifecycle_value(lifecycle.introduced_version, "introduced"),
-                operation_change_summary_value(spec, lifecycle),
+                path_anchor_link(str(group["path"])),
+                path_summary_text(group["operations"]),
+                lifecycle_value(introduced_version, "introduced"),
+                path_change_summary_value(spec, group["operations"]),
                 "-",
-                lifecycle_value(lifecycle.removed_version, "removed"),
+                lifecycle_value(removed_version, "removed"),
             ]
         )
     return rows
@@ -333,7 +429,7 @@ def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "anchor_id": endpoint_anchor_id(endpoint),
-        "header": endpoint_header(operation),
+        "header": md_code(str(operation.get("method", "")).strip().upper() or "-"),
         "bullet_items": [
             item
             for item in [
@@ -374,12 +470,20 @@ def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: int) -> str:
+def render_endpoint_reference(spec: OpenApiSpecLifecycle, operations: list[dict[str, Any]], max_endpoints: int) -> str:
     if not operations:
         return "No endpoint details available in the latest spec."
+    path_groups = [
+        {
+            "anchor_id": str(group["path_anchor_id"]),
+            "header": md_code(str(group["path"])),
+            "operations": [_endpoint_reference_operation(item["operation"]) for item in group["operations"]],
+        }
+        for group in _latest_operation_groups(spec, operations[:max_endpoints])
+    ]
     return render_template(
         "openapi/endpoint_reference.md.j2",
-        operations=[_endpoint_reference_operation(operation) for operation in operations[:max_endpoints]],
+        path_groups=path_groups,
         max_endpoints=max_endpoints,
         total_operations=len(operations),
     )
@@ -399,7 +503,7 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
         table_of_contents_rows=toc_rows[:MAX_TABLE_OF_CONTENTS_ROWS],
         table_of_contents_total=len(toc_rows),
         table_of_contents_limit=MAX_TABLE_OF_CONTENTS_ROWS,
-        endpoint_reference=render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS),
+        endpoint_reference=render_endpoint_reference(spec, spec.latest_operation_details, MAX_ENDPOINTS),
         version_timeline_rows=[
             [
                 md_code(version),
