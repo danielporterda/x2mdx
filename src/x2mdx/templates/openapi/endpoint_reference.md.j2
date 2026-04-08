@@ -1,7 +1,11 @@
-{% for operation in operations %}
+{% for path_group in path_groups %}
+{{ anchor(path_group.anchor_id) }}
+
+{{ heading(3, path_group.header) }}
+{% for operation in path_group.operations %}
 {{ anchor(operation.anchor_id) }}
 
-{{ heading(3, operation.header) }}
+{{ heading(4, operation.header) }}
 {% if operation.bullet_items %}
 {{ bullet_list(operation.bullet_items) }}
 {% endif %}
@@ -30,6 +34,10 @@
 
 {{ table(["Code", "Description", "Content Types", "Schemas"], operation.response_rows) }}
 {% endif %}
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}
 {% if not loop.last %}
 
 {% endif %}
