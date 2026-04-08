@@ -84,7 +84,7 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
             self.assertIn("| Name | Summary | Introduced | Changed | Deprecated | Removed |", spec_page)
             self.assertIn("[`/livez`](#path-livez)", spec_page)
             self.assertIn("### `/livez`", spec_page)
-            self.assertIn("#### `GET`", spec_page)
+            self.assertIn("**Method:** `GET`", spec_page)
             self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
             self.assertIn("| `application/json` | `object` | `actAs`, `commandId`, `commands` |", spec_page)
             self.assertIn("**Request Example: `application/json`**", spec_page)

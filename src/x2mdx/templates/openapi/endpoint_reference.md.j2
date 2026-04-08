@@ -5,7 +5,11 @@
 {% for operation in path_group.operations %}
 {{ anchor(operation.anchor_id) }}
 
+{% if path_group.show_method_headings %}
 {{ heading(4, operation.header) }}
+{% else %}
+{{ paragraph("**Method:** " ~ operation.header) }}
+{% endif %}
 {% if operation.bullet_items %}
 {{ bullet_list(operation.bullet_items) }}
 {% endif %}

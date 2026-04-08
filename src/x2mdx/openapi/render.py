@@ -477,6 +477,7 @@ def render_endpoint_reference(spec: OpenApiSpecLifecycle, operations: list[dict[
         {
             "anchor_id": str(group["path_anchor_id"]),
             "header": md_code(str(group["path"])),
+            "show_method_headings": len(group["operations"]) > 1,
             "operations": [_endpoint_reference_operation(item["operation"]) for item in group["operations"]],
         }
         for group in _latest_operation_groups(spec, operations[:max_endpoints])

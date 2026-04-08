@@ -275,7 +275,8 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertGreater(spec_page.index("Entity Summary"), spec_page.index("Spec Metadata"))
         self.assertIn("Endpoint Reference (Latest)", spec_page)
         self.assertIn("### `/ping`", spec_page)
-        self.assertIn("#### `GET`", spec_page)
+        self.assertIn("**Method:** `GET`", spec_page)
+        self.assertNotIn("#### `GET`", spec_page)
         self.assertNotIn("### `GET /ping`", spec_page)
         self.assertNotIn("| Endpoint | Operation ID | Summary | Tags |", spec_page)
 
@@ -386,7 +387,8 @@ class OpenApiLifecycleTests(unittest.TestCase):
         spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
 
         self.assertIn("### `/submit`", spec_page)
-        self.assertIn("#### `POST`", spec_page)
+        self.assertIn("**Method:** `POST`", spec_page)
+        self.assertNotIn("#### `POST`", spec_page)
         self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
         self.assertIn("| `application/json` | `object` | `commandId`, `payload` |", spec_page)
         self.assertIn("**Request Example: `application/json`**", spec_page)
@@ -429,7 +431,8 @@ class OpenApiLifecycleTests(unittest.TestCase):
 
         self.assertIn("[`/items/{itemId}`](#path-items-itemid)", spec_page)
         self.assertIn("### `/items/{itemId}`", spec_page)
-        self.assertIn("#### `GET`", spec_page)
+        self.assertIn("**Method:** `GET`", spec_page)
+        self.assertNotIn("#### `GET`", spec_page)
         self.assertIn("Fetch \\{itemId\\}", spec_page)
         self.assertIn("Get \\{itemId\\} by id.", spec_page)
         self.assertNotIn("&#123;", spec_page)
