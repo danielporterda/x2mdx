@@ -280,8 +280,6 @@ class TypeDocTests(unittest.TestCase):
         self.assertEqual(result, 0)
         text = output_file.read_text(encoding="utf-8")
         self.assertIn('title: "TypeScript/JavaScript"', text)
-        self.assertIn("## Source", text)
-        self.assertIn("## Versions", text)
         self.assertIn("## Table of Contents", text)
         self.assertIn("## Version Change Summary", text)
         self.assertIn("## Reference", text)

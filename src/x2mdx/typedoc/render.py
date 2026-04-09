@@ -145,15 +145,6 @@ def build_page(
         description=page_description,
         template_name="typedoc/page.md.j2",
         report=report,
-        source_items=[
-            f"Source: `{report.source_name}`",
-            f"Version filter: `{report.version_filter}`",
-            f"Package: `{report.package_name}`",
-        ],
-        version_items=[
-            f"Publish version: `{report.publish_version}`",
-            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
-        ],
         toc_rows=[
             [
                 f"[`{escape_md_cell(export['name'])}`](#{export['anchor']})",

@@ -1,13 +1,5 @@
 {{ paragraph("Generated from published `" ~ report.package_name ~ "` TypeDoc snapshots.") }}
 
-{{ heading(2, "Source") }}
-
-{{ bullet_list(source_items) }}
-
-{{ heading(2, "Versions") }}
-
-{{ bullet_list(version_items) }}
-
 {{ heading(2, "Table of Contents") }}
 
 {{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], toc_rows) }}
