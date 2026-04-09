@@ -3,6 +3,12 @@
 
 {{ paragraph("This page is generated from versioned Daml docs JSON snapshots.") }}
 
-{{ shared.bullet_section("Source", source_items) }}
+{{ heading(2, "Table of Contents") }}
 
-{{ shared.bullet_section("Modules", module_links) }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], module_toc_rows) }}
+
+{{ heading(2, "Version Change Summary") }}
+
+{{ table(["Version", "Added", "Changed", "Removed"], version_change_summary_rows) }}
+
+{{ shared.bullet_section("Reference", module_links) }}

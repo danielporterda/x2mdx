@@ -368,7 +368,9 @@ class OpenRpcTests(unittest.TestCase):
         remote_page = (output_dir / "specs" / "remote-dapp-api.mdx").read_text(encoding="utf-8")
 
         self.assertIn("Wallet Gateway OpenRPC", overview)
-        self.assertIn("Method Diff Summary", dapp_page)
+        self.assertIn("Table of Contents", overview)
+        self.assertIn("Version Change Summary", dapp_page)
+        self.assertIn("## Reference", dapp_page)
         self.assertIn("Result Example", dapp_page)
         self.assertIn("required fields", remote_page)
 

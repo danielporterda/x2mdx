@@ -319,12 +319,15 @@ def build_package_rows_and_pages(
                 title=package_name,
                 description="Generated package reference page from local Javadoc/Scaladoc snapshots",
                 template_name="jvm_docs/package.md.j2",
-                type_reference_legend=status_legend(),
                 type_reference_rows=[
                     [
                         f"[{md_text(type_label(str(entry['type_text']), package_name))}](#{entry['anchor']})",
-                        str(entry["status_cell"]),
+                        f"`{md_text(str(entry['symbol'].kind).title())}`",
                         str(entry["summary_preview"]),
+                        str(entry["introduced"]),
+                        "-",
+                        str(entry["deprecated"]),
+                        str(entry["removed"]),
                     ]
                     for entry in package_entries
                 ],

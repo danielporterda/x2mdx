@@ -367,12 +367,11 @@ class AsyncApiTests(unittest.TestCase):
         text = output_file.read_text(encoding="utf-8")
         docs = json.loads(docs_json.read_text(encoding="utf-8"))
 
-        self.assertIn("Channel Diff Summary", text)
-        self.assertIn("Version Change Timeline", text)
+        self.assertIn("Table of Contents", text)
+        self.assertIn("Version Change Summary", text)
         self.assertIn("publish required fields added: `offset`", text)
         self.assertIn("**Message Example**", text)
         self.assertEqual(
             docs["navigation"]["dropdowns"][0]["groups"],
             [{"group": "JSON Ledger API", "pages": ["reference/asyncapi"]}],
         )
-

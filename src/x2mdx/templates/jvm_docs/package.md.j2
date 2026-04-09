@@ -1,14 +1,14 @@
 {% import "shared/macros.md.j2" as shared %}
-{{ heading(2, "Type Reference") }}
+{{ heading(2, "Table of Contents") }}
 
-{{ paragraph(type_reference_legend) }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], type_reference_rows) }}
 
-{{ table(["TYPE", "STATUS", "SUMMARY"], type_reference_rows) }}
+{{ heading(2, "Reference") }}
 {% for entry in package_entries %}
 
 {{ anchor(entry.anchor) }}
 
-{{ heading(2, entry.heading) }}
+{{ heading(3, entry.heading) }}
 
 {{ bullet_list(entry.lifecycle_items) }}
 {% if entry.upstream != "-" %}

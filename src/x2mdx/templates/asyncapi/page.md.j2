@@ -1,19 +1,18 @@
 {{ paragraph("Generated from AsyncAPI snapshots for `" ~ (report.info_title or "unknown spec") ~ "`.") }}
 
-{{ bullet_list(overview_items) }}
 {% if report.info_description %}
 {{ paragraph(report.info_description) }}
 {% endif %}
 
-{{ heading(2, "Version Change Timeline") }}
+{{ heading(2, "Table of Contents") }}
 
-{{ table(["Version", "Active Channels", "Added", "Changed", "Removed"], version_timeline_rows) }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], channel_summary_rows) }}
 
-{{ heading(2, "Channel Diff Summary") }}
+{{ heading(2, "Version Change Summary") }}
 
-{{ table(["Channel", "Actions", "Introduced", "Changes", "Removed"], channel_summary_rows) }}
+{{ table(["Version", "Added", "Changed", "Removed"], version_timeline_rows) }}
 
-{{ heading(2, "Channels") }}
+{{ heading(2, "Reference") }}
 {% for channel in channels %}
 
 {{ anchor(channel.anchor) }}

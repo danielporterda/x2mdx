@@ -81,7 +81,7 @@ class PublishedLedgerApiFixtureTests(unittest.TestCase):
             self.assertTrue((output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").exists())
             spec_page = (output_dir / "specs" / "json-ledger-api-openapi-yaml.mdx").read_text(encoding="utf-8")
             self.assertIn("Table of Contents", spec_page)
-            self.assertIn("| Name | Summary | Introduced | Changed | Deprecated | Removed |", spec_page)
+            self.assertIn("| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |", spec_page)
             self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
             self.assertIn("| `application/json` | `object` | `actAs`, `commandId`, `commands` |", spec_page)
             self.assertIn("**Request Example: `application/json`**", spec_page)

@@ -118,6 +118,39 @@ def module_display_name(module_name: str) -> str:
     return ".".join(normalized)
 
 
+def compact_text(text: str, *, limit: int = 120) -> str:
+    normalized = " ".join(text.split())
+    if not normalized:
+        return "-"
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[: limit - 3].rstrip() + "..."
+
+
+def strip_markdown_summary(text: str) -> str:
+    summary = text.strip()
+    if not summary:
+        return ""
+    summary = summary.replace("`", "")
+    summary = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", summary)
+    summary = re.sub(r"\*\*([^*]+)\*\*", r"\1", summary)
+    summary = re.sub(r"_([^_]+)_", r"\1", summary)
+    summary = re.sub(r"<[^>]+>", "", summary)
+    return summary
+
+
+def module_summary_preview(module_doc: dict[str, Any]) -> str:
+    rendered = render_doc_blocks(module_doc.get("md_descr"))
+    if not rendered:
+        return "-"
+    for chunk in rendered.split("\n\n"):
+        stripped = strip_markdown_summary(chunk)
+        normalized = compact_text(stripped)
+        if normalized != "-":
+            return normalized
+    return "-"
+
+
 def normalize_type_lit(value: Any) -> str:
     text = str(value)
     match = re.fullmatch(r'(["\'])([A-Za-z_][A-Za-z0-9_]*)\1', text)
@@ -600,6 +633,7 @@ def build_pages(
         report.modules,
         key=lambda module: module_display_name(str(module.get("md_name", ""))).lower(),
     )
+    modules_by_name = {str(module.get("md_name", "")): module for module in modules_sorted}
 
     for module in modules_sorted:
         name = str(module["md_name"])
@@ -624,9 +658,11 @@ def build_pages(
         )
 
     module_links: list[str] = []
+    module_toc_rows: list[list[str]] = []
     for source_name, display_name, target in module_entries:
         status_suffix = ""
         lifecycle = report.module_lifecycle.get(source_name, {})
+        deprecation_version = report.module_deprecation_first_seen.get(source_name)
         if lifecycle.get("status") == "removed":
             removed_in = lifecycle.get("removed_in")
             if isinstance(removed_in, str) and removed_in.strip():
@@ -638,6 +674,28 @@ def build_pages(
         else:
             module_link = (output_dir / target).relative_to(root).with_suffix("").as_posix()
         module_links.append(f"[{display_name}]({module_link}){status_suffix}")
+        module_doc = modules_by_name[source_name]
+        module_toc_rows.append(
+            [
+                f"[`{display_name}`]({module_link})",
+                "`Module`",
+                escape_md_cell(module_summary_preview(module_doc)),
+                f"`{lifecycle.get('introduced_in') or '-'}`",
+                "-",
+                f"`{deprecation_version}`" if deprecation_version else "-",
+                f"`{lifecycle.get('removed_in')}`" if lifecycle.get("removed_in") else "-",
+            ]
+        )
+
+    version_change_summary_rows = [
+        [
+            f"`{version}`",
+            str(sum(1 for lifecycle in report.module_lifecycle.values() if lifecycle.get("introduced_in") == version)),
+            "0",
+            str(sum(1 for lifecycle in report.module_lifecycle.values() if lifecycle.get("removed_in") == version)),
+        ]
+        for version in report.versions
+    ]
 
     pages.insert(
         0,
@@ -647,12 +705,8 @@ def build_pages(
             description=f"Reference documentation for {overview_title} modules.",
             template_name="daml_json/index.md.j2",
             overview_title=overview_title,
-            source_items=[
-                f"Source name: `{report.source_name}`",
-                f"Version filter: `{report.version_filter}`",
-                f"Publish version: `{report.publish_version}`",
-                f"Versions analyzed: `{', '.join(report.versions)}`",
-            ],
+            module_toc_rows=module_toc_rows,
+            version_change_summary_rows=version_change_summary_rows,
             module_links=module_links,
         ),
     )

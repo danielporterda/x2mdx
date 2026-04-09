@@ -2,8 +2,14 @@
 
 {{ paragraph("Generated from versioned OpenRPC snapshots.") }}
 
-{{ bullet_list(overview_items) }}
+{{ heading(2, "Table of Contents") }}
 
-{{ heading(2, "Spec Reference") }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], toc_rows) }}
 
-{{ table(["Spec", "Title", "Methods", "Changed In"], spec_rows) }}
+{{ heading(2, "Version Change Summary") }}
+
+{{ table(["Version", "Added", "Changed", "Removed"], version_change_summary_rows) }}
+
+{{ heading(2, "Reference") }}
+
+{{ table(["Spec", "Title", "Methods"], spec_rows) }}

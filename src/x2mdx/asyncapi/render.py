@@ -54,6 +54,15 @@ def action_list(channel: AsyncApiChannelLifecycle) -> str:
     return ", ".join(md_code(action) for action in actions)
 
 
+def compact_text(text: str, *, limit: int = 120) -> str:
+    normalized = " ".join(text.split())
+    if not normalized:
+        return "-"
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[: limit - 3].rstrip() + "..."
+
+
 def _channel_context(channel: AsyncApiChannelLifecycle) -> dict[str, Any]:
     lifecycle_bits = [
         f"Actions: {action_list(channel)}",
@@ -127,18 +136,9 @@ def build_page(
         description=page_description,
         template_name="asyncapi/page.md.j2",
         report=report,
-        overview_items=[
-            f"Publish version: `{report.publish_version}`",
-            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
-            f"Source: `{report.source_name}`",
-            f"Version filter: `{report.version_filter}`",
-            f"Latest source path: `{report.latest_source_path}`",
-            f"AsyncAPI version: `{report.asyncapi_version or '-'}`",
-        ],
         version_timeline_rows=[
             [
                 md_code(version),
-                str(report.per_version_deltas[version]["active_count"]),
                 str(report.per_version_deltas[version]["added_count"]),
                 str(report.per_version_deltas[version]["changed_count"]),
                 str(report.per_version_deltas[version]["removed_count"]),
@@ -149,8 +149,10 @@ def build_page(
             [
                 channel_link(channel.channel),
                 action_list(channel),
+                escape_md_cell(compact_text(str(channel.latest.get("description") or ""))),
                 md_code(channel.introduced_version),
                 escape_md_cell(render_change_summary(channel.change_details)),
+                "-",
                 md_code(channel.removed_version) if channel.removed_version else "-",
             ]
             for channel in report.channels

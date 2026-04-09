@@ -3,7 +3,7 @@
 
 {{ heading(2, "Table of Contents") }}
 {% if table_of_contents_rows %}
-{{ table(["Name", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], table_of_contents_rows) }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], table_of_contents_rows) }}
 {% if table_of_contents_total > table_of_contents_limit %}
 {{ paragraph("_Showing first " ~ table_of_contents_limit ~ " entries out of " ~ table_of_contents_total ~ "._") }}
 {% endif %}
@@ -11,13 +11,13 @@
 {{ paragraph("No endpoints found in the latest version.") }}
 {% endif %}
 
-{{ heading(2, "Endpoint Reference (Latest)") }}
-
-{{ endpoint_reference }}
-
-{{ heading(2, "Version Change Timeline") }}
+{{ heading(2, "Version Change Summary") }}
 
 {{ table(["Version", "Added", "Changed", "Removed"], version_timeline_rows) }}
+
+{{ heading(2, "Reference") }}
+
+{{ endpoint_reference }}
 
 {{ heading(2, "Changed Entities") }}
 {% if interesting_rows %}

@@ -6,17 +6,15 @@
 {{ paragraph(spec.info_description) }}
 {% endif %}
 
-{{ bullet_list(metadata_items) }}
+{{ heading(2, "Table of Contents") }}
 
-{{ heading(2, "Version Change Timeline") }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], method_toc_rows) }}
 
-{{ table(["Version", "Active Methods", "Added", "Changed", "Removed"], version_timeline_rows) }}
+{{ heading(2, "Version Change Summary") }}
 
-{{ heading(2, "Method Diff Summary") }}
+{{ table(["Version", "Added", "Changed", "Removed"], version_timeline_rows) }}
 
-{{ table(["Method", "Introduced", "Changes", "Removed"], method_summary_rows) }}
-
-{{ heading(2, "Methods") }}
+{{ heading(2, "Reference") }}
 {% for method in methods %}
 
 {{ anchor(method.anchor) }}

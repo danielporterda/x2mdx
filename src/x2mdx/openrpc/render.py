@@ -37,6 +37,21 @@ def render_change_summary(change_details: list[dict[str, object]]) -> str:
     return "<br/>".join(parts) if parts else "-"
 
 
+def compact_text(text: str, *, limit: int = 120) -> str:
+    normalized = " ".join(str(text).split())
+    if not normalized:
+        return "-"
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[: limit - 3].rstrip() + "..."
+
+
+def changed_versions_cell(changed_in_versions: list[str]) -> str:
+    if not changed_in_versions:
+        return "-"
+    return ", ".join(md_code(version) for version in changed_in_versions)
+
+
 def spec_page_name(spec: OpenRpcSpecLifecycle) -> str:
     return f"{slugify(spec.spec_id)}.mdx"
 
@@ -69,12 +84,32 @@ def build_overview_page(
         description="Versioned OpenRPC reference docs.",
         template_name="openrpc/overview.md.j2",
         overview_title=overview_title,
-        overview_items=[
-            f"Publish version: `{report.publish_version}`",
-            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
-            f"Source: `{report.source_name}`",
-            f"Version filter: `{report.version_filter}`",
-            f"Generated at: `{report.generated_at_utc}`",
+        toc_rows=[
+            [
+                f"[`{escape_md_cell(spec.display_name)}`]("
+                + (
+                    f"{normalized_link_prefix}/{spec_page_link(spec, spec_dir_name=spec_dir_name)}"
+                    if normalized_link_prefix
+                    else spec_page_link(spec, spec_dir_name=spec_dir_name)
+                )
+                + ")",
+                "`Spec`",
+                escape_md_cell(compact_text(spec.info_title or spec.info_description or "")),
+                md_code(spec.introduced_version),
+                escape_md_cell(changed_versions_cell(spec.changed_in_versions)),
+                "-",
+                md_code(spec.removed_version) if spec.removed_version else "-",
+            ]
+            for spec in report.specs
+        ],
+        version_change_summary_rows=[
+            [
+                md_code(version),
+                str(sum(1 for spec in report.specs if spec.introduced_version == version)),
+                str(sum(1 for spec in report.specs if version in spec.changed_in_versions)),
+                str(sum(1 for spec in report.specs if spec.removed_version == version)),
+            ]
+            for version in report.versions
         ],
         spec_rows=[
             [
@@ -87,7 +122,6 @@ def build_overview_page(
                 + ")",
                 escape_md_cell(spec.info_title or "-"),
                 md_code(str(len(spec.methods))),
-                ", ".join(md_code(version) for version in spec.changed_in_versions) if spec.changed_in_versions else "-",
             ]
             for spec in report.specs
         ],
@@ -155,30 +189,26 @@ def build_spec_page(
         template_name="openrpc/spec.md.j2",
         spec=spec,
         overview_link=overview_link,
-        metadata_items=[
-            f"Latest source path: `{spec.latest_source_path}`",
-            f"Publish version: `{spec.latest_version}`",
-            f"OpenRPC version: `{spec.openrpc_version or '-'}`",
-            f"Spec info.version: `{spec.info_version or '-'}`",
+        method_toc_rows=[
+            [
+                f"[{md_code(method.method)}](#{method.anchor})",
+                "`Method`",
+                escape_md_cell(compact_text(method.latest.get("summary") or method.latest.get("description") or "")),
+                md_code(method.introduced_version),
+                escape_md_cell(render_change_summary(method.change_details)),
+                "-",
+                md_code(method.removed_version) if method.removed_version else "-",
+            ]
+            for method in spec.methods
         ],
         version_timeline_rows=[
             [
                 md_code(version),
-                str(spec.per_version_method_deltas[version]["active_count"]),
                 str(spec.per_version_method_deltas[version]["added_count"]),
                 str(spec.per_version_method_deltas[version]["changed_count"]),
                 str(spec.per_version_method_deltas[version]["removed_count"]),
             ]
             for version in spec.versions_present
-        ],
-        method_summary_rows=[
-            [
-                f"[{md_code(method.method)}](#{method.anchor})",
-                md_code(method.introduced_version),
-                escape_md_cell(render_change_summary(method.change_details)),
-                md_code(method.removed_version) if method.removed_version else "-",
-            ]
-            for method in spec.methods
         ],
         methods=[_method_context(method) for method in spec.methods],
     )

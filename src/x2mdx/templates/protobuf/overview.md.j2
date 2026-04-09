@@ -2,15 +2,15 @@
 
 {{ paragraph("This page is generated from local descriptor-image snapshots with source info.") }}
 
-{{ heading(2, "Source") }}
+{{ heading(2, "Table of Contents") }}
 
-{{ bullet_list(source_items) }}
+{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], toc_rows) }}
 
-{{ heading(2, "Latest Snapshot") }}
+{{ heading(2, "Version Change Summary") }}
 
-{{ bullet_list(snapshot_items) }}
+{{ table(["Version", "Added", "Changed", "Removed"], release_rows) }}
 
-{{ heading(2, "Package Reference") }}
+{{ heading(2, "Reference") }}
 
 {{ paragraph("Packages are grouped by API area. Each package page contains its services, endpoint history, and shared type reference.") }}
 {% for group in package_groups %}
@@ -19,7 +19,3 @@
 
 {{ table(["Package", "Services", "Endpoints", "Messages", "Enums"], group.rows) }}
 {% endfor %}
-
-{{ heading(2, "Release Summary") }}
-
-{{ table(["Version", "Endpoints +/~/-", "Messages +/~/-", "Enums +/~/-", "Files +/~/-"], release_rows) }}

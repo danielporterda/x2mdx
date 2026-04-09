@@ -266,7 +266,8 @@ def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
             continue
         rows.append(
             [
-                endpoint_anchor_link(endpoint_name(operation)),
+                endpoint_anchor_link(endpoint_name(operation), label=endpoint_path(operation)),
+                md_code(endpoint_method(operation)),
                 operation_summary_text(operation),
                 lifecycle_value(lifecycle.introduced_version, "introduced"),
                 operation_change_summary_value(spec, lifecycle),
@@ -278,23 +279,27 @@ def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
 
 
 def endpoint_header(operation: dict[str, Any]) -> str:
-    method = str(operation.get("method", "")).strip()
-    path = str(operation.get("path", "")).strip()
-    return md_code(f"{method} {path}".strip())
+    return md_code(endpoint_name(operation))
 
 
 def endpoint_name(operation: dict[str, Any]) -> str:
-    method = str(operation.get("method", "")).strip()
-    path = str(operation.get("path", "")).strip()
-    return f"{method} {path}".strip()
+    return f"{endpoint_method(operation)} {endpoint_path(operation)}".strip()
+
+
+def endpoint_method(operation: dict[str, Any]) -> str:
+    return str(operation.get("method", "")).strip().upper()
+
+
+def endpoint_path(operation: dict[str, Any]) -> str:
+    return str(operation.get("path", "")).strip()
 
 
 def endpoint_anchor_id(endpoint: str) -> str:
     return f"endpoint-{slugify(endpoint)}"
 
 
-def endpoint_anchor_link(endpoint: str) -> str:
-    return f"[{md_code(endpoint)}](#{endpoint_anchor_id(endpoint)})"
+def endpoint_anchor_link(endpoint: str, *, label: str | None = None) -> str:
+    return f"[{md_code(label or endpoint)}](#{endpoint_anchor_id(endpoint)})"
 
 
 def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
@@ -462,7 +467,7 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
             f"Latest tags: {md_code(len(latest_tags))}",
         ],
     )
-    body = body.replace("## Endpoint Reference (Latest)\n\n<a id=", "## Endpoint Reference (Latest)\n\n\n<a id=", 1)
+    body = body.replace("## Reference\n\n<a id=", "## Reference\n\n\n<a id=", 1)
     return Page(
         path=f"{spec_dir_name}/{slugify(spec.spec_id)}.mdx",
         title=spec.display_name,

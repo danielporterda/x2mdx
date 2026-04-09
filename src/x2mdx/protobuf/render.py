@@ -49,6 +49,34 @@ def compact_text(text: str, *, limit: int = 120) -> str:
     return normalized[: limit - 3].rstrip() + "..."
 
 
+def change_versions_for_package(
+    package_name: str,
+    endpoint_lifecycle: list[dict[str, Any]],
+    *,
+    version_order: dict[str, int],
+) -> list[str]:
+    versions = {
+        str(event["version"])
+        for entry in endpoint_lifecycle
+        if entry["package"] == package_name
+        for event in entry.get("history", [])
+        if event.get("kind") == "modified"
+    }
+    return sorted(versions, key=lambda version: version_order.get(version, len(version_order)))
+
+
+def introduced_version_for_package(
+    package_name: str,
+    endpoint_lifecycle: list[dict[str, Any]],
+    *,
+    version_order: dict[str, int],
+) -> str | None:
+    versions = [str(entry["introducedIn"]) for entry in endpoint_lifecycle if entry["package"] == package_name and entry.get("introducedIn")]
+    if not versions:
+        return None
+    return sorted(versions, key=lambda version: version_order.get(version, len(version_order)))[0]
+
+
 def slugify_segment(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9]+", "-", value).strip("-").lower()
     return slug or "item"
@@ -92,6 +120,7 @@ def build_package_page_map(report: dict[str, Any], *, output_dir: Path) -> dict[
 
 def build_type_page_map(report: dict[str, Any], *, package_page_map: dict[str, Path]) -> dict[str, Path]:
     latest = report["latestSnapshot"]
+    version_order = {str(release["version"]): index for index, release in enumerate(report["releases"])}
     type_page_map: dict[str, Path] = {}
     for collection_name in ("messages", "enums"):
         for entity in latest[collection_name].values():
@@ -345,6 +374,7 @@ def render_overview_page(
     package_docs: list[dict[str, Any]],
 ) -> Page:
     latest = report["latestSnapshot"]
+    version_order = {str(release["version"]): index for index, release in enumerate(report["releases"])}
 
     release_rows: list[list[str]] = []
     for release in report["releases"]:
@@ -352,10 +382,9 @@ def render_overview_page(
         release_rows.append(
             [
                 f"`{release['version']}`",
-                f"`{counts['endpoints']['added']}/{counts['endpoints']['modified']}/{counts['endpoints']['removed']}`",
-                f"`{counts['messages']['added']}/{counts['messages']['modified']}/{counts['messages']['removed']}`",
-                f"`{counts['enums']['added']}/{counts['enums']['modified']}/{counts['enums']['removed']}`",
-                f"`{counts['files']['added']}/{counts['files']['modified']}/{counts['files']['removed']}`",
+                str(counts["endpoints"]["added"]),
+                str(counts["endpoints"]["modified"]),
+                str(counts["endpoints"]["removed"]),
             ]
         )
 
@@ -368,6 +397,7 @@ def render_overview_page(
         package_groups[label].append(package)
 
     grouped_packages: list[dict[str, Any]] = []
+    toc_rows: list[list[str]] = []
     for label in PACKAGE_GROUP_ORDER:
         packages = package_groups.get(label, [])
         if not packages:
@@ -376,6 +406,16 @@ def render_overview_page(
         for package in packages:
             package_path = package_page_map[package["package"]]
             link = package_path.relative_to(output_dir.parent).with_suffix("").as_posix()
+            introduced = introduced_version_for_package(
+                package["package"],
+                report["endpointLifecycle"],
+                version_order=version_order,
+            )
+            changed_versions = change_versions_for_package(
+                package["package"],
+                report["endpointLifecycle"],
+                version_order=version_order,
+            )
             rows.append(
                 [
                     f"[`{escape_md(package['package'])}`]({link})",
@@ -385,6 +425,22 @@ def render_overview_page(
                     f"`{package['enumCount']}`",
                 ]
             )
+            toc_rows.append(
+                [
+                    f"[`{escape_md(package['package'])}`]({link})",
+                    "`Package`",
+                    escape_md_cell(
+                        compact_text(
+                            f"{package['serviceCount']} services, {package['endpointCount']} endpoints, "
+                            f"{package['messageCount']} messages, {package['enumCount']} enums"
+                        )
+                    ),
+                    f"`{introduced}`" if introduced else "-",
+                    ", ".join(f"`{version}`" for version in changed_versions) if changed_versions else "-",
+                    "-",
+                    "-",
+                ]
+            )
         grouped_packages.append({"label": label, "rows": rows})
 
     return markdown_page(
@@ -392,20 +448,7 @@ def render_overview_page(
         title="Canton Protobuf History",
         description="Descriptor-backed protobuf API history grouped by package.",
         template_name="protobuf/overview.md.j2",
-        source_items=[
-            f"Source name: `{report['sourceName']}`",
-            f"Version filter: `{report['versionFilter']}`",
-            f"Latest release: `{report['latestRelease']}`",
-            f"Source repo: `{report['repo'].get('remote') or '-'}`",
-            f"Generated at: `{report['generatedAt']}`",
-        ],
-        snapshot_items=[
-            f"Packages: `{latest['stats']['packages']}`",
-            f"Services: `{latest['stats']['services']}`",
-            f"Endpoints: `{latest['stats']['endpoints']}`",
-            f"Messages: `{latest['stats']['messages']}`",
-            f"Enums: `{latest['stats']['enums']}`",
-        ],
+        toc_rows=toc_rows,
         package_groups=grouped_packages,
         release_rows=release_rows,
     )
