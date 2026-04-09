@@ -24,6 +24,32 @@ def render_change_summary(change_details: list[dict[str, object]]) -> str:
     return "<br/>".join(parts) if parts else "-"
 
 
+def render_summary_cell(text: str) -> str:
+    summary = text.strip()
+    return escape_md_cell(summary) if summary else "-"
+
+
+def version_change_summary_rows(exports: list[dict[str, object]], versions: list[str]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for version in versions:
+        added = sum(1 for export in exports if export["introduced_in"] == version)
+        changed = sum(
+            1
+            for export in exports
+            if any(str(entry["version"]) == version for entry in export["change_details"])
+        )
+        removed = sum(1 for export in exports if export["removed_in"] == version)
+        rows.append(
+            [
+                f"`{version}`",
+                f"`{added}`" if added else "-",
+                f"`{changed}`" if changed else "-",
+                f"`{removed}`" if removed else "-",
+            ]
+        )
+    return rows
+
+
 def _type_parameter_rows(items: list[dict[str, Any]]) -> list[list[str]]:
     return [
         [
@@ -120,20 +146,26 @@ def build_page(
         template_name="typedoc/page.md.j2",
         report=report,
         source_items=[
-            f"Publish version: `{report.publish_version}`",
-            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
             f"Source: `{report.source_name}`",
             f"Version filter: `{report.version_filter}`",
+            f"Package: `{report.package_name}`",
         ],
-        export_summary_rows=[
+        version_items=[
+            f"Publish version: `{report.publish_version}`",
+            f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
+        ],
+        toc_rows=[
             [
                 f"[`{escape_md_cell(export['name'])}`](#{export['anchor']})",
                 escape_md_cell(export["kind_label"]),
+                render_summary_cell(str(export["summary"])),
                 f"`{export['introduced_in']}`",
                 escape_md_cell(render_change_summary(export["change_details"])),
+                "-",
                 f"`{export['removed_in']}`" if export["removed_in"] else "-",
             ]
             for export in report.exports
         ],
+        version_change_summary_rows=version_change_summary_rows(report.exports, report.versions),
         grouped_exports=grouped_exports,
     )
