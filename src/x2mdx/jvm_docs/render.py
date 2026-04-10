@@ -334,7 +334,7 @@ def build_package_rows_and_pages(
                 package_entries=[
                     {
                         "anchor": str(entry["anchor"]),
-                        "heading": f"`{md_code(entry['symbol'].symbol)}`",
+                        "heading": f"`{md_code(type_label(str(entry['type_text']), package_name))}`",
                         "lifecycle_items": [
                             f"Introduced: {entry['introduced']}",
                             f"Deprecated: {entry['deprecated']}",
