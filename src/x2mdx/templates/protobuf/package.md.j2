@@ -28,27 +28,21 @@
 {% for endpoint in service.endpoint_details %}
 
 {{ anchor(endpoint.anchor) }}
-{{ paragraph("**Endpoint `" ~ endpoint.title ~ "`**") }}
+{{ shared.detail_label("Endpoint `" ~ endpoint.title ~ "`") }}
 
 {{ bullet_list(endpoint.summary_items) }}
 
-{{ paragraph("**Signature**") }}
-
-{{ code_block("protobuf", endpoint.signature) }}
+{{ shared.detail_code_block("Signature", "protobuf", endpoint.signature) }}
 
 {{ paragraph(endpoint.description) }}
 
-{{ paragraph("**History**") }}
+{{ shared.detail_label("History") }}
 
 {{ endpoint.history_table }}
 
-{{ paragraph("**Request Type**") }}
+{{ shared.detail_bullet_list("Request Type", [endpoint.request_type]) }}
 
-{{ bullet_list([endpoint.request_type]) }}
-
-{{ paragraph("**Response Type**") }}
-
-{{ bullet_list([endpoint.response_type]) }}
+{{ shared.detail_bullet_list("Response Type", [endpoint.response_type]) }}
 {% endfor %}
 {% endfor %}
 {% endif %}

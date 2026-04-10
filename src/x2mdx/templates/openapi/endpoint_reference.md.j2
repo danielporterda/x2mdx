@@ -1,3 +1,4 @@
+{% import "shared/macros.md.j2" as shared %}
 {% for operation in operations %}
 {{ anchor(operation.anchor_id) }}
 
@@ -6,12 +7,10 @@
 {{ bullet_list(operation.bullet_items) }}
 {% endif %}
 {% if operation.parameter_rows %}
-**Parameters**
-
-{{ table(["Name", "In", "Required", "Schema", "Description"], operation.parameter_rows) }}
+{{ shared.detail_table("Parameters", ["Name", "In", "Required", "Schema", "Description"], operation.parameter_rows) }}
 {% endif %}
 {% if operation.request_body %}
-**Request Body**
+{{ shared.detail_label("Request Body") }}
 
 {{ bullet_list(["Required: " ~ operation.request_body.required]) }}
 {% if operation.request_body.content_rows %}
@@ -20,15 +19,11 @@
 {{ bullet_list(["Content: " ~ operation.request_body.content]) }}
 {% endif %}
 {% for example in operation.request_body.examples %}
-**Request Example: {{ example.content_type }}**
-
-{{ code_block("json", example.body) }}
+{{ shared.detail_code_block("Request Example: " ~ example.content_type, "json", example.body) }}
 {% endfor %}
 {% endif %}
 {% if operation.response_rows %}
-**Responses**
-
-{{ table(["Code", "Description", "Content Types", "Schemas"], operation.response_rows) }}
+{{ shared.detail_table("Responses", ["Code", "Description", "Content Types", "Schemas"], operation.response_rows) }}
 {% endif %}
 {% if not loop.last %}
 

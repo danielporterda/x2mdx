@@ -11,20 +11,13 @@
 {{ paragraph("Upstream docs: " ~ entry.upstream) }}
 {% endif %}
 {% if entry.signature %}
-{{ paragraph("**Signature**") }}
-
-{{ code_block("text", entry.signature) }}
+{{ shared.detail_code_block("Signature", "text", entry.signature) }}
 {% endif %}
 {% if entry.summary %}
-{{ paragraph("**Summary**") }}
+{{ shared.detail_label("Summary") }}
 
 {{ paragraph(entry.summary) }}
 {% endif %}
-{{ paragraph("**Members**") }}
-{% if entry.member_rows %}
-{{ table(["Docs", "Member", "Introduced", "Deprecated", "Removed"], entry.member_rows) }}
-{% else %}
-{{ paragraph("No members found for this type in the configured artifacts.") }}
-{% endif %}
+{{ shared.detail_table("Members", ["Docs", "Member", "Introduced", "Deprecated", "Removed"], entry.member_rows, empty_message="No members found for this type in the configured artifacts.") }}
 {% endfor %}
 {% endcall %}

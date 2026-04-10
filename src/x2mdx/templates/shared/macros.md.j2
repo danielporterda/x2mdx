@@ -82,6 +82,39 @@
 {{ generic_table_section(title, headers, rows, level=level) }}
 {%- endmacro %}
 
+{% macro detail_label(title) -%}
+{{ paragraph("**" ~ title ~ "**") }}
+{%- endmacro %}
+
+{% macro detail_table(title, headers, rows, empty_message=None) -%}
+{{ detail_label(title) }}
+{% if rows %}
+
+{{ table(headers, rows) }}
+{% elif empty_message %}
+
+{{ paragraph(empty_message) }}
+{% endif %}
+{%- endmacro %}
+
+{% macro detail_code_block(title, language, body) -%}
+{{ detail_label(title) }}
+
+{{ code_block(language, body) }}
+{%- endmacro %}
+
+{% macro detail_bullet_list(title, items) -%}
+{{ detail_label(title) }}
+
+{{ bullet_list(items) }}
+{%- endmacro %}
+
+{% macro version_changes(rows) -%}
+{% if rows %}
+{{ detail_table("Version Changes", ["Version", "Changes"], rows) }}
+{% endif %}
+{%- endmacro %}
+
 {% macro warning(text) -%}
 {{ admonition("Warning", text) }}
 {%- endmacro %}

@@ -16,13 +16,9 @@
 {% if channel.description %}
 {{ paragraph(channel.description) }}
 {% endif %}
-{% if channel.change_rows %}
-**Version Changes**
-
-{{ table(["Version", "Changes"], channel.change_rows) }}
-{% endif %}
+{{ shared.version_changes(channel.change_rows) }}
 {% for action in channel.actions %}
-**{{ action.heading }}**
+{{ shared.detail_label(action.heading) }}
 {% if action.detail_items %}
 
 {{ bullet_list(action.detail_items) }}
@@ -34,9 +30,7 @@
 
 {{ table(["Payload Schema", "Required Fields"], [action.payload_row]) }}
 {% if action.sample is not none %}
-**Message Example**
-
-{{ code_block("json", pretty_json(action.sample)) }}
+{{ shared.detail_code_block("Message Example", "json", pretty_json(action.sample)) }}
 {% endif %}
 {% endfor %}
 {% endfor %}

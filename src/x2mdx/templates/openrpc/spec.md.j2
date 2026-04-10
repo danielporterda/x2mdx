@@ -22,35 +22,18 @@
 
 {{ paragraph(method.description) }}
 {% endif %}
-{% if method.change_rows %}
+{{ shared.version_changes(method.change_rows) }}
 
-**Version Changes**
+{{ shared.detail_table("Parameters", ["Parameter", "Schema", "Required Fields", "Description"], method.parameter_rows, empty_message="_No parameters._") }}
 
-{{ table(["Version", "Changes"], method.change_rows) }}
-{% endif %}
-
-**Parameters**
-
-{% if method.parameter_rows %}
-{{ table(["Parameter", "Schema", "Required Fields", "Description"], method.parameter_rows) }}
-{% else %}
-_No parameters._
-{% endif %}
-
-**Result**
-
-{{ table(["Schema", "Required Fields", "Description"], [method.result_row]) }}
+{{ shared.detail_table("Result", ["Schema", "Required Fields", "Description"], [method.result_row]) }}
 {% if method.param_sample is not none %}
 
-**Params Example**
-
-{{ code_block("json", pretty_json(method.param_sample)) }}
+{{ shared.detail_code_block("Params Example", "json", pretty_json(method.param_sample)) }}
 {% endif %}
 {% if method.result_sample is not none %}
 
-**Result Example**
-
-{{ code_block("json", pretty_json(method.result_sample)) }}
+{{ shared.detail_code_block("Result Example", "json", pretty_json(method.result_sample)) }}
 {% endif %}
 {% endfor %}
 {% endcall %}
