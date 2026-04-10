@@ -262,9 +262,10 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("Version Change Summary", spec_page)
         self.assertIn("Table of Contents", spec_page)
         self.assertIn("| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |", spec_page)
-        self.assertIn("[`/ping`](#endpoint-get-ping)", spec_page)
+        self.assertIn("[`/ping`](#endpoint-path-ping)", spec_page)
+        self.assertIn('<a id="endpoint-path-ping"></a>', spec_page)
         self.assertIn('<a id="endpoint-get-ping"></a>', spec_page)
-        self.assertIn("| [`/ping`](#endpoint-get-ping) | `GET` | Ping endpoint | `v0.1.0` | v0.1.1:", spec_page)
+        self.assertIn("| [`/ping`](#endpoint-path-ping) | - | Ping endpoint | `v0.1.0` | v0.1.1:", spec_page)
         self.assertIn("summary changed `Ping` -> `Ping endpoint`", spec_page)
         self.assertIn("query param `limit` added", spec_page)
         self.assertIn("response `200` description updated", spec_page)
@@ -273,8 +274,68 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertGreater(spec_page.index("Spec Metadata"), spec_page.index("Latest Components"))
         self.assertGreater(spec_page.index("Entity Summary"), spec_page.index("Spec Metadata"))
         self.assertIn("## Reference", spec_page)
-        self.assertIn("### `GET /ping`", spec_page)
+        self.assertIn("### `/ping`", spec_page)
+        self.assertIn("- Method: `GET`", spec_page)
+        self.assertNotIn("### `GET /ping`", spec_page)
         self.assertNotIn("| Endpoint | Operation ID | Summary | Tags |", spec_page)
+
+    def test_render_pages_group_operations_by_path(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.1.0
+                    paths:
+                      /accounts:
+                        get:
+                          operationId: listAccounts
+                          summary: List accounts
+                          responses:
+                            "200":
+                              description: ok
+                        post:
+                          operationId: createAccount
+                          summary: Create account
+                          requestBody:
+                            required: true
+                            content:
+                              application/json:
+                                schema:
+                                  type: object
+                                  required: [name]
+                                  properties:
+                                    name:
+                                      type: string
+                          responses:
+                            "200":
+                              description: created
+                    """,
+                )
+            ],
+            self._config(),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        pages = build_pages(report)
+        out_dir = self.root / "grouped-by-path"
+        write_pages(pages, out_dir)
+        spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
+
+        self.assertEqual(spec_page.count("| [`/accounts`](#endpoint-path-accounts) |"), 1)
+        self.assertIn("| [`/accounts`](#endpoint-path-accounts) | `GET, POST` |", spec_page)
+        self.assertIn("GET: List accounts; POST: Create account", spec_page)
+        self.assertIn("### `/accounts`", spec_page)
+        self.assertIn("- Methods: `GET`, `POST`", spec_page)
+        self.assertIn("**`GET`**", spec_page)
+        self.assertIn("**`POST`**", spec_page)
+        self.assertNotIn("### `GET /accounts`", spec_page)
+        self.assertNotIn("### `POST /accounts`", spec_page)
 
     def test_render_pages_show_required_request_body_fields(self) -> None:
         report = build_openapi_lifecycle_report_from_snapshots(
@@ -334,7 +395,8 @@ class OpenApiLifecycleTests(unittest.TestCase):
         write_pages(pages, out_dir)
         spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
 
-        self.assertIn("### `POST /submit`", spec_page)
+        self.assertIn("### `/submit`", spec_page)
+        self.assertIn("- Method: `POST`", spec_page)
         self.assertIn("| Content Type | Schema | Required Fields |", spec_page)
         self.assertIn("| `application/json` | `object` | `commandId`, `payload` |", spec_page)
         self.assertIn("**Request Example: `application/json`**", spec_page)
@@ -375,7 +437,8 @@ class OpenApiLifecycleTests(unittest.TestCase):
         write_pages(pages, out_dir)
         spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
 
-        self.assertIn("`GET /items/{itemId}`", spec_page)
+        self.assertIn("### `/items/{itemId}`", spec_page)
+        self.assertIn("- Method: `GET`", spec_page)
         self.assertIn("Fetch \\{itemId\\}", spec_page)
         self.assertIn("Get \\{itemId\\} by id.", spec_page)
         self.assertNotIn("&#123;", spec_page)

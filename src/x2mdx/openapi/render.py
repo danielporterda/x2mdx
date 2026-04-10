@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import json
 import re
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
@@ -219,13 +220,20 @@ def summarize_operation_transition(previous: dict[str, Any] | None, current: dic
 
 
 def operation_summary_text(operation: dict[str, Any]) -> str:
-    summary = str(operation.get("summary", "") or "").strip()
+    summary = operation_summary_value(operation)
     if summary:
         return md_text(summary)
+    return "-"
+
+
+def operation_summary_value(operation: dict[str, Any]) -> str:
+    summary = str(operation.get("summary", "") or "").strip()
+    if summary:
+        return summary
     description = str(operation.get("description", "") or "").strip()
     if description:
-        return md_text(description)
-    return "-"
+        return description
+    return ""
 
 
 def operation_change_summary_value(spec: OpenApiSpecLifecycle, lifecycle: OpenApiEntityLifecycle) -> str:
@@ -258,21 +266,25 @@ def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
         for record in spec.entity_lifecycle
         if record.entity_type == "operation"
     }
+    operation_groups = group_operations_by_path(spec.latest_operation_details)
     rows: list[list[str]] = []
-    for operation in spec.latest_operation_details:
-        entity_key = str(operation.get("entity_key", "") or "")
-        lifecycle = lifecycle_by_key.get(entity_key)
-        if lifecycle is None:
+    for path, operations in operation_groups.items():
+        lifecycles = [
+            lifecycle
+            for operation in operations
+            if (lifecycle := lifecycle_by_key.get(str(operation.get("entity_key", "") or ""))) is not None
+        ]
+        if not lifecycles:
             continue
         rows.append(
             [
-                endpoint_anchor_link(endpoint_name(operation), label=endpoint_path(operation)),
-                md_code(endpoint_method(operation)),
-                operation_summary_text(operation),
-                lifecycle_value(lifecycle.introduced_version, "introduced"),
-                operation_change_summary_value(spec, lifecycle),
+                endpoint_path_anchor_link(path),
+                path_kind_value(operations),
+                path_summary_text(operations),
+                introduced_versions_value(lifecycles),
+                path_change_summary_value(spec, lifecycles),
                 "-",
-                lifecycle_value(lifecycle.removed_version, "removed"),
+                removed_versions_value(lifecycles),
             ]
         )
     return rows
@@ -302,8 +314,84 @@ def endpoint_anchor_link(endpoint: str, *, label: str | None = None) -> str:
     return f"[{md_code(label or endpoint)}](#{endpoint_anchor_id(endpoint)})"
 
 
+def endpoint_path_anchor_id(path: str) -> str:
+    return f"endpoint-path-{slugify(path)}"
+
+
+def endpoint_path_anchor_link(path: str, *, label: str | None = None) -> str:
+    return f"[{md_code(label or path)}](#{endpoint_path_anchor_id(path)})"
+
+
+def group_operations_by_path(operations: list[dict[str, Any]]) -> OrderedDict[str, list[dict[str, Any]]]:
+    grouped: OrderedDict[str, list[dict[str, Any]]] = OrderedDict()
+    for operation in operations:
+        grouped.setdefault(endpoint_path(operation), []).append(operation)
+    return grouped
+
+
+def path_kind_value(operations: list[dict[str, Any]]) -> str:
+    methods = []
+    for operation in operations:
+        method = endpoint_method(operation)
+        if method and method not in methods:
+            methods.append(method)
+    if len(methods) <= 1:
+        return "-"
+    return md_code(", ".join(methods))
+
+
+def path_summary_text(operations: list[dict[str, Any]]) -> str:
+    if len(operations) == 1:
+        return operation_summary_text(operations[0])
+
+    parts: list[str] = []
+    for operation in operations:
+        summary = operation_summary_value(operation)
+        method = endpoint_method(operation)
+        if summary:
+            parts.append(f"{method}: {summary}")
+        else:
+            parts.append(method)
+    return md_text(compact_change_summary(parts, max_items=4))
+
+
+def distinct_versions(values: list[str | None]) -> list[str]:
+    seen: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            seen.append(value)
+    return seen
+
+
+def versions_value(values: list[str | None], kind: str) -> str:
+    versions = distinct_versions(values)
+    if not versions:
+        return "-"
+    if len(versions) == 1:
+        return lifecycle_value(versions[0], kind)
+    return md_code(", ".join(versions))
+
+
+def introduced_versions_value(lifecycles: list[OpenApiEntityLifecycle]) -> str:
+    return versions_value([record.introduced_version for record in lifecycles], "introduced")
+
+
+def removed_versions_value(lifecycles: list[OpenApiEntityLifecycle]) -> str:
+    return versions_value([record.removed_version for record in lifecycles], "removed")
+
+
+def path_change_summary_value(spec: OpenApiSpecLifecycle, lifecycles: list[OpenApiEntityLifecycle]) -> str:
+    summaries = [
+        summary
+        for lifecycle in lifecycles
+        if (summary := operation_change_summary_value(spec, lifecycle)) != "-"
+    ]
+    if not summaries:
+        return "-"
+    return compact_change_summary(summaries, max_items=3)
+
+
 def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
-    endpoint = endpoint_name(operation)
     parameters = operation.get("parameters", [])
     request_body = operation.get("request_body", {})
     responses = operation.get("responses", [])
@@ -337,8 +425,8 @@ def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
         }
 
     return {
-        "anchor_id": endpoint_anchor_id(endpoint),
-        "header": endpoint_header(operation),
+        "anchor_id": endpoint_anchor_id(endpoint_name(operation)),
+        "method": md_code(endpoint_method(operation)),
         "bullet_items": [
             item
             for item in [
@@ -382,11 +470,20 @@ def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
 def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: int) -> str:
     if not operations:
         return "No endpoint details available in the latest spec."
+    path_groups = list(group_operations_by_path(operations).items())
     return render_template(
         "openapi/endpoint_reference.md.j2",
-        operations=[_endpoint_reference_operation(operation) for operation in operations[:max_endpoints]],
+        path_groups=[
+            {
+                "anchor_id": endpoint_path_anchor_id(path),
+                "header": md_code(path),
+                "methods": [md_code(endpoint_method(operation)) for operation in group],
+                "operations": [_endpoint_reference_operation(operation) for operation in group],
+            }
+            for path, group in path_groups[:max_endpoints]
+        ],
         max_endpoints=max_endpoints,
-        total_operations=len(operations),
+        total_paths=len(path_groups),
     )
 
 

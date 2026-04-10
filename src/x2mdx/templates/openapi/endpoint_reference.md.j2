@@ -1,8 +1,18 @@
 {% import "shared/macros.md.j2" as shared %}
-{% for operation in operations %}
-{{ anchor(operation.anchor_id) }}
+{% for path_group in path_groups %}
+{{ anchor(path_group.anchor_id) }}
 
-{{ heading(3, operation.header) }}
+{{ heading(3, path_group.header) }}
+{% if path_group.methods | length > 1 %}
+{{ bullet_list(["Methods: " ~ (path_group.methods | join(", "))]) }}
+{% endif %}
+{% for operation in path_group.operations %}
+{{ anchor(operation.anchor_id) }}
+{% if path_group.methods | length == 1 %}
+{{ bullet_list(["Method: " ~ operation.method]) }}
+{% else %}
+{{ shared.detail_label(operation.method) }}
+{% endif %}
 {% if operation.bullet_items %}
 {{ bullet_list(operation.bullet_items) }}
 {% endif %}
@@ -29,7 +39,11 @@
 
 {% endif %}
 {% endfor %}
-{% if total_operations > max_endpoints %}
+{% if not loop.last %}
 
-{{ paragraph("_Showing first " ~ max_endpoints ~ " endpoints out of " ~ total_operations ~ "._") }}
+{% endif %}
+{% endfor %}
+{% if total_paths > max_endpoints %}
+
+{{ paragraph("_Showing first " ~ max_endpoints ~ " endpoint paths out of " ~ total_paths ~ "._") }}
 {% endif %}
