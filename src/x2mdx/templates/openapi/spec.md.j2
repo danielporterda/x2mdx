@@ -1,53 +1,54 @@
 {% import "shared/macros.md.j2" as shared %}
 {{ paragraph("Generated from supplied versioned OpenAPI artifacts.") }}
 
-{{ heading(2, "Table of Contents") }}
-{% if table_of_contents_rows %}
-{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], table_of_contents_rows) }}
+{% set toc_note = none %}
 {% if table_of_contents_total > table_of_contents_limit %}
-{{ paragraph("_Showing first " ~ table_of_contents_limit ~ " entries out of " ~ table_of_contents_total ~ "._") }}
+{% set toc_note = "_Showing first " ~ table_of_contents_limit ~ " entries out of " ~ table_of_contents_total ~ "._" %}
 {% endif %}
-{% else %}
-{{ paragraph("No endpoints found in the latest version.") }}
-{% endif %}
-
-{{ heading(2, "Version Change Summary") }}
-
-{{ table(["Version", "Added", "Changed", "Removed"], version_timeline_rows) }}
-
-{{ heading(2, "Reference") }}
-
+{% call shared.standard_reference_layout(
+    toc_rows=table_of_contents_rows,
+    version_rows=version_timeline_rows,
+    toc_empty_message="No endpoints found in the latest version.",
+    toc_note=toc_note
+) %}
 {{ endpoint_reference }}
+{% endcall %}
 
-{{ heading(2, "Changed Entities") }}
-{% if interesting_rows %}
-{{ table(["Entity", "Type", "Introduced", "Changed In", "Removed"], interesting_rows) }}
+{% set interesting_note = none %}
 {% if interesting_total > interesting_limit %}
-{{ paragraph("_Showing first " ~ interesting_limit ~ " rows out of " ~ interesting_total ~ " changed entities._") }}
+{% set interesting_note = "_Showing first " ~ interesting_limit ~ " rows out of " ~ interesting_total ~ " changed entities._" %}
 {% endif %}
-{% else %}
-{{ paragraph("No entity-level lifecycle changes in the selected version range.") }}
-{% endif %}
+{{ shared.generic_table_section(
+    "Changed Entities",
+    ["Entity", "Type", "Introduced", "Changed In", "Removed"],
+    interesting_rows,
+    empty_message="No entity-level lifecycle changes in the selected version range.",
+    note=interesting_note
+) }}
 
-{{ heading(2, "Latest Operations") }}
-{% if latest_operations_rows %}
-{{ table(["Operation", "Introduced", "Changed In", "Removed"], latest_operations_rows) }}
+{% set latest_operations_note = none %}
 {% if latest_operations_total > latest_operations_limit %}
-{{ paragraph("_Showing first " ~ latest_operations_limit ~ " operations out of " ~ latest_operations_total ~ "._") }}
+{% set latest_operations_note = "_Showing first " ~ latest_operations_limit ~ " operations out of " ~ latest_operations_total ~ "._" %}
 {% endif %}
-{% else %}
-{{ paragraph("No operations in latest version.") }}
-{% endif %}
+{{ shared.generic_table_section(
+    "Latest Operations",
+    ["Operation", "Introduced", "Changed In", "Removed"],
+    latest_operations_rows,
+    empty_message="No operations in latest version.",
+    note=latest_operations_note
+) }}
 
-{{ heading(2, "Latest Components") }}
-{% if latest_components_rows %}
-{{ table(["Component", "Introduced", "Changed In", "Removed"], latest_components_rows) }}
+{% set latest_components_note = none %}
 {% if latest_components_total > latest_components_limit %}
-{{ paragraph("_Showing first " ~ latest_components_limit ~ " components out of " ~ latest_components_total ~ "._") }}
+{% set latest_components_note = "_Showing first " ~ latest_components_limit ~ " components out of " ~ latest_components_total ~ "._" %}
 {% endif %}
-{% else %}
-{{ paragraph("No components in latest version.") }}
-{% endif %}
+{{ shared.generic_table_section(
+    "Latest Components",
+    ["Component", "Introduced", "Changed In", "Removed"],
+    latest_components_rows,
+    empty_message="No components in latest version.",
+    note=latest_components_note
+) }}
 
 {{ shared.bullet_section("Spec Metadata", spec_metadata_items) }}
 

@@ -1,15 +1,8 @@
+{% import "shared/macros.md.j2" as shared %}
 {{ heading(1, overview_title) }}
 
 {{ paragraph("Generated from versioned OpenRPC snapshots.") }}
 
-{{ heading(2, "Table of Contents") }}
-
-{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], toc_rows) }}
-
-{{ heading(2, "Version Change Summary") }}
-
-{{ table(["Version", "Added", "Changed", "Removed"], version_change_summary_rows) }}
-
-{{ heading(2, "Reference") }}
-
+{% call shared.standard_reference_layout(toc_rows=toc_rows, version_rows=version_change_summary_rows) %}
 {{ table(["Spec", "Title", "Methods"], spec_rows) }}
+{% endcall %}

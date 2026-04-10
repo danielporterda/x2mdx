@@ -4,6 +4,74 @@
 {{ heading(level, text) }}
 {%- endmacro %}
 
+{% macro generic_table_section(title, headers, rows, empty_message=None, note=None, level=2) -%}
+{{ heading(level, title) }}
+
+{% if rows %}
+{{ table(headers, rows) }}
+{% if note %}
+
+{{ paragraph(note) }}
+{% endif %}
+{% elif empty_message %}
+{{ paragraph(empty_message) }}
+{% endif %}
+{%- endmacro %}
+
+{% macro standard_toc(rows, empty_message=None, note=None, level=2, title="Table of Contents") -%}
+{{ generic_table_section(
+    title,
+    ["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"],
+    rows,
+    empty_message=empty_message,
+    note=note,
+    level=level
+) }}
+{%- endmacro %}
+
+{% macro version_change_summary(rows, empty_message=None, note=None, level=2, title="Version Change Summary") -%}
+{{ generic_table_section(
+    title,
+    ["Version", "Added", "Changed", "Removed"],
+    rows,
+    empty_message=empty_message,
+    note=note,
+    level=level
+) }}
+{%- endmacro %}
+
+{% macro standard_reference_layout(
+    toc_rows,
+    version_rows=None,
+    include_version_summary=True,
+    toc_empty_message=None,
+    toc_note=None,
+    version_empty_message=None,
+    version_note=None,
+    level=2,
+    reference_title="Reference"
+) -%}
+{{ standard_toc(
+    toc_rows,
+    empty_message=toc_empty_message,
+    note=toc_note,
+    level=level
+) }}
+{% if include_version_summary %}
+
+{{ version_change_summary(
+    version_rows or [],
+    empty_message=version_empty_message,
+    note=version_note,
+    level=level
+) }}
+{% endif %}
+
+{{ heading(level, reference_title) }}
+
+{{ caller() }}
+{%- endmacro %}
+
 {% macro bullet_section(title, items, level=2) -%}
 {{ heading(level, title) }}
 
@@ -11,9 +79,7 @@
 {%- endmacro %}
 
 {% macro table_section(title, headers, rows, level=2) -%}
-{{ heading(level, title) }}
-
-{{ table(headers, rows) }}
+{{ generic_table_section(title, headers, rows, level=level) }}
 {%- endmacro %}
 
 {% macro warning(text) -%}

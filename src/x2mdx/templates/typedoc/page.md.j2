@@ -1,14 +1,7 @@
+{% import "shared/macros.md.j2" as shared %}
 {{ paragraph("Generated from published `" ~ report.package_name ~ "` TypeDoc snapshots.") }}
 
-{{ heading(2, "Table of Contents") }}
-
-{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], toc_rows) }}
-
-{{ heading(2, "Version Change Summary") }}
-
-{{ table(["Version", "Added", "Changed", "Removed"], version_change_summary_rows) }}
-
-{{ heading(2, "Reference") }}
+{% call shared.standard_reference_layout(toc_rows=toc_rows, version_rows=version_change_summary_rows) %}
 {% for group in grouped_exports %}
 
 {{ heading(3, group.title) }}
@@ -65,3 +58,4 @@
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endcall %}

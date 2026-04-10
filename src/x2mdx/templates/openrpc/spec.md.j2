@@ -1,3 +1,4 @@
+{% import "shared/macros.md.j2" as shared %}
 {{ heading(1, spec.display_name) }}
 
 [Back to overview]({{ overview_link }})
@@ -6,15 +7,7 @@
 {{ paragraph(spec.info_description) }}
 {% endif %}
 
-{{ heading(2, "Table of Contents") }}
-
-{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], method_toc_rows) }}
-
-{{ heading(2, "Version Change Summary") }}
-
-{{ table(["Version", "Added", "Changed", "Removed"], version_timeline_rows) }}
-
-{{ heading(2, "Reference") }}
+{% call shared.standard_reference_layout(toc_rows=method_toc_rows, version_rows=version_timeline_rows) %}
 {% for method in methods %}
 
 {{ anchor(method.anchor) }}
@@ -60,3 +53,4 @@ _No parameters._
 {{ code_block("json", pretty_json(method.result_sample)) }}
 {% endif %}
 {% endfor %}
+{% endcall %}

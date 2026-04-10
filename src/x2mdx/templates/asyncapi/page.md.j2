@@ -1,18 +1,11 @@
+{% import "shared/macros.md.j2" as shared %}
 {{ paragraph("Generated from AsyncAPI snapshots for `" ~ (report.info_title or "unknown spec") ~ "`.") }}
 
 {% if report.info_description %}
 {{ paragraph(report.info_description) }}
 {% endif %}
 
-{{ heading(2, "Table of Contents") }}
-
-{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], channel_summary_rows) }}
-
-{{ heading(2, "Version Change Summary") }}
-
-{{ table(["Version", "Added", "Changed", "Removed"], version_timeline_rows) }}
-
-{{ heading(2, "Reference") }}
+{% call shared.standard_reference_layout(toc_rows=channel_summary_rows, version_rows=version_timeline_rows) %}
 {% for channel in channels %}
 
 {{ anchor(channel.anchor) }}
@@ -47,3 +40,4 @@
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% endcall %}

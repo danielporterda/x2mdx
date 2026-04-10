@@ -1,9 +1,5 @@
 {% import "shared/macros.md.j2" as shared %}
-{{ heading(2, "Table of Contents") }}
-
-{{ table(["Name", "Kind", "Summary", "Introduced", "Changed", "Deprecated", "Removed"], type_reference_rows) }}
-
-{{ heading(2, "Reference") }}
+{% call shared.standard_reference_layout(toc_rows=type_reference_rows, include_version_summary=False) %}
 {% for entry in package_entries %}
 
 {{ anchor(entry.anchor) }}
@@ -31,3 +27,4 @@
 {{ paragraph("No members found for this type in the configured artifacts.") }}
 {% endif %}
 {% endfor %}
+{% endcall %}
