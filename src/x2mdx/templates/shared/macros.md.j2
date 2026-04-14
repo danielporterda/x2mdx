@@ -18,6 +18,31 @@
 {% endif %}
 {%- endmacro %}
 
+{% macro status_toc(
+    rows,
+    empty_message=None,
+    note=None,
+    level=2,
+    title="Table of Contents",
+    legend=None,
+    first_column_title="NAME"
+) -%}
+{{ heading(level, title) }}
+
+{% if legend %}
+{{ paragraph(legend) }}
+{% endif %}
+{% if rows %}
+{{ table([first_column_title, "STATUS", "SUMMARY"], rows) }}
+{% if note %}
+
+{{ paragraph(note) }}
+{% endif %}
+{% elif empty_message %}
+{{ paragraph(empty_message) }}
+{% endif %}
+{%- endmacro %}
+
 {% macro standard_toc(rows, empty_message=None, note=None, level=2, title="Table of Contents") -%}
 {{ generic_table_section(
     title,
