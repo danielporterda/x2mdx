@@ -5,150 +5,152 @@ description: "Generated package reference page from local Javadoc/Scaladoc snaps
 
 ## Table of Contents
 
-| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ActiveContract](#type-com-daml-ledger-javaapi-data-activecontract) | `Type` |  | `3.4.10` | - | - | - |
-| [ActiveContracts](#type-com-daml-ledger-javaapi-data-activecontracts) | `Type` |  | `3.4.10` | - | - | - |
-| [ArchivedEvent](#type-com-daml-ledger-javaapi-data-archivedevent) | `Type` |  | `3.4.10` | - | - | - |
-| [AssignCommand](#type-com-daml-ledger-javaapi-data-assigncommand) | `Type` |  | `3.4.10` | - | - | - |
-| [AssignedEvent](#type-com-daml-ledger-javaapi-data-assignedevent) | `Type` |  | `3.4.10` | - | - | - |
-| [Bool](#type-com-daml-ledger-javaapi-data-bool) | `Type` |  | `3.4.10` | - | - | - |
-| [Command](#type-com-daml-ledger-javaapi-data-command) | `Type` |  | `3.4.10` | - | - | - |
-| [CommandsSubmission](#type-com-daml-ledger-javaapi-data-commandssubmission) | `Type` | This class can be used to build a valid submission. It provides... | `3.4.10` | - | - | - |
-| [CommandsSubmission.RedundantDeduplicationSpecification](#type-com-daml-ledger-javaapi-data-commandssubmission-redundantdeduplicationspecification) | `Type` |  | `3.4.10` | - | - | - |
-| [Completion](#type-com-daml-ledger-javaapi-data-completion) | `Type` |  | `3.4.10` | - | - | - |
-| [CompletionStreamRequest](#type-com-daml-ledger-javaapi-data-completionstreamrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [CompletionStreamResponse](#type-com-daml-ledger-javaapi-data-completionstreamresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [ConnectedSynchronizer](#type-com-daml-ledger-javaapi-data-connectedsynchronizer) | `Type` |  | `3.4.10` | - | - | - |
-| [Contract](#type-com-daml-ledger-javaapi-data-contract) | `Type` |  | `3.4.10` | - | - | - |
-| [ContractEntry](#type-com-daml-ledger-javaapi-data-contractentry) | `Type` | This interface represents events in ActiveContracts. | `3.4.10` | - | - | - |
-| [ContractFilter](#type-com-daml-ledger-javaapi-data-contractfilter) | `Type` | This class contains utilities to decode a CreatedEvent and create an... | `3.4.10` | - | - | - |
-| [ContractId](#type-com-daml-ledger-javaapi-data-contractid) | `Type` |  | `3.4.10` | - | - | - |
-| [CreateAndExerciseCommand](#type-com-daml-ledger-javaapi-data-createandexercisecommand) | `Type` |  | `3.4.10` | - | - | - |
-| [CreateCommand](#type-com-daml-ledger-javaapi-data-createcommand) | `Type` |  | `3.4.10` | - | - | - |
-| [CreateUserRequest](#type-com-daml-ledger-javaapi-data-createuserrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [CreateUserResponse](#type-com-daml-ledger-javaapi-data-createuserresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [CreatedEvent](#type-com-daml-ledger-javaapi-data-createdevent) | `Type` |  | `3.4.10` | - | - | - |
-| [CumulativeFilter](#type-com-daml-ledger-javaapi-data-cumulativefilter) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlCollectors](#type-com-daml-ledger-javaapi-data-damlcollectors) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlEnum](#type-com-daml-ledger-javaapi-data-damlenum) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlGenMap](#type-com-daml-ledger-javaapi-data-damlgenmap) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlList](#type-com-daml-ledger-javaapi-data-damllist) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlOptional](#type-com-daml-ledger-javaapi-data-damloptional) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlRecord](#type-com-daml-ledger-javaapi-data-damlrecord) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlRecord.Field](#type-com-daml-ledger-javaapi-data-damlrecord-field) | `Type` |  | `3.4.10` | - | - | - |
-| [DamlTextMap](#type-com-daml-ledger-javaapi-data-damltextmap) | `Type` |  | `3.4.10` | - | - | - |
-| [Date](#type-com-daml-ledger-javaapi-data-date) | `Type` |  | `3.4.10` | - | - | - |
-| [DeleteUserRequest](#type-com-daml-ledger-javaapi-data-deleteuserrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [DeleteUserResponse](#type-com-daml-ledger-javaapi-data-deleteuserresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [DisclosedContract](#type-com-daml-ledger-javaapi-data-disclosedcontract) | `Type` |  | `3.4.10` | - | - | - |
-| [Event](#type-com-daml-ledger-javaapi-data-event) | `Type` | This interface represents events in Transactions. | `3.4.10` | - | - | - |
-| [EventFormat](#type-com-daml-ledger-javaapi-data-eventformat) | `Type` |  | `3.4.10` | - | - | - |
-| [EventUtils](#type-com-daml-ledger-javaapi-data-eventutils) | `Type` |  | `3.4.10` | - | - | - |
-| [ExerciseByKeyCommand](#type-com-daml-ledger-javaapi-data-exercisebykeycommand) | `Type` |  | `3.4.10` | - | - | - |
-| [ExerciseCommand](#type-com-daml-ledger-javaapi-data-exercisecommand) | `Type` |  | `3.4.10` | - | - | - |
-| [ExercisedEvent](#type-com-daml-ledger-javaapi-data-exercisedevent) | `Type` |  | `3.4.10` | - | - | - |
-| [Filter](#type-com-daml-ledger-javaapi-data-filter) | `Type` |  | `3.4.10` | - | - | - |
-| [Filter.Interface](#type-com-daml-ledger-javaapi-data-filter-interface) | `Type` | Settings for including an interface in CumulativeFilter. There are... | `3.4.10` | - | - | - |
-| [Filter.Template](#type-com-daml-ledger-javaapi-data-filter-template) | `Type` |  | `3.4.10` | - | - | - |
-| [Filter.Wildcard](#type-com-daml-ledger-javaapi-data-filter-wildcard) | `Type` |  | `3.4.10` | - | - | - |
-| [GetActiveContractsRequest](#type-com-daml-ledger-javaapi-data-getactivecontractsrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetActiveContractsResponse](#type-com-daml-ledger-javaapi-data-getactivecontractsresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetConnectedSynchronizersRequest](#type-com-daml-ledger-javaapi-data-getconnectedsynchronizersrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetConnectedSynchronizersResponse](#type-com-daml-ledger-javaapi-data-getconnectedsynchronizersresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetEventsByContractIdRequest](#type-com-daml-ledger-javaapi-data-geteventsbycontractidrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetEventsByContractIdResponse](#type-com-daml-ledger-javaapi-data-geteventsbycontractidresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetEventsByContractIdResponse.Archived](#type-com-daml-ledger-javaapi-data-geteventsbycontractidresponse-archived) | `Type` |  | `3.4.10` | - | - | - |
-| [GetEventsByContractIdResponse.Created](#type-com-daml-ledger-javaapi-data-geteventsbycontractidresponse-created) | `Type` |  | `3.4.10` | - | - | - |
-| [GetLatestPrunedOffsetsResponse](#type-com-daml-ledger-javaapi-data-getlatestprunedoffsetsresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetLedgerEndResponse](#type-com-daml-ledger-javaapi-data-getledgerendresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPackageRequest](#type-com-daml-ledger-javaapi-data-getpackagerequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPackageResponse](#type-com-daml-ledger-javaapi-data-getpackageresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPackageResponse.HashFunction](#type-com-daml-ledger-javaapi-data-getpackageresponse-hashfunction) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPackageStatusRequest](#type-com-daml-ledger-javaapi-data-getpackagestatusrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPackageStatusResponse](#type-com-daml-ledger-javaapi-data-getpackagestatusresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPackageStatusResponse.PackageStatus](#type-com-daml-ledger-javaapi-data-getpackagestatusresponse-packagestatus) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPreferredPackageVersionRequest](#type-com-daml-ledger-javaapi-data-getpreferredpackageversionrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPreferredPackageVersionResponse](#type-com-daml-ledger-javaapi-data-getpreferredpackageversionresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPreferredPackagesRequest](#type-com-daml-ledger-javaapi-data-getpreferredpackagesrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetPreferredPackagesResponse](#type-com-daml-ledger-javaapi-data-getpreferredpackagesresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUpdateByIdRequest](#type-com-daml-ledger-javaapi-data-getupdatebyidrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUpdateByOffsetRequest](#type-com-daml-ledger-javaapi-data-getupdatebyoffsetrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUpdateResponse](#type-com-daml-ledger-javaapi-data-getupdateresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUpdatesRequest](#type-com-daml-ledger-javaapi-data-getupdatesrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUpdatesResponse](#type-com-daml-ledger-javaapi-data-getupdatesresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUserRequest](#type-com-daml-ledger-javaapi-data-getuserrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GetUserResponse](#type-com-daml-ledger-javaapi-data-getuserresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [GrantUserRightsRequest](#type-com-daml-ledger-javaapi-data-grantuserrightsrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [GrantUserRightsResponse](#type-com-daml-ledger-javaapi-data-grantuserrightsresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [Identifier](#type-com-daml-ledger-javaapi-data-identifier) | `Type` |  | `3.4.10` | - | - | - |
-| [IncompleteAssigned](#type-com-daml-ledger-javaapi-data-incompleteassigned) | `Type` |  | `3.4.10` | - | - | - |
-| [IncompleteUnassigned](#type-com-daml-ledger-javaapi-data-incompleteunassigned) | `Type` |  | `3.4.10` | - | - | - |
-| [Int64](#type-com-daml-ledger-javaapi-data-int64) | `Type` |  | `3.4.10` | - | - | - |
-| [ListUserRightsRequest](#type-com-daml-ledger-javaapi-data-listuserrightsrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [ListUserRightsResponse](#type-com-daml-ledger-javaapi-data-listuserrightsresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [ListUsersRequest](#type-com-daml-ledger-javaapi-data-listusersrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [ListUsersResponse](#type-com-daml-ledger-javaapi-data-listusersresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [NoFilter](#type-com-daml-ledger-javaapi-data-nofilter) | `Type` |  | `3.4.10` | - | - | - |
-| [Numeric](#type-com-daml-ledger-javaapi-data-numeric) | `Type` |  | `3.4.10` | - | - | - |
-| [OffsetCheckpoint](#type-com-daml-ledger-javaapi-data-offsetcheckpoint) | `Type` |  | `3.4.10` | - | - | - |
-| [PackagePreference](#type-com-daml-ledger-javaapi-data-packagepreference) | `Type` |  | `3.4.10` | - | - | - |
-| [PackageReference](#type-com-daml-ledger-javaapi-data-packagereference) | `Type` |  | `3.4.10` | - | - | - |
-| [PackageVersion](#type-com-daml-ledger-javaapi-data-packageversion) | `Type` |  | `3.4.10` | - | - | - |
-| [PackageVettingRequirement](#type-com-daml-ledger-javaapi-data-packagevettingrequirement) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantAuthorizationAdded](#type-com-daml-ledger-javaapi-data-participantauthorizationadded) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantAuthorizationChanged](#type-com-daml-ledger-javaapi-data-participantauthorizationchanged) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantAuthorizationRevoked](#type-com-daml-ledger-javaapi-data-participantauthorizationrevoked) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantAuthorizationTopologyFormat](#type-com-daml-ledger-javaapi-data-participantauthorizationtopologyformat) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantPermission](#type-com-daml-ledger-javaapi-data-participantpermission) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantPermission.Confirmation](#type-com-daml-ledger-javaapi-data-participantpermission-confirmation) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantPermission.Observation](#type-com-daml-ledger-javaapi-data-participantpermission-observation) | `Type` |  | `3.4.10` | - | - | - |
-| [ParticipantPermission.Submission](#type-com-daml-ledger-javaapi-data-participantpermission-submission) | `Type` |  | `3.4.10` | - | - | - |
-| [Party](#type-com-daml-ledger-javaapi-data-party) | `Type` |  | `3.4.10` | - | - | - |
-| [PrefetchContractKey](#type-com-daml-ledger-javaapi-data-prefetchcontractkey) | `Type` |  | `3.4.10` | - | - | - |
-| [Reassignment](#type-com-daml-ledger-javaapi-data-reassignment) | `Type` |  | `3.4.10` | - | - | - |
-| [ReassignmentCommand](#type-com-daml-ledger-javaapi-data-reassignmentcommand) | `Type` |  | `3.4.10` | - | - | - |
-| [ReassignmentCommands](#type-com-daml-ledger-javaapi-data-reassignmentcommands) | `Type` | This class can be used to build a valid submission. It provides... | `3.4.10` | - | - | - |
-| [ReassignmentEvent](#type-com-daml-ledger-javaapi-data-reassignmentevent) | `Type` |  | `3.4.10` | - | - | - |
-| [RevokeUserRightsRequest](#type-com-daml-ledger-javaapi-data-revokeuserrightsrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [RevokeUserRightsResponse](#type-com-daml-ledger-javaapi-data-revokeuserrightsresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitAndWaitForReassignmentRequest](#type-com-daml-ledger-javaapi-data-submitandwaitforreassignmentrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitAndWaitForReassignmentResponse](#type-com-daml-ledger-javaapi-data-submitandwaitforreassignmentresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitAndWaitForTransactionRequest](#type-com-daml-ledger-javaapi-data-submitandwaitfortransactionrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitAndWaitForTransactionResponse](#type-com-daml-ledger-javaapi-data-submitandwaitfortransactionresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitAndWaitRequest](#type-com-daml-ledger-javaapi-data-submitandwaitrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitAndWaitResponse](#type-com-daml-ledger-javaapi-data-submitandwaitresponse) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitReassignmentRequest](#type-com-daml-ledger-javaapi-data-submitreassignmentrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [SubmitRequest](#type-com-daml-ledger-javaapi-data-submitrequest) | `Type` |  | `3.4.10` | - | - | - |
-| [SynchronizerTime](#type-com-daml-ledger-javaapi-data-synchronizertime) | `Type` |  | `3.4.10` | - | - | - |
-| [Template](#type-com-daml-ledger-javaapi-data-template) | `Type` |  | `3.4.10` | - | - | - |
-| [Text](#type-com-daml-ledger-javaapi-data-text) | `Type` |  | `3.4.10` | - | - | - |
-| [Timestamp](#type-com-daml-ledger-javaapi-data-timestamp) | `Type` | A Timestamp value is represented as microseconds since the UNIX epoch. | `3.4.10` | - | - | - |
-| [TopologyEvent](#type-com-daml-ledger-javaapi-data-topologyevent) | `Type` | This interface represents events in TopologyTransactions. | `3.4.10` | - | - | - |
-| [TopologyFormat](#type-com-daml-ledger-javaapi-data-topologyformat) | `Type` |  | `3.4.10` | - | - | - |
-| [TopologyTransaction](#type-com-daml-ledger-javaapi-data-topologytransaction) | `Type` |  | `3.4.10` | - | - | - |
-| [Transaction](#type-com-daml-ledger-javaapi-data-transaction) | `Type` |  | `3.4.10` | - | - | - |
-| [Transaction.Node](#type-com-daml-ledger-javaapi-data-transaction-node) | `Type` |  | `3.4.10` | - | - | - |
-| [Transaction.WrappedTransactionTree](#type-com-daml-ledger-javaapi-data-transaction-wrappedtransactiontree) | `Type` | A generic class that encapsulates a transaction tree along with a... | `3.4.10` | - | - | - |
-| [TransactionFormat](#type-com-daml-ledger-javaapi-data-transactionformat) | `Type` |  | `3.4.10` | - | - | - |
-| [TransactionShape](#type-com-daml-ledger-javaapi-data-transactionshape) | `Type` |  | `3.4.10` | - | - | - |
-| [UnassignCommand](#type-com-daml-ledger-javaapi-data-unassigncommand) | `Type` |  | `3.4.10` | - | - | - |
-| [UnassignedEvent](#type-com-daml-ledger-javaapi-data-unassignedevent) | `Type` |  | `3.4.10` | - | - | - |
-| [Unit](#type-com-daml-ledger-javaapi-data-unit) | `Type` |  | `3.4.10` | - | - | - |
-| [UnsupportedEventTypeException](#type-com-daml-ledger-javaapi-data-unsupportedeventtypeexception) | `Type` |  | `3.4.10` | - | - | - |
-| [UpdateFormat](#type-com-daml-ledger-javaapi-data-updateformat) | `Type` |  | `3.4.10` | - | - | - |
-| [UpdateSubmission](#type-com-daml-ledger-javaapi-data-updatesubmission) | `Type` | This class can be used to build a valid submission for an Update. It... | `3.4.10` | - | - | - |
-| [User](#type-com-daml-ledger-javaapi-data-user) | `Type` |  | `3.4.10` | - | - | - |
-| [User.Right](#type-com-daml-ledger-javaapi-data-user-right) | `Type` |  | `3.4.10` | - | - | - |
-| [User.Right.CanActAs](#type-com-daml-ledger-javaapi-data-user-right-canactas) | `Type` |  | `3.4.10` | - | - | - |
-| [User.Right.CanReadAs](#type-com-daml-ledger-javaapi-data-user-right-canreadas) | `Type` |  | `3.4.10` | - | - | - |
-| [User.Right.CanReadAsAnyParty](#type-com-daml-ledger-javaapi-data-user-right-canreadasanyparty) | `Type` |  | `3.4.10` | - | - | - |
-| [User.Right.IdentityProviderAdmin](#type-com-daml-ledger-javaapi-data-user-right-identityprovideradmin) | `Type` |  | `3.4.10` | - | - | - |
-| [User.Right.ParticipantAdmin](#type-com-daml-ledger-javaapi-data-user-right-participantadmin) | `Type` |  | `3.4.10` | - | - | - |
-| [Utils](#type-com-daml-ledger-javaapi-data-utils) | `Type` |  | `3.4.10` | - | - | - |
-| [Value](#type-com-daml-ledger-javaapi-data-value) | `Type` |  | `3.4.10` | - | - | - |
-| [Variant](#type-com-daml-ledger-javaapi-data-variant) | `Type` |  | `3.4.10` | - | - | - |
-| [WorkflowEvent](#type-com-daml-ledger-javaapi-data-workflowevent) | `Type` | A Ledger event regarding a workflow identified by the getWorkflowId(). | `3.4.10` | - | - | - |
+🟢 Active Since  🟠 Deprecated  🔴 Removed
+
+| NAME | STATUS | SUMMARY |
+| --- | --- | --- |
+| [`ActiveContract`](#type-com-daml-ledger-javaapi-data-activecontract) | 🟢 `v3.4` | - |
+| [`ActiveContracts`](#type-com-daml-ledger-javaapi-data-activecontracts) | 🟢 `v3.4` | - |
+| [`ArchivedEvent`](#type-com-daml-ledger-javaapi-data-archivedevent) | 🟢 `v3.4` | - |
+| [`AssignCommand`](#type-com-daml-ledger-javaapi-data-assigncommand) | 🟢 `v3.4` | - |
+| [`AssignedEvent`](#type-com-daml-ledger-javaapi-data-assignedevent) | 🟢 `v3.4` | - |
+| [`Bool`](#type-com-daml-ledger-javaapi-data-bool) | 🟢 `v3.4` | - |
+| [`Command`](#type-com-daml-ledger-javaapi-data-command) | 🟢 `v3.4` | - |
+| [`CommandsSubmission`](#type-com-daml-ledger-javaapi-data-commandssubmission) | 🟢 `v3.4` | This class can be used to build a valid submission. It provides... |
+| [`CommandsSubmission.RedundantDeduplicationSpecification`](#type-com-daml-ledger-javaapi-data-commandssubmission-redundantdeduplicationspecification) | 🟢 `v3.4` | - |
+| [`Completion`](#type-com-daml-ledger-javaapi-data-completion) | 🟢 `v3.4` | - |
+| [`CompletionStreamRequest`](#type-com-daml-ledger-javaapi-data-completionstreamrequest) | 🟢 `v3.4` | - |
+| [`CompletionStreamResponse`](#type-com-daml-ledger-javaapi-data-completionstreamresponse) | 🟢 `v3.4` | - |
+| [`ConnectedSynchronizer`](#type-com-daml-ledger-javaapi-data-connectedsynchronizer) | 🟢 `v3.4` | - |
+| [`Contract`](#type-com-daml-ledger-javaapi-data-contract) | 🟢 `v3.4` | - |
+| [`ContractEntry`](#type-com-daml-ledger-javaapi-data-contractentry) | 🟢 `v3.4` | This interface represents events in ActiveContracts. |
+| [`ContractFilter`](#type-com-daml-ledger-javaapi-data-contractfilter) | 🟢 `v3.4` | This class contains utilities to decode a CreatedEvent and create an... |
+| [`ContractId`](#type-com-daml-ledger-javaapi-data-contractid) | 🟢 `v3.4` | - |
+| [`CreateAndExerciseCommand`](#type-com-daml-ledger-javaapi-data-createandexercisecommand) | 🟢 `v3.4` | - |
+| [`CreateCommand`](#type-com-daml-ledger-javaapi-data-createcommand) | 🟢 `v3.4` | - |
+| [`CreateUserRequest`](#type-com-daml-ledger-javaapi-data-createuserrequest) | 🟢 `v3.4` | - |
+| [`CreateUserResponse`](#type-com-daml-ledger-javaapi-data-createuserresponse) | 🟢 `v3.4` | - |
+| [`CreatedEvent`](#type-com-daml-ledger-javaapi-data-createdevent) | 🟢 `v3.4` | - |
+| [`CumulativeFilter`](#type-com-daml-ledger-javaapi-data-cumulativefilter) | 🟢 `v3.4` | - |
+| [`DamlCollectors`](#type-com-daml-ledger-javaapi-data-damlcollectors) | 🟢 `v3.4` | - |
+| [`DamlEnum`](#type-com-daml-ledger-javaapi-data-damlenum) | 🟢 `v3.4` | - |
+| [`DamlGenMap`](#type-com-daml-ledger-javaapi-data-damlgenmap) | 🟢 `v3.4` | - |
+| [`DamlList`](#type-com-daml-ledger-javaapi-data-damllist) | 🟢 `v3.4` | - |
+| [`DamlOptional`](#type-com-daml-ledger-javaapi-data-damloptional) | 🟢 `v3.4` | - |
+| [`DamlRecord`](#type-com-daml-ledger-javaapi-data-damlrecord) | 🟢 `v3.4` | - |
+| [`DamlRecord.Field`](#type-com-daml-ledger-javaapi-data-damlrecord-field) | 🟢 `v3.4` | - |
+| [`DamlTextMap`](#type-com-daml-ledger-javaapi-data-damltextmap) | 🟢 `v3.4` | - |
+| [`Date`](#type-com-daml-ledger-javaapi-data-date) | 🟢 `v3.4` | - |
+| [`DeleteUserRequest`](#type-com-daml-ledger-javaapi-data-deleteuserrequest) | 🟢 `v3.4` | - |
+| [`DeleteUserResponse`](#type-com-daml-ledger-javaapi-data-deleteuserresponse) | 🟢 `v3.4` | - |
+| [`DisclosedContract`](#type-com-daml-ledger-javaapi-data-disclosedcontract) | 🟠 `v3.4` Deprecated | - |
+| [`Event`](#type-com-daml-ledger-javaapi-data-event) | 🟢 `v3.4` | This interface represents events in Transactions. |
+| [`EventFormat`](#type-com-daml-ledger-javaapi-data-eventformat) | 🟢 `v3.4` | - |
+| [`EventUtils`](#type-com-daml-ledger-javaapi-data-eventutils) | 🟢 `v3.4` | - |
+| [`ExerciseByKeyCommand`](#type-com-daml-ledger-javaapi-data-exercisebykeycommand) | 🟢 `v3.4` | - |
+| [`ExerciseCommand`](#type-com-daml-ledger-javaapi-data-exercisecommand) | 🟢 `v3.4` | - |
+| [`ExercisedEvent`](#type-com-daml-ledger-javaapi-data-exercisedevent) | 🟢 `v3.4` | - |
+| [`Filter`](#type-com-daml-ledger-javaapi-data-filter) | 🟢 `v3.4` | - |
+| [`Filter.Interface`](#type-com-daml-ledger-javaapi-data-filter-interface) | 🟢 `v3.4` | Settings for including an interface in CumulativeFilter. There are... |
+| [`Filter.Template`](#type-com-daml-ledger-javaapi-data-filter-template) | 🟢 `v3.4` | - |
+| [`Filter.Wildcard`](#type-com-daml-ledger-javaapi-data-filter-wildcard) | 🟢 `v3.4` | - |
+| [`GetActiveContractsRequest`](#type-com-daml-ledger-javaapi-data-getactivecontractsrequest) | 🟢 `v3.4` | - |
+| [`GetActiveContractsResponse`](#type-com-daml-ledger-javaapi-data-getactivecontractsresponse) | 🟢 `v3.4` | - |
+| [`GetConnectedSynchronizersRequest`](#type-com-daml-ledger-javaapi-data-getconnectedsynchronizersrequest) | 🟢 `v3.4` | - |
+| [`GetConnectedSynchronizersResponse`](#type-com-daml-ledger-javaapi-data-getconnectedsynchronizersresponse) | 🟢 `v3.4` | - |
+| [`GetEventsByContractIdRequest`](#type-com-daml-ledger-javaapi-data-geteventsbycontractidrequest) | 🟢 `v3.4` | - |
+| [`GetEventsByContractIdResponse`](#type-com-daml-ledger-javaapi-data-geteventsbycontractidresponse) | 🟢 `v3.4` | - |
+| [`GetEventsByContractIdResponse.Archived`](#type-com-daml-ledger-javaapi-data-geteventsbycontractidresponse-archived) | 🟢 `v3.4` | - |
+| [`GetEventsByContractIdResponse.Created`](#type-com-daml-ledger-javaapi-data-geteventsbycontractidresponse-created) | 🟢 `v3.4` | - |
+| [`GetLatestPrunedOffsetsResponse`](#type-com-daml-ledger-javaapi-data-getlatestprunedoffsetsresponse) | 🟢 `v3.4` | - |
+| [`GetLedgerEndResponse`](#type-com-daml-ledger-javaapi-data-getledgerendresponse) | 🟢 `v3.4` | - |
+| [`GetPackageRequest`](#type-com-daml-ledger-javaapi-data-getpackagerequest) | 🟢 `v3.4` | - |
+| [`GetPackageResponse`](#type-com-daml-ledger-javaapi-data-getpackageresponse) | 🟢 `v3.4` | - |
+| [`GetPackageResponse.HashFunction`](#type-com-daml-ledger-javaapi-data-getpackageresponse-hashfunction) | 🟢 `v3.4` | - |
+| [`GetPackageStatusRequest`](#type-com-daml-ledger-javaapi-data-getpackagestatusrequest) | 🟢 `v3.4` | - |
+| [`GetPackageStatusResponse`](#type-com-daml-ledger-javaapi-data-getpackagestatusresponse) | 🟢 `v3.4` | - |
+| [`GetPackageStatusResponse.PackageStatus`](#type-com-daml-ledger-javaapi-data-getpackagestatusresponse-packagestatus) | 🟢 `v3.4` | - |
+| [`GetPreferredPackageVersionRequest`](#type-com-daml-ledger-javaapi-data-getpreferredpackageversionrequest) | 🟢 `v3.4` | - |
+| [`GetPreferredPackageVersionResponse`](#type-com-daml-ledger-javaapi-data-getpreferredpackageversionresponse) | 🟢 `v3.4` | - |
+| [`GetPreferredPackagesRequest`](#type-com-daml-ledger-javaapi-data-getpreferredpackagesrequest) | 🟢 `v3.4` | - |
+| [`GetPreferredPackagesResponse`](#type-com-daml-ledger-javaapi-data-getpreferredpackagesresponse) | 🟢 `v3.4` | - |
+| [`GetUpdateByIdRequest`](#type-com-daml-ledger-javaapi-data-getupdatebyidrequest) | 🟢 `v3.4` | - |
+| [`GetUpdateByOffsetRequest`](#type-com-daml-ledger-javaapi-data-getupdatebyoffsetrequest) | 🟢 `v3.4` | - |
+| [`GetUpdateResponse`](#type-com-daml-ledger-javaapi-data-getupdateresponse) | 🟢 `v3.4` | - |
+| [`GetUpdatesRequest`](#type-com-daml-ledger-javaapi-data-getupdatesrequest) | 🟢 `v3.4` | - |
+| [`GetUpdatesResponse`](#type-com-daml-ledger-javaapi-data-getupdatesresponse) | 🟢 `v3.4` | - |
+| [`GetUserRequest`](#type-com-daml-ledger-javaapi-data-getuserrequest) | 🟢 `v3.4` | - |
+| [`GetUserResponse`](#type-com-daml-ledger-javaapi-data-getuserresponse) | 🟢 `v3.4` | - |
+| [`GrantUserRightsRequest`](#type-com-daml-ledger-javaapi-data-grantuserrightsrequest) | 🟢 `v3.4` | - |
+| [`GrantUserRightsResponse`](#type-com-daml-ledger-javaapi-data-grantuserrightsresponse) | 🟢 `v3.4` | - |
+| [`Identifier`](#type-com-daml-ledger-javaapi-data-identifier) | 🟢 `v3.4` | - |
+| [`IncompleteAssigned`](#type-com-daml-ledger-javaapi-data-incompleteassigned) | 🟢 `v3.4` | - |
+| [`IncompleteUnassigned`](#type-com-daml-ledger-javaapi-data-incompleteunassigned) | 🟢 `v3.4` | - |
+| [`Int64`](#type-com-daml-ledger-javaapi-data-int64) | 🟢 `v3.4` | - |
+| [`ListUserRightsRequest`](#type-com-daml-ledger-javaapi-data-listuserrightsrequest) | 🟢 `v3.4` | - |
+| [`ListUserRightsResponse`](#type-com-daml-ledger-javaapi-data-listuserrightsresponse) | 🟢 `v3.4` | - |
+| [`ListUsersRequest`](#type-com-daml-ledger-javaapi-data-listusersrequest) | 🟢 `v3.4` | - |
+| [`ListUsersResponse`](#type-com-daml-ledger-javaapi-data-listusersresponse) | 🟢 `v3.4` | - |
+| [`NoFilter`](#type-com-daml-ledger-javaapi-data-nofilter) | 🟢 `v3.4` | - |
+| [`Numeric`](#type-com-daml-ledger-javaapi-data-numeric) | 🟢 `v3.4` | - |
+| [`OffsetCheckpoint`](#type-com-daml-ledger-javaapi-data-offsetcheckpoint) | 🟢 `v3.4` | - |
+| [`PackagePreference`](#type-com-daml-ledger-javaapi-data-packagepreference) | 🟢 `v3.4` | - |
+| [`PackageReference`](#type-com-daml-ledger-javaapi-data-packagereference) | 🟢 `v3.4` | - |
+| [`PackageVersion`](#type-com-daml-ledger-javaapi-data-packageversion) | 🟢 `v3.4` | - |
+| [`PackageVettingRequirement`](#type-com-daml-ledger-javaapi-data-packagevettingrequirement) | 🟢 `v3.4` | - |
+| [`ParticipantAuthorizationAdded`](#type-com-daml-ledger-javaapi-data-participantauthorizationadded) | 🟢 `v3.4` | - |
+| [`ParticipantAuthorizationChanged`](#type-com-daml-ledger-javaapi-data-participantauthorizationchanged) | 🟢 `v3.4` | - |
+| [`ParticipantAuthorizationRevoked`](#type-com-daml-ledger-javaapi-data-participantauthorizationrevoked) | 🟢 `v3.4` | - |
+| [`ParticipantAuthorizationTopologyFormat`](#type-com-daml-ledger-javaapi-data-participantauthorizationtopologyformat) | 🟢 `v3.4` | - |
+| [`ParticipantPermission`](#type-com-daml-ledger-javaapi-data-participantpermission) | 🟢 `v3.4` | - |
+| [`ParticipantPermission.Confirmation`](#type-com-daml-ledger-javaapi-data-participantpermission-confirmation) | 🟢 `v3.4` | - |
+| [`ParticipantPermission.Observation`](#type-com-daml-ledger-javaapi-data-participantpermission-observation) | 🟢 `v3.4` | - |
+| [`ParticipantPermission.Submission`](#type-com-daml-ledger-javaapi-data-participantpermission-submission) | 🟢 `v3.4` | - |
+| [`Party`](#type-com-daml-ledger-javaapi-data-party) | 🟢 `v3.4` | - |
+| [`PrefetchContractKey`](#type-com-daml-ledger-javaapi-data-prefetchcontractkey) | 🟢 `v3.4` | - |
+| [`Reassignment`](#type-com-daml-ledger-javaapi-data-reassignment) | 🟢 `v3.4` | - |
+| [`ReassignmentCommand`](#type-com-daml-ledger-javaapi-data-reassignmentcommand) | 🟢 `v3.4` | - |
+| [`ReassignmentCommands`](#type-com-daml-ledger-javaapi-data-reassignmentcommands) | 🟢 `v3.4` | This class can be used to build a valid submission. It provides... |
+| [`ReassignmentEvent`](#type-com-daml-ledger-javaapi-data-reassignmentevent) | 🟢 `v3.4` | - |
+| [`RevokeUserRightsRequest`](#type-com-daml-ledger-javaapi-data-revokeuserrightsrequest) | 🟢 `v3.4` | - |
+| [`RevokeUserRightsResponse`](#type-com-daml-ledger-javaapi-data-revokeuserrightsresponse) | 🟢 `v3.4` | - |
+| [`SubmitAndWaitForReassignmentRequest`](#type-com-daml-ledger-javaapi-data-submitandwaitforreassignmentrequest) | 🟢 `v3.4` | - |
+| [`SubmitAndWaitForReassignmentResponse`](#type-com-daml-ledger-javaapi-data-submitandwaitforreassignmentresponse) | 🟢 `v3.4` | - |
+| [`SubmitAndWaitForTransactionRequest`](#type-com-daml-ledger-javaapi-data-submitandwaitfortransactionrequest) | 🟢 `v3.4` | - |
+| [`SubmitAndWaitForTransactionResponse`](#type-com-daml-ledger-javaapi-data-submitandwaitfortransactionresponse) | 🟢 `v3.4` | - |
+| [`SubmitAndWaitRequest`](#type-com-daml-ledger-javaapi-data-submitandwaitrequest) | 🟢 `v3.4` | - |
+| [`SubmitAndWaitResponse`](#type-com-daml-ledger-javaapi-data-submitandwaitresponse) | 🟢 `v3.4` | - |
+| [`SubmitReassignmentRequest`](#type-com-daml-ledger-javaapi-data-submitreassignmentrequest) | 🟢 `v3.4` | - |
+| [`SubmitRequest`](#type-com-daml-ledger-javaapi-data-submitrequest) | 🟢 `v3.4` | - |
+| [`SynchronizerTime`](#type-com-daml-ledger-javaapi-data-synchronizertime) | 🟢 `v3.4` | - |
+| [`Template`](#type-com-daml-ledger-javaapi-data-template) | 🟢 `v3.4` | - |
+| [`Text`](#type-com-daml-ledger-javaapi-data-text) | 🟢 `v3.4` | - |
+| [`Timestamp`](#type-com-daml-ledger-javaapi-data-timestamp) | 🟢 `v3.4` | A Timestamp value is represented as microseconds since the UNIX epoch. |
+| [`TopologyEvent`](#type-com-daml-ledger-javaapi-data-topologyevent) | 🟢 `v3.4` | This interface represents events in TopologyTransactions. |
+| [`TopologyFormat`](#type-com-daml-ledger-javaapi-data-topologyformat) | 🟢 `v3.4` | - |
+| [`TopologyTransaction`](#type-com-daml-ledger-javaapi-data-topologytransaction) | 🟢 `v3.4` | - |
+| [`Transaction`](#type-com-daml-ledger-javaapi-data-transaction) | 🔴 `v3.4` Removed | - |
+| [`Transaction.Node`](#type-com-daml-ledger-javaapi-data-transaction-node) | 🟢 `v3.4` | - |
+| [`Transaction.WrappedTransactionTree`](#type-com-daml-ledger-javaapi-data-transaction-wrappedtransactiontree) | 🟢 `v3.4` | A generic class that encapsulates a transaction tree along with a... |
+| [`TransactionFormat`](#type-com-daml-ledger-javaapi-data-transactionformat) | 🟢 `v3.4` | - |
+| [`TransactionShape`](#type-com-daml-ledger-javaapi-data-transactionshape) | 🟢 `v3.4` | - |
+| [`UnassignCommand`](#type-com-daml-ledger-javaapi-data-unassigncommand) | 🟢 `v3.4` | - |
+| [`UnassignedEvent`](#type-com-daml-ledger-javaapi-data-unassignedevent) | 🟢 `v3.4` | - |
+| [`Unit`](#type-com-daml-ledger-javaapi-data-unit) | 🟢 `v3.4` | - |
+| [`UnsupportedEventTypeException`](#type-com-daml-ledger-javaapi-data-unsupportedeventtypeexception) | 🟢 `v3.4` | - |
+| [`UpdateFormat`](#type-com-daml-ledger-javaapi-data-updateformat) | 🟢 `v3.4` | - |
+| [`UpdateSubmission`](#type-com-daml-ledger-javaapi-data-updatesubmission) | 🟢 `v3.4` | This class can be used to build a valid submission for an Update. It... |
+| [`User`](#type-com-daml-ledger-javaapi-data-user) | 🟢 `v3.4` | - |
+| [`User.Right`](#type-com-daml-ledger-javaapi-data-user-right) | 🟢 `v3.4` | - |
+| [`User.Right.CanActAs`](#type-com-daml-ledger-javaapi-data-user-right-canactas) | 🟢 `v3.4` | - |
+| [`User.Right.CanReadAs`](#type-com-daml-ledger-javaapi-data-user-right-canreadas) | 🟢 `v3.4` | - |
+| [`User.Right.CanReadAsAnyParty`](#type-com-daml-ledger-javaapi-data-user-right-canreadasanyparty) | 🟢 `v3.4` | - |
+| [`User.Right.IdentityProviderAdmin`](#type-com-daml-ledger-javaapi-data-user-right-identityprovideradmin) | 🟢 `v3.4` | - |
+| [`User.Right.ParticipantAdmin`](#type-com-daml-ledger-javaapi-data-user-right-participantadmin) | 🟢 `v3.4` | - |
+| [`Utils`](#type-com-daml-ledger-javaapi-data-utils) | 🟢 `v3.4` | - |
+| [`Value`](#type-com-daml-ledger-javaapi-data-value) | 🟢 `v3.4` | - |
+| [`Variant`](#type-com-daml-ledger-javaapi-data-variant) | 🟢 `v3.4` | - |
+| [`WorkflowEvent`](#type-com-daml-ledger-javaapi-data-workflowevent) | 🟢 `v3.4` | A Ledger event regarding a workflow identified by the getWorkflowId(). |
 
 ## Reference
 

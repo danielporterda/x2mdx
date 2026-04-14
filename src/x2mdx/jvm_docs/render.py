@@ -423,16 +423,13 @@ def build_package_rows_and_pages(
                 template_name="jvm_docs/package.md.j2",
                 type_reference_rows=[
                     [
-                        f"[{md_text(type_label(str(entry['type_text']), package_name))}](#{entry['anchor']})",
-                        f"`{md_text(str(entry['symbol'].kind).title())}`",
-                        str(entry["summary_preview"]),
-                        str(entry["introduced"]),
-                        "-",
-                        str(entry["deprecated"]),
-                        str(entry["removed"]),
+                        f"[`{md_text(type_label(str(entry['type_text']), package_name))}`](#{entry['anchor']})",
+                        str(entry["status_cell"]),
+                        str(entry["summary_preview"] or "-"),
                     ]
                     for entry in package_entries
                 ],
+                type_toc_legend=status_legend(),
                 package_entries=[
                     {
                         "anchor": str(entry["anchor"]),
