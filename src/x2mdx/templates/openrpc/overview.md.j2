@@ -3,6 +3,6 @@
 
 {{ paragraph("Generated from versioned OpenRPC snapshots.") }}
 
-{% call shared.standard_reference_layout(toc_rows=toc_rows, version_rows=version_change_summary_rows) %}
-{{ table(["Spec", "Title", "Methods"], spec_rows) }}
-{% endcall %}
+{{ bullet_list(overview_items) }}
+
+{{ shared.status_toc(spec_rows, legend=spec_summary_legend) }}

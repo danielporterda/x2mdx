@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from x2mdx.output import Page
-from x2mdx.templating import markdown_page
+from x2mdx.templating import markdown_page, render_status_cell, render_status_legend
 
 PACKAGE_GROUP_ORDER = [
     "Ledger API",
@@ -47,6 +47,17 @@ def compact_text(text: str, *, limit: int = 120) -> str:
     if len(normalized) <= limit:
         return normalized
     return normalized[: limit - 3].rstrip() + "..."
+
+
+def compact_package_summary(package: dict[str, Any]) -> str:
+    parts = [
+        f"{package['serviceCount']} services",
+        f"{package['endpointCount']} endpoints",
+        f"{package['messageCount']} messages",
+    ]
+    if package["enumCount"]:
+        parts.append(f"{package['enumCount']} enums")
+    return escape_md_cell(", ".join(parts))
 
 
 def change_versions_for_package(
@@ -365,6 +376,33 @@ def build_package_docs(report: dict[str, Any]) -> list[dict[str, Any]]:
     )
 
 
+def package_status(
+    package_name: str,
+    lifecycle_entries: list[dict[str, Any]],
+) -> str:
+    package_entries = [entry for entry in lifecycle_entries if entry["package"] == package_name]
+    if not package_entries:
+        return "-"
+
+    introduced_versions = sorted({str(entry["introducedIn"]) for entry in package_entries if entry.get("introducedIn")})
+    changed_versions = sorted(
+        {
+            str(version)
+            for entry in package_entries
+            for version in [entry.get("lastChangedIn"), entry.get("removedIn")]
+            if version and str(version) not in introduced_versions
+        }
+    )
+    removed_versions = sorted({str(entry["removedIn"]) for entry in package_entries if entry.get("removedIn")})
+    all_removed = bool(package_entries) and all(not entry.get("current", True) for entry in package_entries)
+    removed_version = removed_versions[-1] if all_removed and removed_versions else None
+    return render_status_cell(
+        introduced=introduced_versions[0] if introduced_versions else None,
+        changed=changed_versions,
+        removed=removed_version,
+    )
+
+
 def render_overview_page(
     report: dict[str, Any],
     *,
@@ -374,7 +412,6 @@ def render_overview_page(
     package_docs: list[dict[str, Any]],
 ) -> Page:
     latest = report["latestSnapshot"]
-    version_order = {str(release["version"]): index for index, release in enumerate(report["releases"])}
 
     release_rows: list[list[str]] = []
     for release in report["releases"]:
@@ -382,9 +419,10 @@ def render_overview_page(
         release_rows.append(
             [
                 f"`{release['version']}`",
-                str(counts["endpoints"]["added"]),
-                str(counts["endpoints"]["modified"]),
-                str(counts["endpoints"]["removed"]),
+                f"`{counts['endpoints']['added']}/{counts['endpoints']['modified']}/{counts['endpoints']['removed']}`",
+                f"`{counts['messages']['added']}/{counts['messages']['modified']}/{counts['messages']['removed']}`",
+                f"`{counts['enums']['added']}/{counts['enums']['modified']}/{counts['enums']['removed']}`",
+                f"`{counts['files']['added']}/{counts['files']['modified']}/{counts['files']['removed']}`",
             ]
         )
 
@@ -406,16 +444,6 @@ def render_overview_page(
         for package in packages:
             package_path = package_page_map[package["package"]]
             link = package_path.relative_to(output_dir.parent).with_suffix("").as_posix()
-            introduced = introduced_version_for_package(
-                package["package"],
-                report["endpointLifecycle"],
-                version_order=version_order,
-            )
-            changed_versions = change_versions_for_package(
-                package["package"],
-                report["endpointLifecycle"],
-                version_order=version_order,
-            )
             rows.append(
                 [
                     f"[`{escape_md(package['package'])}`]({link})",
@@ -428,17 +456,11 @@ def render_overview_page(
             toc_rows.append(
                 [
                     f"[`{escape_md(package['package'])}`]({link})",
-                    "`Package`",
-                    escape_md_cell(
-                        compact_text(
-                            f"{package['serviceCount']} services, {package['endpointCount']} endpoints, "
-                            f"{package['messageCount']} messages, {package['enumCount']} enums"
-                        )
+                    package_status(
+                        package["package"],
+                        report["endpointLifecycle"],
                     ),
-                    f"`{introduced}`" if introduced else "-",
-                    ", ".join(f"`{version}`" for version in changed_versions) if changed_versions else "-",
-                    "-",
-                    "-",
+                    compact_package_summary(package),
                 ]
             )
         grouped_packages.append({"label": label, "rows": rows})
@@ -448,7 +470,22 @@ def render_overview_page(
         title="Canton Protobuf History",
         description="Descriptor-backed protobuf API history grouped by package.",
         template_name="protobuf/overview.md.j2",
-        toc_rows=toc_rows,
+        source_items=[
+            f"Source name: `{report['sourceName']}`",
+            f"Version filter: `{report['versionFilter']}`",
+            f"Latest release: `{report['latestRelease']}`",
+            f"Source repo: `{report['repo'].get('remote') or '-'}`",
+            f"Generated at: `{report['generatedAt']}`",
+        ],
+        snapshot_items=[
+            f"Packages: `{latest['stats']['packages']}`",
+            f"Services: `{latest['stats']['services']}`",
+            f"Endpoints: `{latest['stats']['endpoints']}`",
+            f"Messages: `{latest['stats']['messages']}`",
+            f"Enums: `{latest['stats']['enums']}`",
+        ],
+        package_toc_legend=render_status_legend(include_deprecated=False),
+        package_toc_rows=toc_rows,
         package_groups=grouped_packages,
         release_rows=release_rows,
     )

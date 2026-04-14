@@ -9,32 +9,39 @@ description: "Splice Wallet JSON-RPC Remote dApp API"
 
 An OpenRPC specification for remotely hosted Wallet Providers. Due to the remote nature, an implementing provider must bridge certain functionality on the client-side to satisfy the general dApp API spec.
 
+- Latest source path: `api-specs/openrpc-dapp-remote-api.json`
+- Publish version: `0.21.0`
+- OpenRPC version: `1.2.6`
+- Spec info.version: `0.1.0`
+
+## Version Change Timeline
+
+| Version | Active Methods | Added | Changed | Removed |
+| --- | --- | --- | --- | --- |
+| `0.20.0` | 13 | 0 | 0 | 0 |
+| `0.21.0` | 13 | 0 | 0 | 0 |
+
 ## Table of Contents
 
-| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`accountsChanged`](#method-accountschanged) | `Method` | - | `0.20.0` | - | - | - |
-| [`connect`](#method-connect) | `Method` | Ensures ledger connectivity and returns the connected network information. | `0.20.0` | - | - | - |
-| [`connected`](#method-connected) | `Method` | Informs when the user connects to a network. | `0.20.0` | - | - | - |
-| [`disconnect`](#method-disconnect) | `Method` | Invoke a disconnect of the wallet gateway session. | `0.20.0` | - | - | - |
-| [`getActiveNetwork`](#method-getactivenetwork) | `Method` | Returns the active network. | `0.20.0` | - | - | - |
-| [`getPrimaryAccount`](#method-getprimaryaccount) | `Method` | Returns the primary account. | `0.20.0` | - | - | - |
-| [`ledgerApi`](#method-ledgerapi) | `Method` | Proxy for the JSON-API endpoints. Injects authorization headers automatically. | `0.20.0` | - | - | - |
-| [`listAccounts`](#method-listaccounts) | `Method` | - | `0.20.0` | - | - | - |
-| [`onStatusChanged`](#method-onstatuschanged) | `Method` | - | `0.20.0` | - | - | - |
-| [`prepareExecute`](#method-prepareexecute) | `Method` | Prepares, signs, and executes a transaction. | `0.20.0` | - | - | - |
-| [`signMessage`](#method-signmessage) | `Method` | Signs a message. | `0.20.0` | - | - | - |
-| [`status`](#method-status) | `Method` | Returns the current status of the wallet provider session. | `0.20.0` | - | - | - |
-| [`txChanged`](#method-txchanged) | `Method` | - | `0.20.0` | - | - | - |
+🟢 Active Since  🔵 Changed  🔴 Removed
 
-## Version Change Summary
+| NAME | STATUS | SUMMARY |
+| --- | --- | --- |
+| [`accountsChanged`](#method-accountschanged) | 🟢 `v0.20` | - |
+| [`connect`](#method-connect) | 🟢 `v0.20` | Ensures ledger connectivity and returns the connected network information. |
+| [`connected`](#method-connected) | 🟢 `v0.20` | Informs when the user connects to a network. |
+| [`disconnect`](#method-disconnect) | 🟢 `v0.20` | Invoke a disconnect of the wallet gateway session. |
+| [`getActiveNetwork`](#method-getactivenetwork) | 🟢 `v0.20` | Returns the active network. |
+| [`getPrimaryAccount`](#method-getprimaryaccount) | 🟢 `v0.20` | Returns the primary account. |
+| [`ledgerApi`](#method-ledgerapi) | 🟢 `v0.20` | Proxy for the JSON-API endpoints. Injects authorization headers automatically. |
+| [`listAccounts`](#method-listaccounts) | 🟢 `v0.20` | - |
+| [`onStatusChanged`](#method-onstatuschanged) | 🟢 `v0.20` | - |
+| [`prepareExecute`](#method-prepareexecute) | 🟢 `v0.20` | Prepares, signs, and executes a transaction. |
+| [`signMessage`](#method-signmessage) | 🟢 `v0.20` | Signs a message. |
+| [`status`](#method-status) | 🟢 `v0.20` | Returns the current status of the wallet provider session. |
+| [`txChanged`](#method-txchanged) | 🟢 `v0.20` | - |
 
-| Version | Added | Changed | Removed |
-| --- | --- | --- | --- |
-| `0.20.0` | 0 | 0 | 0 |
-| `0.21.0` | 0 | 0 | 0 |
-
-## Reference
+## Methods
 
 <a id="method-accountschanged"></a>
 ### `accountsChanged`

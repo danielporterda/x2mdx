@@ -7,7 +7,15 @@
 {{ paragraph(spec.info_description) }}
 {% endif %}
 
-{% call shared.standard_reference_layout(toc_rows=method_toc_rows, version_rows=version_timeline_rows) %}
+{{ bullet_list(metadata_items) }}
+
+{{ heading(2, "Version Change Timeline") }}
+
+{{ table(["Version", "Active Methods", "Added", "Changed", "Removed"], version_timeline_rows) }}
+
+{{ shared.status_toc(method_summary_rows, legend=method_summary_legend) }}
+
+{{ heading(2, "Methods") }}
 {% for method in methods %}
 
 {{ anchor(method.anchor) }}
@@ -36,4 +44,3 @@
 {{ shared.detail_code_block("Result Example", "json", pretty_json(method.result_sample)) }}
 {% endif %}
 {% endfor %}
-{% endcall %}

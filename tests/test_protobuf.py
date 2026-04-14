@@ -178,7 +178,7 @@ class ProtobufTests(unittest.TestCase):
 
         self.assertIn("Canton Protobuf History", overview_text)
         self.assertIn("Table of Contents", overview_text)
-        self.assertIn("Version Change Summary", overview_text)
+        self.assertIn("Release Summary", overview_text)
         self.assertIn("## Reference", overview_text)
         self.assertIn("com.example.v1", overview_text)
         self.assertIn("(protobuf-history/packages/com-example-v1)", overview_text)

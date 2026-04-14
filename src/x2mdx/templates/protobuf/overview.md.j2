@@ -3,7 +3,18 @@
 
 {{ paragraph("This page is generated from local descriptor-image snapshots with source info.") }}
 
-{% call shared.standard_reference_layout(toc_rows=toc_rows, version_rows=release_rows) %}
+{{ shared.bullet_section("Source", source_items) }}
+
+{{ shared.bullet_section("Latest Snapshot", snapshot_items) }}
+
+{{ shared.status_toc(package_toc_rows, legend=package_toc_legend) }}
+
+{{ heading(2, "Release Summary") }}
+
+{{ table(["Version", "Endpoints +/~/-", "Messages +/~/-", "Enums +/~/-", "Files +/~/-"], release_rows) }}
+
+{{ heading(2, "Reference") }}
+
 {{ paragraph("Packages are grouped by API area. Each package page contains its services, endpoint history, and shared type reference.") }}
 {% for group in package_groups %}
 
@@ -11,4 +22,3 @@
 
 {{ table(["Package", "Services", "Endpoints", "Messages", "Enums"], group.rows) }}
 {% endfor %}
-{% endcall %}

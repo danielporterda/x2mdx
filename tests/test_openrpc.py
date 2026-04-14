@@ -369,8 +369,8 @@ class OpenRpcTests(unittest.TestCase):
 
         self.assertIn("Wallet Gateway OpenRPC", overview)
         self.assertIn("Table of Contents", overview)
-        self.assertIn("Version Change Summary", dapp_page)
-        self.assertIn("## Reference", dapp_page)
+        self.assertIn("## Version Change Timeline", dapp_page)
+        self.assertIn("## Methods", dapp_page)
         self.assertIn("Result Example", dapp_page)
         self.assertIn("required fields", remote_page)
 

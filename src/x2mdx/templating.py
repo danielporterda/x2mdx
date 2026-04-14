@@ -69,6 +69,74 @@ def pretty_json(value: Any) -> str:
     return json.dumps(value, indent=2)
 
 
+def compact_version_label(value: Any) -> str:
+    text = str(value).strip()
+    if not text or text == "-":
+        return "-"
+    if text.startswith("v"):
+        return text
+    match = re.fullmatch(r"(\d+)\.(\d+)(?:\.(\d+))?(?:[-+].*)?", text)
+    if match:
+        return f"v{match.group(1)}.{match.group(2)}"
+    return f"v{text}"
+
+
+def compact_version_sequence(values: list[Any]) -> str:
+    labels = [compact_version_label(value) for value in values if str(value).strip() and str(value).strip() != "-"]
+    if not labels:
+        return "-"
+    if len(labels) == 1:
+        return labels[0]
+    return f"{labels[-1]} +{len(labels) - 1}"
+
+
+def render_status_cell(
+    *,
+    introduced: Any | None = None,
+    changed: list[Any] | None = None,
+    deprecated: Any | None = None,
+    removed: Any | None = None,
+) -> str:
+    parts: list[str] = []
+    introduced_text = str(introduced).strip() if introduced is not None else ""
+    deprecated_text = str(deprecated).strip() if deprecated is not None else ""
+    removed_text = str(removed).strip() if removed is not None else ""
+    if introduced_text and introduced_text != "-":
+        parts.append(f"🟢 `{compact_version_label(introduced_text)}`")
+    changed_versions: list[str] = []
+    for value in changed or []:
+        text = str(value).strip()
+        if not text or text == "-":
+            continue
+        if text in {introduced_text, deprecated_text, removed_text}:
+            continue
+        if text not in changed_versions:
+            changed_versions.append(text)
+    if changed_versions:
+        parts.append(f"🔵 `{compact_version_sequence(changed_versions)}`")
+    if deprecated_text and deprecated_text != "-":
+        parts.append(f"🟠 `{compact_version_label(deprecated_text)}`")
+    if removed_text and removed_text != "-":
+        parts.append(f"🔴 `{compact_version_label(removed_text)}`")
+    return " ".join(parts) or "-"
+
+
+def render_status_legend(
+    *,
+    include_changed: bool = True,
+    include_deprecated: bool = True,
+    include_removed: bool = True,
+) -> str:
+    items = ["🟢 Active Since"]
+    if include_changed:
+        items.append("🔵 Changed")
+    if include_deprecated:
+        items.append("🟠 Deprecated")
+    if include_removed:
+        items.append("🔴 Removed")
+    return "  ".join(items)
+
+
 def _finalize(value: Any) -> Any:
     return "" if value is None else value
 
@@ -95,6 +163,10 @@ def template_environment() -> Environment:
         accordion_list=accordion_list,
         render_card_group=render_card_group,
         pretty_json=pretty_json,
+        compact_version_label=compact_version_label,
+        compact_version_sequence=compact_version_sequence,
+        render_status_cell=render_status_cell,
+        render_status_legend=render_status_legend,
     )
     return environment
 
