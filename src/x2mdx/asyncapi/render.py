@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import html
 import re
 from pathlib import Path
@@ -9,6 +10,16 @@ from typing import Any
 
 from x2mdx.asyncapi.models import AsyncApiChannelLifecycle, AsyncApiReport
 from x2mdx.output import Page
+from x2mdx.presentation import (
+    CollectionPageModel,
+    DetailCodeBlock,
+    DetailTable,
+    LifecycleStatus,
+    ProtocolInteraction,
+    ProtocolSubject,
+    VersionDeltaRow,
+    version_delta_row_cells,
+)
 from x2mdx.templating import markdown_page
 
 
@@ -63,7 +74,7 @@ def compact_text(text: str, *, limit: int = 120) -> str:
     return normalized[: limit - 3].rstrip() + "..."
 
 
-def _channel_context(channel: AsyncApiChannelLifecycle) -> dict[str, Any]:
+def _channel_context_legacy(channel: AsyncApiChannelLifecycle) -> dict[str, Any]:
     lifecycle_bits = [
         f"Actions: {action_list(channel)}",
         f"Introduced: `{channel.introduced_version}`",
@@ -123,7 +134,7 @@ def _channel_context(channel: AsyncApiChannelLifecycle) -> dict[str, Any]:
     }
 
 
-def build_page(
+def build_page_legacy(
     report: AsyncApiReport,
     *,
     output_path: str,
@@ -157,5 +168,161 @@ def build_page(
             ]
             for channel in report.channels
         ],
-        channels=[_channel_context(channel) for channel in report.channels],
+        channels=[_channel_context_legacy(channel) for channel in report.channels],
+    )
+
+
+def _channel_subject(channel: AsyncApiChannelLifecycle) -> ProtocolSubject:
+    lifecycle_items = [
+        f"Actions: {action_list(channel)}",
+        f"Introduced: `{channel.introduced_version}`",
+    ]
+    if channel.change_details:
+        lifecycle_items.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in channel.change_details))
+    if channel.removed_version:
+        lifecycle_items.append(f"Removed in: `{channel.removed_version}`")
+        lifecycle_items.append("Shown for historical reference.")
+    interactions: list[ProtocolInteraction] = []
+    for action in channel.latest.get("actions", []):
+        detail_items = tuple(
+            item
+            for item in [
+                f"Operation ID: `{action['operation_id']}`" if action["operation_id"] else "",
+                f"WebSocket method: `{action['ws_method']}`" if action["ws_method"] else "",
+                (
+                    f"Message: `{action['message']['name']}`"
+                    if action["message"]["name"] and action["message"]["name"] != "-"
+                    else ""
+                ),
+                (
+                    f"Content type: `{action['message']['content_type']}`"
+                    if action["message"]["content_type"] and action["message"]["content_type"] != "-"
+                    else ""
+                ),
+            ]
+            if item
+        )
+        detail_blocks: list[DetailTable | DetailCodeBlock] = [
+            DetailTable(
+                headers=("Payload Schema", "Required Fields"),
+                rows=(
+                    (
+                        md_code(action["message"]["payload_schema"]),
+                        ", ".join(md_code(field) for field in action["message"]["required_fields"])
+                        if action["message"]["required_fields"]
+                        else "-",
+                    ),
+                ),
+            )
+        ]
+        if action["message"]["sample"] is not None:
+            detail_blocks.append(
+                DetailCodeBlock(
+                    title="Message Example",
+                    language="json",
+                    body=json.dumps(action["message"]["sample"], indent=2),
+                )
+            )
+        interactions.append(
+            ProtocolInteraction(
+                label=str(action["action"]).capitalize(),
+                detail_items=detail_items,
+                description=str(action["description"] or ""),
+                detail_blocks=tuple(detail_blocks),
+            )
+        )
+    return ProtocolSubject(
+        anchor=channel.anchor,
+        title=channel.channel,
+        kind=action_list(channel),
+        summary=escape_md_cell(compact_text(str(channel.latest.get("description") or ""))),
+        lifecycle=LifecycleStatus.from_values(
+            introduced=channel.introduced_version,
+            changed_versions=[str(entry["version"]) for entry in channel.change_details],
+            removed=channel.removed_version,
+        ),
+        lifecycle_items=tuple(lifecycle_items),
+        description=str(channel.latest.get("description") or ""),
+        version_changes=tuple(
+            (
+                md_code(str(entry["version"])),
+                escape_md_cell("; ".join(str(change) for change in entry["changes"])),
+            )
+            for entry in channel.change_details
+        ),
+        interactions=tuple(interactions),
+    )
+
+
+def _channel_context(channel: ProtocolSubject) -> dict[str, Any]:
+    actions: list[dict[str, Any]] = []
+    for action in channel.interactions:
+        payload = next(
+            block for block in action.detail_blocks if isinstance(block, DetailTable) and block.headers == ("Payload Schema", "Required Fields")
+        )
+        sample = next((block for block in action.detail_blocks if isinstance(block, DetailCodeBlock)), None)
+        actions.append(
+            {
+                "heading": action.label,
+                "detail_items": list(action.detail_items),
+                "description": action.description,
+                "payload_row": list(payload.rows[0]),
+                "sample": json.loads(sample.body) if sample else None,
+            }
+        )
+    return {
+        "anchor": channel.anchor,
+        "name": channel.title,
+        "lifecycle_bits": list(channel.lifecycle_items),
+        "description": channel.description,
+        "change_rows": [list(row) for row in channel.version_changes],
+        "actions": actions,
+    }
+
+
+def build_page(
+    report: AsyncApiReport,
+    *,
+    output_path: str,
+    page_title: str,
+    page_description: str,
+) -> Page:
+    channels = tuple(_channel_subject(channel) for channel in report.channels)
+    page_model = CollectionPageModel(
+        path=Path(output_path).as_posix(),
+        title=page_title,
+        description=page_description,
+        version_rows=tuple(
+            VersionDeltaRow(
+                version=version,
+                added=str(report.per_version_deltas[version]["added_count"]),
+                changed=str(report.per_version_deltas[version]["changed_count"]),
+                removed=str(report.per_version_deltas[version]["removed_count"]),
+            )
+            for version in report.versions
+        ),
+        toc_rows=tuple(
+            (
+                channel_link(channel.title),
+                channel.kind,
+                channel.summary,
+                md_code(channel.lifecycle.introduced or "-"),
+                "<br/>".join(f"{version}: {changes}" for version, changes in channel.version_changes)
+                if channel.version_changes
+                else "-",
+                "-",
+                md_code(channel.lifecycle.removed) if channel.lifecycle.removed else "-",
+            )
+            for channel in channels
+        ),
+    )
+    return markdown_page(
+        path=page_model.path,
+        title=page_model.title,
+        description=page_model.description,
+        template_name="asyncapi/page.md.j2",
+        report=report,
+        version_timeline_rows=[version_delta_row_cells(row) for row in page_model.version_rows],
+        channel_summary_rows=[list(row) for row in page_model.toc_rows],
+        channels=[_channel_context(channel) for channel in channels],
     )

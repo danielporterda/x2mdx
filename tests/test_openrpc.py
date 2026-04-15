@@ -11,6 +11,8 @@ from pathlib import Path
 from x2mdx.cli import main as cli_main
 from x2mdx.openrpc.lifecycle import build_openrpc_report_from_sources, parse_openrpc
 from x2mdx.openrpc.models import OpenRpcSourceSnapshot
+from x2mdx.openrpc.render import build_pages, build_pages_legacy
+from tests.parity import assert_page_tree_equal
 
 
 def write_text(path: Path, contents: str) -> None:
@@ -342,6 +344,78 @@ class OpenRpcTests(unittest.TestCase):
         remote_methods = {method.method: method for method in specs["remote-dapp-api"].methods}
         self.assertEqual(remote_methods["status"].changed_in_versions, ["1.1.0"])
         self.assertIn("result updated (required fields)", remote_methods["status"].change_details[0]["changes"])
+
+    def test_render_builder_matches_legacy_output(self) -> None:
+        report = build_openrpc_report_from_sources(
+            [
+                self._snapshot(
+                    version="1.0.0",
+                    spec_id="dapp-api",
+                    display_name="Dapp API",
+                    source_path="api-specs/openrpc-dapp-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Dapp API", "version": "1.0.0"},
+                          "methods": [
+                            {
+                              "name": "status",
+                              "description": "Return provider status.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            }
+                          ]
+                        }
+                    """,
+                ),
+                self._snapshot(
+                    version="1.1.0",
+                    spec_id="dapp-api",
+                    display_name="Dapp API",
+                    source_path="api-specs/openrpc-dapp-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Dapp API", "version": "1.1.0"},
+                          "methods": [
+                            {
+                              "name": "status",
+                              "description": "Return wallet provider status.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "connect",
+                              "description": "Connect to a provider.",
+                              "params": [
+                                {
+                                  "name": "network",
+                                  "schema": {"type": "string"}
+                                }
+                              ],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            }
+                          ]
+                        }
+                    """,
+                ),
+            ],
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        _legacy_root, legacy_pages = build_pages_legacy(
+            report,
+            output_dir=Path("reference"),
+            overview_title="Wallet Gateway JSON-RPC",
+        )
+        _actual_root, actual_pages = build_pages(
+            report,
+            output_dir=Path("reference"),
+            overview_title="Wallet Gateway JSON-RPC",
+        )
+
+        assert_page_tree_equal(self, actual_pages, legacy_pages)
 
     def test_cli_builds_openrpc_pages(self) -> None:
         manifest_path = self._write_manifest()

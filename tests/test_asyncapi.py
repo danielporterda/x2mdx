@@ -10,7 +10,9 @@ from pathlib import Path
 
 from x2mdx.asyncapi.lifecycle import build_asyncapi_report_from_sources, parse_asyncapi
 from x2mdx.asyncapi.models import AsyncApiSourceSnapshot
+from x2mdx.asyncapi.render import build_page, build_page_legacy
 from x2mdx.cli import main as cli_main
+from tests.parity import assert_page_equal
 
 
 def write_text(path: Path, contents: str) -> None:
@@ -320,6 +322,114 @@ class AsyncApiTests(unittest.TestCase):
         self.assertEqual(report.per_version_deltas["1.1.0"]["added_count"], 1)
         self.assertEqual(report.per_version_deltas["1.1.0"]["changed_count"], 1)
         self.assertEqual(report.per_version_deltas["1.1.0"]["removed_count"], 1)
+
+    def test_render_builder_matches_legacy_output(self) -> None:
+        report = build_asyncapi_report_from_sources(
+            [
+                self._snapshot(
+                    "1.0.0",
+                    "published/1.0.0/asyncapi.yaml",
+                    """
+                    asyncapi: 2.6.0
+                    info:
+                      title: Sample WebSocket API
+                      version: 1.0.0
+                    channels:
+                      /stream:
+                        description: Stream updates.
+                        publish:
+                          operationId: sendStream
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/StreamRequest'
+                    components:
+                      schemas:
+                        StreamRequest:
+                          type: object
+                          required: [party]
+                          properties:
+                            party:
+                              type: string
+                      messages:
+                        StreamRequest:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/StreamRequest'
+                    """,
+                ),
+                self._snapshot(
+                    "1.1.0",
+                    "published/1.1.0/asyncapi.yaml",
+                    """
+                    asyncapi: 2.6.0
+                    info:
+                      title: Sample WebSocket API
+                      version: 1.1.0
+                    channels:
+                      /stream:
+                        description: Stream updates for clients.
+                        publish:
+                          operationId: sendStream
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/StreamRequest'
+                        subscribe:
+                          operationId: onStream
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/StreamEvent'
+                    components:
+                      schemas:
+                        StreamRequest:
+                          type: object
+                          required: [party, offset]
+                          properties:
+                            party:
+                              type: string
+                            offset:
+                              type: string
+                        StreamEvent:
+                          type: object
+                          required: [offset]
+                          properties:
+                            offset:
+                              type: string
+                      messages:
+                        StreamRequest:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/StreamRequest'
+                        StreamEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/StreamEvent'
+                    """,
+                ),
+            ],
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        actual = build_page(
+            report,
+            output_path="reference/asyncapi.mdx",
+            page_title="AsyncAPI",
+            page_description="AsyncAPI description.",
+        )
+        legacy = build_page_legacy(
+            report,
+            output_path="reference/asyncapi.mdx",
+            page_title="AsyncAPI",
+            page_description="AsyncAPI description.",
+        )
+
+        assert_page_equal(self, actual, legacy)
 
     def test_cli_builds_asyncapi_page_and_updates_docs_json(self) -> None:
         manifest_path = self._write_manifest()
