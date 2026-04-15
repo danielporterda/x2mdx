@@ -11,9 +11,10 @@ from pathlib import Path
 from x2mdx.cli import main as cli_main
 from x2mdx.openapi.lifecycle import build_openapi_lifecycle_report_from_snapshots, parse_openapi
 from x2mdx.openapi.models import OpenApiLifecycleConfig, OpenApiSourceSnapshot
-from x2mdx.openapi.render import build_pages
+from x2mdx.openapi.render import build_api_page, build_api_page_legacy, build_pages, build_pages_legacy
 from x2mdx.openapi.serde import report_from_json_data, report_to_json_data
 from x2mdx.render import write_pages
+from tests.parity import assert_page_equal, assert_page_tree_equal
 
 
 def write_text(path: Path, contents: str) -> None:
@@ -443,6 +444,128 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("Get \\{itemId\\} by id.", spec_page)
         self.assertNotIn("&#123;", spec_page)
         self.assertNotIn("&#125;", spec_page)
+
+    def test_render_builders_match_legacy_output(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.1.0
+                    paths:
+                      /ping:
+                        get:
+                          operationId: getPing
+                          summary: Ping
+                          responses:
+                            "200":
+                              description: ok
+                      /accounts:
+                        get:
+                          operationId: listAccounts
+                          summary: List accounts
+                          responses:
+                            "200":
+                              description: ok
+                        post:
+                          operationId: createAccount
+                          summary: Create account
+                          requestBody:
+                            required: true
+                            content:
+                              application/json:
+                                schema:
+                                  type: object
+                                  required: [name]
+                                  properties:
+                                    name:
+                                      type: string
+                          responses:
+                            "201":
+                              description: created
+                    components:
+                      schemas:
+                        CreateAccountRequest:
+                          type: object
+                          required: [name]
+                          properties:
+                            name:
+                              type: string
+                    """,
+                ),
+                self._snapshot(
+                    "v0.1.1",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.1.1
+                    paths:
+                      /ping:
+                        get:
+                          operationId: getPing
+                          summary: Ping endpoint
+                          responses:
+                            "200":
+                              description: ok
+                      /accounts:
+                        get:
+                          operationId: listAccounts
+                          summary: List accounts
+                          responses:
+                            "200":
+                              description: ok
+                        post:
+                          operationId: createAccount
+                          summary: Create account
+                          requestBody:
+                            required: true
+                            content:
+                              application/json:
+                                schema:
+                                  type: object
+                                  required: [name, owner]
+                                  properties:
+                                    name:
+                                      type: string
+                                    owner:
+                                      type: string
+                          responses:
+                            "201":
+                              description: created
+                    components:
+                      schemas:
+                        CreateAccountRequest:
+                          type: object
+                          required: [name, owner]
+                          properties:
+                            name:
+                              type: string
+                            owner:
+                              type: string
+                    """,
+                ),
+            ],
+            self._config(),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        assert_page_tree_equal(
+            self,
+            build_pages(report, overview_title="Utility Apps API Specs"),
+            build_pages_legacy(report, overview_title="Utility Apps API Specs"),
+        )
+        assert_page_equal(
+            self,
+            build_api_page(report, "single-page-reference.mdx"),
+            build_api_page_legacy(report, "single-page-reference.mdx"),
+        )
 
     def test_cli_list_formats_outputs_supported_formats(self) -> None:
         stdout = io.StringIO()
