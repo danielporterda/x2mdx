@@ -11,10 +11,9 @@ from pathlib import Path
 from x2mdx.cli import main as cli_main
 from x2mdx.openapi.lifecycle import build_openapi_lifecycle_report_from_snapshots, parse_openapi
 from x2mdx.openapi.models import OpenApiLifecycleConfig, OpenApiSourceSnapshot
-from x2mdx.openapi.render import build_api_page, build_api_page_legacy, build_pages, build_pages_legacy
+from x2mdx.openapi.render import build_pages
 from x2mdx.openapi.serde import report_from_json_data, report_to_json_data
 from x2mdx.render import write_pages
-from tests.parity import assert_page_equal, assert_page_tree_equal
 
 
 def write_text(path: Path, contents: str) -> None:
@@ -262,11 +261,19 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("[Open](./specs/utility-yaml)", overview)
         self.assertIn("Version Change Summary", spec_page)
         self.assertIn("Table of Contents", spec_page)
-        self.assertIn("| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |", spec_page)
+        self.assertNotIn("🟢", spec_page)
+        self.assertNotIn("🔵", spec_page)
+        self.assertNotIn("🔴", spec_page)
+        self.assertIn(">Active Since</span>", spec_page)
+        self.assertIn(">Changed</span>", spec_page)
+        self.assertIn("| NAME | STATUS | SUMMARY |", spec_page)
         self.assertIn("[`/ping`](#endpoint-path-ping)", spec_page)
         self.assertIn('<a id="endpoint-path-ping"></a>', spec_page)
         self.assertIn('<a id="endpoint-get-ping"></a>', spec_page)
-        self.assertIn("| [`/ping`](#endpoint-path-ping) | - | Ping endpoint | `v0.1.0` | v0.1.1:", spec_page)
+        self.assertIn("| [`/ping`](#endpoint-path-ping) | <span title=\"Active Since\"", spec_page)
+        self.assertIn("<code>v0.1.0</code>", spec_page)
+        self.assertIn("<code>v0.1.1</code>", spec_page)
+        self.assertIn("| Ping endpoint |", spec_page)
         self.assertIn("summary changed `Ping` -> `Ping endpoint`", spec_page)
         self.assertIn("query param `limit` added", spec_page)
         self.assertIn("response `200` description updated", spec_page)
@@ -329,14 +336,110 @@ class OpenApiLifecycleTests(unittest.TestCase):
         spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
 
         self.assertEqual(spec_page.count("| [`/accounts`](#endpoint-path-accounts) |"), 1)
-        self.assertIn("| [`/accounts`](#endpoint-path-accounts) | `GET, POST` |", spec_page)
-        self.assertIn("GET: List accounts; POST: Create account", spec_page)
+        self.assertIn("| [`/accounts`](#endpoint-path-accounts) | <span title=\"Active Since\"", spec_page)
+        self.assertIn("<code>v0.1.0</code>", spec_page)
+        self.assertIn("| `GET, POST`: GET: List accounts; POST: Create account |", spec_page)
         self.assertIn("### `/accounts`", spec_page)
         self.assertIn("- Methods: `GET`, `POST`", spec_page)
         self.assertIn("**`GET`**", spec_page)
         self.assertIn("**`POST`**", spec_page)
         self.assertNotIn("### `GET /accounts`", spec_page)
         self.assertNotIn("### `POST /accounts`", spec_page)
+
+    def test_render_pages_show_explicit_lifecycle_and_replacement_metadata(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.1.0
+                    paths:
+                      /payments:
+                        get:
+                          operationId: listPayments
+                          summary: List payments
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+                self._snapshot(
+                    "v0.2.0",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.2.0
+                    paths:
+                      /payments:
+                        get:
+                          operationId: listPaymentsV2
+                          x-state: stable
+                          x-replaces: listPayments
+                          summary: List payments
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+            ],
+            self._config(),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        pages = build_pages(report)
+        out_dir = self.root / "out-lifecycle-replacement"
+        write_pages(pages, out_dir)
+        spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
+
+        self.assertIn("Lifecycle state: `stable`", spec_page)
+        self.assertIn("Replaces: `listPayments`", spec_page)
+        self.assertIn("**Version Changes**", spec_page)
+        self.assertIn("operation id changed `listPayments` -> `listPaymentsV2`", spec_page)
+        self.assertIn("lifecycle state changed `-` -> `stable`", spec_page)
+        self.assertIn("replacement target changed `-` -> `listPayments`", spec_page)
+
+    def test_render_pages_show_deprecated_without_replacement(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/utility.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Utility API
+                      version: 0.1.0
+                    paths:
+                      /legacy-payments:
+                        get:
+                          operationId: listLegacyPayments
+                          deprecated: true
+                          summary: Legacy payment listing
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+            ],
+            self._config(),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        pages = build_pages(report)
+        out_dir = self.root / "out-deprecated"
+        write_pages(pages, out_dir)
+        spec_page = (out_dir / "specs" / "utility-yaml.mdx").read_text(encoding="utf-8")
+
+        self.assertIn("Lifecycle state: `deprecated`", spec_page)
+        self.assertNotIn("Replaces:", spec_page)
 
     def test_render_pages_show_required_request_body_fields(self) -> None:
         report = build_openapi_lifecycle_report_from_snapshots(
@@ -444,128 +547,6 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("Get \\{itemId\\} by id.", spec_page)
         self.assertNotIn("&#123;", spec_page)
         self.assertNotIn("&#125;", spec_page)
-
-    def test_render_builders_match_legacy_output(self) -> None:
-        report = build_openapi_lifecycle_report_from_snapshots(
-            [
-                self._snapshot(
-                    "v0.1.0",
-                    "published/utility.yaml",
-                    """
-                    openapi: 3.0.3
-                    info:
-                      title: Utility API
-                      version: 0.1.0
-                    paths:
-                      /ping:
-                        get:
-                          operationId: getPing
-                          summary: Ping
-                          responses:
-                            "200":
-                              description: ok
-                      /accounts:
-                        get:
-                          operationId: listAccounts
-                          summary: List accounts
-                          responses:
-                            "200":
-                              description: ok
-                        post:
-                          operationId: createAccount
-                          summary: Create account
-                          requestBody:
-                            required: true
-                            content:
-                              application/json:
-                                schema:
-                                  type: object
-                                  required: [name]
-                                  properties:
-                                    name:
-                                      type: string
-                          responses:
-                            "201":
-                              description: created
-                    components:
-                      schemas:
-                        CreateAccountRequest:
-                          type: object
-                          required: [name]
-                          properties:
-                            name:
-                              type: string
-                    """,
-                ),
-                self._snapshot(
-                    "v0.1.1",
-                    "published/utility.yaml",
-                    """
-                    openapi: 3.0.3
-                    info:
-                      title: Utility API
-                      version: 0.1.1
-                    paths:
-                      /ping:
-                        get:
-                          operationId: getPing
-                          summary: Ping endpoint
-                          responses:
-                            "200":
-                              description: ok
-                      /accounts:
-                        get:
-                          operationId: listAccounts
-                          summary: List accounts
-                          responses:
-                            "200":
-                              description: ok
-                        post:
-                          operationId: createAccount
-                          summary: Create account
-                          requestBody:
-                            required: true
-                            content:
-                              application/json:
-                                schema:
-                                  type: object
-                                  required: [name, owner]
-                                  properties:
-                                    name:
-                                      type: string
-                                    owner:
-                                      type: string
-                          responses:
-                            "201":
-                              description: created
-                    components:
-                      schemas:
-                        CreateAccountRequest:
-                          type: object
-                          required: [name, owner]
-                          properties:
-                            name:
-                              type: string
-                            owner:
-                              type: string
-                    """,
-                ),
-            ],
-            self._config(),
-            source_name="unit test snapshots",
-            version_filter="unit test versions",
-        )
-
-        assert_page_tree_equal(
-            self,
-            build_pages(report, overview_title="Utility Apps API Specs"),
-            build_pages_legacy(report, overview_title="Utility Apps API Specs"),
-        )
-        assert_page_equal(
-            self,
-            build_api_page(report, "single-page-reference.mdx"),
-            build_api_page_legacy(report, "single-page-reference.mdx"),
-        )
 
     def test_cli_list_formats_outputs_supported_formats(self) -> None:
         stdout = io.StringIO()

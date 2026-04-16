@@ -5,15 +5,15 @@ description: "Generated package reference page from local Javadoc/Scaladoc snaps
 
 ## Table of Contents
 
-🟢 Active Since  🟠 Deprecated  🔴 Removed
+<span style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.85em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span>Active Since</span>
 
 | NAME | STATUS | SUMMARY |
 | --- | --- | --- |
-| [`DurationConversion`](#type-com-daml-api-util-durationconversion) | 🟢 `v2.10` | - |
-| [`LedgerEffectiveTimeTolerance`](#type-com-daml-api-util-ledgereffectivetimetolerance) | 🟢 `v2.10` | - |
-| [`TimeProvider`](#type-com-daml-api-util-timeprovider) | 🟢 `v2.10` | - |
-| [`TimestampConversion`](#type-com-daml-api-util-timestampconversion) | 🟢 `v2.10` | - |
-| [`ToleranceWindow`](#type-com-daml-api-util-tolerancewindow) | 🟢 `v2.10` | - |
+| [`DurationConversion`](#type-com-daml-api-util-durationconversion) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v2.10</code></span> | - |
+| [`LedgerEffectiveTimeTolerance`](#type-com-daml-api-util-ledgereffectivetimetolerance) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v2.10</code></span> | - |
+| [`TimeProvider`](#type-com-daml-api-util-timeprovider) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v2.10</code></span> | - |
+| [`TimestampConversion`](#type-com-daml-api-util-timestampconversion) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v2.10</code></span> | - |
+| [`ToleranceWindow`](#type-com-daml-api-util-tolerancewindow) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v2.10</code></span> | - |
 
 ## Reference
 
@@ -21,6 +21,8 @@ description: "Generated package reference page from local Javadoc/Scaladoc snaps
 
 ### `DurationConversion`
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced: `2.10.2`
 - Deprecated: -
 - Removed: -
@@ -35,15 +37,17 @@ object DurationConversion
 
 **Members**
 
-| Docs | Member | Introduced | Deprecated | Removed |
-| --- | --- | --- | --- | --- |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/DurationConversion$.html#fromProto(pDuration:com.google.protobuf.duration.Duration):java.time.Duration) | `fromProto(pDuration: Duration): Duration` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/DurationConversion$.html#toProto(jDuration:java.time.Duration):com.google.protobuf.duration.Duration) | `toProto(jDuration: Duration): Duration` | `2.10.2` | - | - |
+| Docs | Member | Lifecycle | Replaces | Introduced | Deprecated | Removed |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/DurationConversion$.html#fromProto(pDuration:com.google.protobuf.duration.Duration):java.time.Duration) | `fromProto(pDuration: Duration): Duration` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/DurationConversion$.html#toProto(jDuration:java.time.Duration):com.google.protobuf.duration.Duration) | `toProto(jDuration: Duration): Duration` | - | - | `2.10.2` | - | - |
 
 <a id="type-com-daml-api-util-ledgereffectivetimetolerance"></a>
 
 ### `LedgerEffectiveTimeTolerance`
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced: `2.10.2`
 - Deprecated: -
 - Removed: -
@@ -58,17 +62,19 @@ final case class LedgerEffectiveTimeTolerance(transactionLatency: Duration, skew
 
 **Members**
 
-| Docs | Member | Introduced | Deprecated | Removed |
-| --- | --- | --- | --- | --- |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#skew:java.time.Duration) | `skew: Duration` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#toleranceInFuture:java.time.Duration) | `toleranceInFuture: Duration` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#toleranceInPast:java.time.Duration) | `toleranceInPast: Duration` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#transactionLatency:java.time.Duration) | `transactionLatency: Duration` | `2.10.2` | - | - |
+| Docs | Member | Lifecycle | Replaces | Introduced | Deprecated | Removed |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#skew:java.time.Duration) | `skew: Duration` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#toleranceInFuture:java.time.Duration) | `toleranceInFuture: Duration` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#toleranceInPast:java.time.Duration) | `toleranceInPast: Duration` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/LedgerEffectiveTimeTolerance.html#transactionLatency:java.time.Duration) | `transactionLatency: Duration` | - | - | `2.10.2` | - | - |
 
 <a id="type-com-daml-api-util-timeprovider"></a>
 
 ### `TimeProvider`
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced: `2.10.2`
 - Deprecated: -
 - Removed: -
@@ -83,19 +89,21 @@ trait TimeProvider extends AnyRef
 
 **Members**
 
-| Docs | Member | Introduced | Deprecated | Removed |
-| --- | --- | --- | --- | --- |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider$.html#ConstantextendsTimeProviderwithProductwithSerializable) | `Constant` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider$.html#MappedTimeProviderextendsTimeProviderwithProductwithSerializable) | `MappedTimeProvider` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider$.html#UTC) | `UTC` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider.html#getCurrentTime:java.time.Instant) | `getCurrentTime(): Instant` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider.html#getCurrentTimestamp:com.daml.lf.data.Time.Timestamp) | `getCurrentTimestamp(): Timestamp` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider.html#map(transform:java.time.Instant=>java.time.Instant):com.daml.api.util.TimeProvider) | `map(transform: (Instant) => Instant): TimeProvider` | `2.10.2` | - | - |
+| Docs | Member | Lifecycle | Replaces | Introduced | Deprecated | Removed |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider$.html#ConstantextendsTimeProviderwithProductwithSerializable) | `Constant` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider$.html#MappedTimeProviderextendsTimeProviderwithProductwithSerializable) | `MappedTimeProvider` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider$.html#UTC) | `UTC` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider.html#getCurrentTime:java.time.Instant) | `getCurrentTime(): Instant` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider.html#getCurrentTimestamp:com.daml.lf.data.Time.Timestamp) | `getCurrentTimestamp(): Timestamp` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimeProvider.html#map(transform:java.time.Instant=>java.time.Instant):com.daml.api.util.TimeProvider) | `map(transform: (Instant) => Instant): TimeProvider` | - | - | `2.10.2` | - | - |
 
 <a id="type-com-daml-api-util-timestampconversion"></a>
 
 ### `TimestampConversion`
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced: `2.10.2`
 - Deprecated: -
 - Removed: -
@@ -110,24 +118,26 @@ object TimestampConversion
 
 **Members**
 
-| Docs | Member | Introduced | Deprecated | Removed |
-| --- | --- | --- | --- | --- |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#ConversionMode) | `ConversionMode` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#ConversionModeextendsAnyRef) | `ConversionMode` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#MAX:java.time.Instant) | `MAX: Instant` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#MIN:java.time.Instant) | `MIN: Instant` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#fromInstant(instant:java.time.Instant):com.google.protobuf.timestamp.Timestamp) | `fromInstant(instant: Instant): Timestamp` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#fromLf(timestamp:com.daml.lf.data.Time.Timestamp):com.google.protobuf.timestamp.Timestamp) | `fromLf(timestamp: Timestamp): Timestamp` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#instantToMicros(t:java.time.Instant):com.daml.ledger.api.v1.value.Value.Sum.Timestamp) | `instantToMicros(t: Instant): Timestamp` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#microsToInstant(micros:com.daml.ledger.api.v1.value.Value.Sum.Timestamp):java.time.Instant) | `microsToInstant(micros: Timestamp): Instant` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#roundInstantToMicros(t:java.time.Instant):com.daml.ledger.api.v1.value.Value.Sum.Timestamp) | `roundInstantToMicros(t: Instant): Timestamp` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#toInstant(protoTimestamp:com.google.protobuf.timestamp.Timestamp):java.time.Instant) | `toInstant(protoTimestamp: Timestamp): Instant` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#toLf(protoTimestamp:com.google.protobuf.timestamp.Timestamp,mode:com.daml.api.util.TimestampConversion.ConversionMode):com.daml.lf.data.Time.Timestamp) | `toLf(protoTimestamp: Timestamp, mode: ConversionMode): Timestamp` | `2.10.2` | - | - |
+| Docs | Member | Lifecycle | Replaces | Introduced | Deprecated | Removed |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#ConversionMode) | `ConversionMode` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#ConversionModeextendsAnyRef) | `ConversionMode` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#MAX:java.time.Instant) | `MAX: Instant` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#MIN:java.time.Instant) | `MIN: Instant` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#fromInstant(instant:java.time.Instant):com.google.protobuf.timestamp.Timestamp) | `fromInstant(instant: Instant): Timestamp` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#fromLf(timestamp:com.daml.lf.data.Time.Timestamp):com.google.protobuf.timestamp.Timestamp) | `fromLf(timestamp: Timestamp): Timestamp` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#instantToMicros(t:java.time.Instant):com.daml.ledger.api.v1.value.Value.Sum.Timestamp) | `instantToMicros(t: Instant): Timestamp` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#microsToInstant(micros:com.daml.ledger.api.v1.value.Value.Sum.Timestamp):java.time.Instant) | `microsToInstant(micros: Timestamp): Instant` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#roundInstantToMicros(t:java.time.Instant):com.daml.ledger.api.v1.value.Value.Sum.Timestamp) | `roundInstantToMicros(t: Instant): Timestamp` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#toInstant(protoTimestamp:com.google.protobuf.timestamp.Timestamp):java.time.Instant) | `toInstant(protoTimestamp: Timestamp): Instant` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/TimestampConversion$.html#toLf(protoTimestamp:com.google.protobuf.timestamp.Timestamp,mode:com.daml.api.util.TimestampConversion.ConversionMode):com.daml.lf.data.Time.Timestamp) | `toLf(protoTimestamp: Timestamp, mode: ConversionMode): Timestamp` | - | - | `2.10.2` | - | - |
 
 <a id="type-com-daml-api-util-tolerancewindow"></a>
 
 ### `ToleranceWindow`
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced: `2.10.2`
 - Deprecated: -
 - Removed: -
@@ -142,7 +152,7 @@ trait ToleranceWindow extends AnyRef
 
 **Members**
 
-| Docs | Member | Introduced | Deprecated | Removed |
-| --- | --- | --- | --- | --- |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/ToleranceWindow.html#toleranceInFuture:java.time.Duration) | `toleranceInFuture(): Duration` | `2.10.2` | - | - |
-| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/ToleranceWindow.html#toleranceInPast:java.time.Duration) | `toleranceInPast(): Duration` | `2.10.2` | - | - |
+| Docs | Member | Lifecycle | Replaces | Introduced | Deprecated | Removed |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/ToleranceWindow.html#toleranceInFuture:java.time.Duration) | `toleranceInFuture(): Duration` | - | - | `2.10.2` | - | - |
+| [Open](https://javadoc.io/doc/com.daml/bindings-scala_2.13/2.10.3/com/daml/api/util/ToleranceWindow.html#toleranceInPast:java.time.Duration) | `toleranceInPast(): Duration` | - | - | `2.10.2` | - | - |

@@ -189,6 +189,27 @@ class JvmDocsTests(unittest.TestCase):
             },
         )
 
+        lifecycle_manifest_path = self.root / "lifecycle" / "bindings-java.json"
+        lifecycle_manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        lifecycle_manifest_path.write_text(
+            json.dumps(
+                {
+                    "schemaVersion": 1,
+                    "symbols": {
+                        "com.example.Foo": {"state": "beta"},
+                        "com.example.Foo#newMethod()": {
+                            "state": "stable",
+                            "replaces": "com.example.Foo#oldMethod()",
+                        },
+                        "com.example.scala.Baz": {"state": "alpha"},
+                    },
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
         manifest = {
             "source": "unit test jvm docs",
             "artifacts": [
@@ -197,6 +218,7 @@ class JvmDocsTests(unittest.TestCase):
                     "artifact": "bindings-java",
                     "language": "java",
                     "include_prefixes": ["com.example"],
+                    "lifecycle_manifest_path": str(lifecycle_manifest_path),
                     "versions": [
                         {"version": "1.0.0", "jar_path": "jars/bindings-java/1.0.0/bindings-java-1.0.0-javadoc.jar"},
                         {"version": "1.1.0", "jar_path": "jars/bindings-java/1.1.0/bindings-java-1.1.0-javadoc.jar"},
@@ -208,6 +230,7 @@ class JvmDocsTests(unittest.TestCase):
                     "artifact": "bindings-scala_2.13",
                     "language": "scala",
                     "include_prefixes": ["com.example.scala"],
+                    "lifecycle_manifest_path": str(lifecycle_manifest_path),
                     "versions": [
                         {"version": "2.0.0", "jar_path": "jars/bindings-scala_2.13/2.0.0/bindings-scala_2.13-2.0.0-javadoc.jar"},
                         {"version": "2.1.0", "jar_path": "jars/bindings-scala_2.13/2.1.0/bindings-scala_2.13-2.1.0-javadoc.jar"},
@@ -236,15 +259,22 @@ class JvmDocsTests(unittest.TestCase):
         self.assertEqual(java_symbols["com.example.Foo"].latest_summary, "Foo summary v1.2.0")
         self.assertEqual(java_symbols["com.example.Bar"].introduced_version, "1.2.0")
         self.assertEqual(java_symbols["com.example.Foo#newMethod"].introduced_version, "1.1.0")
+        self.assertEqual(java_symbols["com.example.Foo"].canonical_id, "com.example.Foo")
+        self.assertEqual(java_symbols["com.example.Foo"].lifecycle_state, "beta")
+        self.assertEqual(java_symbols["com.example.Foo#newMethod"].canonical_id, "com.example.Foo#newMethod()")
+        self.assertEqual(java_symbols["com.example.Foo#newMethod"].lifecycle_state, "stable")
+        self.assertEqual(java_symbols["com.example.Foo#newMethod"].replaces, "com.example.Foo#oldMethod()")
 
         old_method = java_symbols["com.example.Foo#oldMethod"]
         self.assertEqual(old_method.deprecated_version, "1.1.0")
         self.assertEqual(old_method.removed_version, "1.2.0")
         self.assertIn("newMethod", old_method.deprecation_note or "")
+        self.assertIsNone(old_method.replaces)
 
         scala_symbols = {symbol.symbol: symbol for symbol in scala_artifact.symbols}
         self.assertEqual(scala_symbols["com.example.scala.Baz"].latest_signature, "final class Baz")
         self.assertEqual(scala_symbols["com.example.scala.Baz"].latest_summary, "Baz summary v2.1.0")
+        self.assertEqual(scala_symbols["com.example.scala.Baz"].lifecycle_state, "alpha")
         self.assertEqual(scala_symbols["com.example.scala.Qux"].introduced_version, "2.1.0")
         self.assertEqual(scala_symbols["com.example.scala.Baz.stop()"].introduced_version, "2.1.0")
 
@@ -342,6 +372,10 @@ class JvmDocsTests(unittest.TestCase):
 
         self.assertIn("Custom JVM Docs", overview_text)
         self.assertIn("details/bindings-java", overview_text)
+        self.assertIn(
+            "Replacement relationships are not inferred from deprecation notes or upstream 'use X instead' text.",
+            overview_text,
+        )
         self.assertIn("## Table of Contents", java_text)
         self.assertIn("| NAME | STATUS | SUMMARY |", java_text)
         self.assertIn("🟢 Active Since", java_text)
@@ -357,10 +391,14 @@ class JvmDocsTests(unittest.TestCase):
         self.assertIn("[`Foo`](#type-com-example-foo)", java_package_text)
         self.assertIn("[`Bar`](#type-com-example-bar)", java_package_text)
         self.assertIn("## Table of Contents", java_package_text)
-        self.assertIn("🟢 Active Since", java_package_text)
+        self.assertIn("Active Since", java_package_text)
+        self.assertIn("Beta", java_package_text)
         self.assertIn("| NAME | STATUS | SUMMARY |", java_package_text)
-        self.assertIn("🟢 `v1.2`", java_package_text)
-        self.assertIn("🔴 `v1.2` Removed", java_package_text)
+        self.assertIn(">Beta</span>", java_package_text)
+        self.assertIn(">Deprecated</span>", java_package_text)
+        self.assertIn("Lifecycle state: `beta`", java_package_text)
+        self.assertIn("| `newMethod` | `stable` | `com.example.Foo#oldMethod()` |", java_package_text)
+        self.assertNotIn("Replaces: `newMethod()`", java_text)
         self.assertNotIn("| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |", java_package_text)
         self.assertIn("#type-com-example-foo", java_package_text)
         self.assertIn("## `Foo`", java_package_text)
@@ -376,8 +414,9 @@ class JvmDocsTests(unittest.TestCase):
         self.assertNotIn("### Signature", java_package_text)
         self.assertNotIn("### Summary", java_package_text)
         self.assertNotIn("### Members", java_package_text)
-        self.assertNotIn("style=", java_package_text)
-        self.assertNotIn("<span", java_package_text)
+        self.assertNotIn('style="', java_package_text)
+        self.assertIn("style={{", java_package_text)
+        self.assertIn("<span", java_package_text)
         self.assertNotIn("| Type | Upstream | Summary | Introduced | Deprecated | Removed |", java_package_text)
         self.assertEqual(
             docs_payload["navigation"]["dropdowns"][0]["pages"],

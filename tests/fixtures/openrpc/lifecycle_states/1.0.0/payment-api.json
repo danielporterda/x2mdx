@@ -1,0 +1,31 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "Payment API",
+    "version": "1.0.0"
+  },
+  "methods": [
+    {
+      "name": "listLegacyPayments",
+      "description": "List legacy payments.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "listPayments",
+      "description": "List payments.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

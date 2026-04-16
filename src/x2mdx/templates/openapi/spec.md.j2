@@ -5,14 +5,18 @@
 {% if table_of_contents_total > table_of_contents_limit %}
 {% set toc_note = "_Showing first " ~ table_of_contents_limit ~ " entries out of " ~ table_of_contents_total ~ "._" %}
 {% endif %}
-{% call shared.standard_reference_layout(
-    toc_rows=table_of_contents_rows,
-    version_rows=version_timeline_rows,
-    toc_empty_message="No endpoints found in the latest version.",
-    toc_note=toc_note
-) %}
+{{ shared.status_toc(
+    table_of_contents_rows,
+    empty_message="No endpoints found in the latest version.",
+    note=toc_note,
+    legend=table_of_contents_legend
+) }}
+
+{{ shared.version_change_summary(version_timeline_rows) }}
+
+{{ heading(2, "Reference") }}
+
 {{ endpoint_reference }}
-{% endcall %}
 
 {% set interesting_note = none %}
 {% if interesting_total > interesting_limit %}

@@ -30,10 +30,22 @@
 {{ heading(level, title) }}
 
 {% if legend %}
+{% if legend is string %}
 {{ paragraph(legend) }}
+{% else %}
+{{ paragraph(render_status_legend_items(legend)) }}
+{% endif %}
 {% endif %}
 {% if rows %}
+{% if rows[0] is mapping %}
+| {{ first_column_title }} | STATUS | SUMMARY |
+| --- | --- | --- |
+{%- for row in rows %}
+| {{ row["link"] }} | {{ render_status_badges(row["status_tokens"]) }} | {{ row["summary"] }} |
+{%- endfor %}
+{% else %}
 {{ table([first_column_title, "STATUS", "SUMMARY"], rows) }}
+{% endif %}
 {% if note %}
 
 {{ paragraph(note) }}

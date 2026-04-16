@@ -19,6 +19,19 @@ GROUP_KIND_LABELS = {
     "Functions": "Function",
 }
 
+LIFECYCLE_TAG_VALUES = {
+    "@alpha": "alpha",
+    "@beta": "beta",
+    "@stable": "stable",
+    "@deprecated": "deprecated",
+}
+LIFECYCLE_TAG_PRIORITY = [
+    "@deprecated",
+    "@stable",
+    "@beta",
+    "@alpha",
+]
+
 
 def version_sort_key(version: str) -> tuple[Any, ...]:
     if m := SNAPSHOT_VERSION_RE.fullmatch(version):
@@ -75,6 +88,14 @@ def extract_block_tag_texts(comment: dict[str, Any] | None, tag_name: str) -> li
     return out
 
 
+def extract_first_block_tag_text(comment: dict[str, Any] | None, tag_name: str) -> str | None:
+    values = extract_block_tag_texts(comment, tag_name)
+    if not values:
+        return None
+    text = values[0].strip()
+    return text or None
+
+
 def parse_named_tag_map(comment: dict[str, Any] | None, tag_name: str) -> dict[str, str]:
     mapping: dict[str, str] = {}
     for item in extract_block_tag_texts(comment, tag_name):
@@ -90,6 +111,32 @@ def comment_has_internal_tag(comment: dict[str, Any] | None) -> bool:
         return False
     tags = comment.get("modifierTags")
     return isinstance(tags, list) and "@internal" in tags
+
+
+def extract_lifecycle_state(comment: dict[str, Any] | None) -> str | None:
+    if not isinstance(comment, dict):
+        return None
+
+    present_tags: set[str] = set()
+    modifier_tags = comment.get("modifierTags")
+    if isinstance(modifier_tags, list):
+        for tag in modifier_tags:
+            if isinstance(tag, str) and tag in LIFECYCLE_TAG_VALUES:
+                present_tags.add(tag)
+
+    block_tags = comment.get("blockTags")
+    if isinstance(block_tags, list):
+        for tag in block_tags:
+            if not isinstance(tag, dict):
+                continue
+            tag_name = tag.get("tag")
+            if isinstance(tag_name, str) and tag_name in LIFECYCLE_TAG_VALUES:
+                present_tags.add(tag_name)
+
+    for tag_name in LIFECYCLE_TAG_PRIORITY:
+        if tag_name in present_tags:
+            return LIFECYCLE_TAG_VALUES[tag_name]
+    return None
 
 
 def is_internal_node(node: dict[str, Any]) -> bool:
@@ -310,6 +357,14 @@ def describe_signature_changes(previous_export: dict[str, Any], current_export: 
 
 def describe_export_changes(previous_export: dict[str, Any], current_export: dict[str, Any]) -> list[str]:
     changes: list[str] = []
+    if previous_export.get("state") != current_export.get("state"):
+        before = previous_export.get("state") or "-"
+        after = current_export.get("state") or "-"
+        changes.append(f"lifecycle state changed `{before}` -> `{after}`")
+    if previous_export.get("replaces") != current_export.get("replaces"):
+        before = previous_export.get("replaces") or "-"
+        after = current_export.get("replaces") or "-"
+        changes.append(f"replacement target changed `{before}` -> `{after}`")
     if previous_export["summary"] != current_export["summary"]:
         changes.append("summary updated")
     if (
@@ -449,12 +504,26 @@ def build_export_doc(group_title: str, node: dict[str, Any], *, group_index: int
                 source_location = str(file_name)
 
     export_comment = node.get("comment") if isinstance(node.get("comment"), dict) else None
+    signature_comment = next(
+        (
+            signature.get("comment")
+            for signature in public_signatures
+            if isinstance(signature.get("comment"), dict)
+        ),
+        None,
+    )
+    lifecycle_state = extract_lifecycle_state(export_comment) or extract_lifecycle_state(signature_comment)
+    replaces = extract_first_block_tag_text(export_comment, "@replaces") or extract_first_block_tag_text(
+        signature_comment, "@replaces"
+    )
     type_parameter_docs = extract_type_parameter_docs(node, fallback_comment=export_comment)
     signature_docs = extract_signature_docs(public_signatures)
     fingerprint = json.dumps(
         {
             "group": group_title,
             "name": name,
+            "state": lifecycle_state,
+            "replaces": replaces,
             "doc": normalize_for_fingerprint(node),
         },
         sort_keys=True,
@@ -467,6 +536,8 @@ def build_export_doc(group_title: str, node: dict[str, Any], *, group_index: int
         "group": group_title,
         "kind_label": kind_label,
         "anchor": anchor_for_export(group_title, name),
+        "state": lifecycle_state,
+        "replaces": replaces,
         "summary": summary or "",
         "signature": signature,
         "signature_docs": signature_docs,

@@ -45,21 +45,23 @@ description: "Descriptor-backed protobuf API history for package com.daml.ledger
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`CommandCompletionService`](#service-com-daml-ledger-api-v2-commandcompletionservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_completion_service.proto#L29) | Allows clients to observe the status of their submissions. Commands may be submitted via the Command Submission Servi... |
-| [`CommandService`](#service-com-daml-ledger-api-v2-commandservice) | `3` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L23) | Command Service is able to correlate submitted commands with completion data, identify timeouts, and return contextua... |
-| [`CommandSubmissionService`](#service-com-daml-ledger-api-v2-commandsubmissionservice) | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L29) | Allows clients to attempt advancing the ledger's state by submitting commands. The final states of their submissions... |
-| [`ContractService`](#service-com-daml-ledger-api-v2-contractservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/contract_service.proto#L15) | This service is experimental / alpha, therefore no backwards compatibility is guaranteed. |
-| [`EventQueryService`](#service-com-daml-ledger-api-v2-eventqueryservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/event_query_service.proto#L32) | Query events by contract id. Note that querying by contract key is not (yet) supported, as contract keys are not supp... |
-| [`PackageService`](#service-com-daml-ledger-api-v2-packageservice) | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L54) | Allows clients to query the Daml-LF packages that are supported by the server. |
-| [`StateService`](#service-com-daml-ledger-api-v2-stateservice) | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L17) | Allows clients to get state from the ledger. |
-| [`UpdateService`](#service-com-daml-ledger-api-v2-updateservice) | `3` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L30) | Allows clients to read updates (transactions, (un)assignments, topology events) from the ledger. ``GetUpdates`` and `... |
-| [`VersionService`](#service-com-daml-ledger-api-v2-versionservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/version_service.proto#L16) | Allows clients to retrieve information about the ledger API version |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`CommandCompletionService`](#service-com-daml-ledger-api-v2-commandcompletionservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_completion_service.proto#L29) | Allows clients to observe the status of their submissions. Commands may be submitted via the Command Submission Servi... |
+| [`CommandService`](#service-com-daml-ledger-api-v2-commandservice) | - | `3` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L23) | Command Service is able to correlate submitted commands with completion data, identify timeouts, and return contextua... |
+| [`CommandSubmissionService`](#service-com-daml-ledger-api-v2-commandsubmissionservice) | - | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L29) | Allows clients to attempt advancing the ledger's state by submitting commands. The final states of their submissions... |
+| [`ContractService`](#service-com-daml-ledger-api-v2-contractservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/contract_service.proto#L15) | This service is experimental / alpha, therefore no backwards compatibility is guaranteed. |
+| [`EventQueryService`](#service-com-daml-ledger-api-v2-eventqueryservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/event_query_service.proto#L32) | Query events by contract id. Note that querying by contract key is not (yet) supported, as contract keys are not supp... |
+| [`PackageService`](#service-com-daml-ledger-api-v2-packageservice) | - | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L54) | Allows clients to query the Daml-LF packages that are supported by the server. |
+| [`StateService`](#service-com-daml-ledger-api-v2-stateservice) | - | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L17) | Allows clients to get state from the ledger. |
+| [`UpdateService`](#service-com-daml-ledger-api-v2-updateservice) | - | `3` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L30) | Allows clients to read updates (transactions, (un)assignments, topology events) from the ledger. ``GetUpdates`` and `... |
+| [`VersionService`](#service-com-daml-ledger-api-v2-versionservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/version_service.proto#L16) | Allows clients to retrieve information about the ledger API version |
 
 <a id="service-com-daml-ledger-api-v2-commandcompletionservice"></a>
 ### Service `CommandCompletionService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_completion_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_completion_service.proto#L29)
 - Endpoints tracked: `1`
 
@@ -78,13 +80,15 @@ Allows clients to observe the status of their submissions.
  Clients that do not receive a successful completion about their submission MUST NOT assume that it was successful.
  Clients SHOULD subscribe to the CompletionStream before starting to submit commands to prevent race conditions.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`CompletionStream`](#endpoint-com-daml-ledger-api-v2-commandcompletionservice-completionstream) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.CompletionStreamRequest`](#type-com-daml-ledger-api-v2-completionstreamrequest) | [`com.daml.ledger.api.v2.CompletionStreamResponse`](#type-com-daml-ledger-api-v2-completionstreamresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_completion_service.proto#L31) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`CompletionStream`](#endpoint-com-daml-ledger-api-v2-commandcompletionservice-completionstream) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.CompletionStreamRequest`](#type-com-daml-ledger-api-v2-completionstreamrequest) | [`com.daml.ledger.api.v2.CompletionStreamResponse`](#type-com-daml-ledger-api-v2-completionstreamresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_completion_service.proto#L31) |
 
 <a id="endpoint-com-daml-ledger-api-v2-commandcompletionservice-completionstream"></a>
 **Endpoint `CommandCompletionService.CompletionStream`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -116,6 +120,8 @@ Subscribe to command completion events.
 <a id="service-com-daml-ledger-api-v2-commandservice"></a>
 ### Service `CommandService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L23)
 - Endpoints tracked: `3`
 
@@ -125,15 +131,17 @@ Command Service is able to correlate submitted commands with completion data, id
  Note that submitted commands generally produce completion events as well, even in case a command gets rejected.
  For example, the participant SHOULD produce a completion event for a rejection of a duplicate command.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`SubmitAndWait`](#endpoint-com-daml-ledger-api-v2-commandservice-submitandwait) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitAndWaitRequest`](#type-com-daml-ledger-api-v2-submitandwaitrequest) | [`com.daml.ledger.api.v2.SubmitAndWaitResponse`](#type-com-daml-ledger-api-v2-submitandwaitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L26) |
-| [`SubmitAndWaitForReassignment`](#endpoint-com-daml-ledger-api-v2-commandservice-submitandwaitforreassignment) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitAndWaitForReassignmentRequest`](#type-com-daml-ledger-api-v2-submitandwaitforreassignmentrequest) | [`com.daml.ledger.api.v2.SubmitAndWaitForReassignmentResponse`](#type-com-daml-ledger-api-v2-submitandwaitforreassignmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L34) |
-| [`SubmitAndWaitForTransaction`](#endpoint-com-daml-ledger-api-v2-commandservice-submitandwaitfortransaction) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitAndWaitForTransactionRequest`](#type-com-daml-ledger-api-v2-submitandwaitfortransactionrequest) | [`com.daml.ledger.api.v2.SubmitAndWaitForTransactionResponse`](#type-com-daml-ledger-api-v2-submitandwaitfortransactionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L30) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`SubmitAndWait`](#endpoint-com-daml-ledger-api-v2-commandservice-submitandwait) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitAndWaitRequest`](#type-com-daml-ledger-api-v2-submitandwaitrequest) | [`com.daml.ledger.api.v2.SubmitAndWaitResponse`](#type-com-daml-ledger-api-v2-submitandwaitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L26) |
+| [`SubmitAndWaitForReassignment`](#endpoint-com-daml-ledger-api-v2-commandservice-submitandwaitforreassignment) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitAndWaitForReassignmentRequest`](#type-com-daml-ledger-api-v2-submitandwaitforreassignmentrequest) | [`com.daml.ledger.api.v2.SubmitAndWaitForReassignmentResponse`](#type-com-daml-ledger-api-v2-submitandwaitforreassignmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L34) |
+| [`SubmitAndWaitForTransaction`](#endpoint-com-daml-ledger-api-v2-commandservice-submitandwaitfortransaction) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitAndWaitForTransactionRequest`](#type-com-daml-ledger-api-v2-submitandwaitfortransactionrequest) | [`com.daml.ledger.api.v2.SubmitAndWaitForTransactionResponse`](#type-com-daml-ledger-api-v2-submitandwaitfortransactionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_service.proto#L30) |
 
 <a id="endpoint-com-daml-ledger-api-v2-commandservice-submitandwait"></a>
 **Endpoint `CommandService.SubmitAndWait`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -166,6 +174,8 @@ Submits a single composite command and waits for its result.
 <a id="endpoint-com-daml-ledger-api-v2-commandservice-submitandwaitforreassignment"></a>
 **Endpoint `CommandService.SubmitAndWaitForReassignment`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -198,6 +208,8 @@ Submits a single composite reassignment command, waits for its result, and retur
 <a id="endpoint-com-daml-ledger-api-v2-commandservice-submitandwaitfortransaction"></a>
 **Endpoint `CommandService.SubmitAndWaitForTransaction`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -230,6 +242,8 @@ Submits a single composite command, waits for its result, and returns the transa
 <a id="service-com-daml-ledger-api-v2-commandsubmissionservice"></a>
 ### Service `CommandSubmissionService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L29)
 - Endpoints tracked: `2`
 
@@ -248,14 +262,16 @@ Allows clients to attempt advancing the ledger's state by submitting commands.
  Clients that do not receive a successful completion about their submission MUST NOT assume that it was successful.
  Clients SHOULD subscribe to the CompletionStream before starting to submit commands to prevent race conditions.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`Submit`](#endpoint-com-daml-ledger-api-v2-commandsubmissionservice-submit) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitRequest`](#type-com-daml-ledger-api-v2-submitrequest) | [`com.daml.ledger.api.v2.SubmitResponse`](#type-com-daml-ledger-api-v2-submitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L31) |
-| [`SubmitReassignment`](#endpoint-com-daml-ledger-api-v2-commandsubmissionservice-submitreassignment) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitReassignmentRequest`](#type-com-daml-ledger-api-v2-submitreassignmentrequest) | [`com.daml.ledger.api.v2.SubmitReassignmentResponse`](#type-com-daml-ledger-api-v2-submitreassignmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L34) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`Submit`](#endpoint-com-daml-ledger-api-v2-commandsubmissionservice-submit) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitRequest`](#type-com-daml-ledger-api-v2-submitrequest) | [`com.daml.ledger.api.v2.SubmitResponse`](#type-com-daml-ledger-api-v2-submitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L31) |
+| [`SubmitReassignment`](#endpoint-com-daml-ledger-api-v2-commandsubmissionservice-submitreassignment) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.SubmitReassignmentRequest`](#type-com-daml-ledger-api-v2-submitreassignmentrequest) | [`com.daml.ledger.api.v2.SubmitReassignmentResponse`](#type-com-daml-ledger-api-v2-submitreassignmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/command_submission_service.proto#L34) |
 
 <a id="endpoint-com-daml-ledger-api-v2-commandsubmissionservice-submit"></a>
 **Endpoint `CommandSubmissionService.Submit`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -287,6 +303,8 @@ Submit a single composite command.
 <a id="endpoint-com-daml-ledger-api-v2-commandsubmissionservice-submitreassignment"></a>
 **Endpoint `CommandSubmissionService.SubmitReassignment`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -318,18 +336,22 @@ Submit a single reassignment.
 <a id="service-com-daml-ledger-api-v2-contractservice"></a>
 ### Service `ContractService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/contract_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/contract_service.proto#L15)
 - Endpoints tracked: `1`
 
 This service is experimental / alpha, therefore no backwards compatibility is guaranteed.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetContract`](#endpoint-com-daml-ledger-api-v2-contractservice-getcontract) | `3.4.11` | `3.4.11` | `` | [`com.daml.ledger.api.v2.GetContractRequest`](#type-com-daml-ledger-api-v2-getcontractrequest) | [`com.daml.ledger.api.v2.GetContractResponse`](#type-com-daml-ledger-api-v2-getcontractresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/contract_service.proto#L22) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetContract`](#endpoint-com-daml-ledger-api-v2-contractservice-getcontract) | - | - | `3.4.11` | `3.4.11` | `` | [`com.daml.ledger.api.v2.GetContractRequest`](#type-com-daml-ledger-api-v2-getcontractrequest) | [`com.daml.ledger.api.v2.GetContractResponse`](#type-com-daml-ledger-api-v2-getcontractresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/contract_service.proto#L22) |
 
 <a id="endpoint-com-daml-ledger-api-v2-contractservice-getcontract"></a>
 **Endpoint `ContractService.GetContract`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.11`
 - Last changed in: `3.4.11`
 - Removed in: `-`
@@ -366,6 +388,8 @@ Looking up contract data by contract ID.
 <a id="service-com-daml-ledger-api-v2-eventqueryservice"></a>
 ### Service `EventQueryService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/event_query_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/event_query_service.proto#L32)
 - Endpoints tracked: `1`
 
@@ -374,13 +398,15 @@ Query events by contract id.
  Note that querying by contract key is not (yet) supported, as contract keys
  are not supported (yet) in multi-synchronizer scenarios.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetEventsByContractId`](#endpoint-com-daml-ledger-api-v2-eventqueryservice-geteventsbycontractid) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetEventsByContractIdRequest`](#type-com-daml-ledger-api-v2-geteventsbycontractidrequest) | [`com.daml.ledger.api.v2.GetEventsByContractIdResponse`](#type-com-daml-ledger-api-v2-geteventsbycontractidresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/event_query_service.proto#L37) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetEventsByContractId`](#endpoint-com-daml-ledger-api-v2-eventqueryservice-geteventsbycontractid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetEventsByContractIdRequest`](#type-com-daml-ledger-api-v2-geteventsbycontractidrequest) | [`com.daml.ledger.api.v2.GetEventsByContractIdResponse`](#type-com-daml-ledger-api-v2-geteventsbycontractidresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/event_query_service.proto#L37) |
 
 <a id="endpoint-com-daml-ledger-api-v2-eventqueryservice-geteventsbycontractid"></a>
 **Endpoint `EventQueryService.GetEventsByContractId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -415,21 +441,25 @@ Get the create and the consuming exercise event for the contract with the provid
 <a id="service-com-daml-ledger-api-v2-packageservice"></a>
 ### Service `PackageService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L54)
 - Endpoints tracked: `4`
 
 Allows clients to query the Daml-LF packages that are supported by the server.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetPackage`](#endpoint-com-daml-ledger-api-v2-packageservice-getpackage) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetPackageRequest`](#type-com-daml-ledger-api-v2-getpackagerequest) | [`com.daml.ledger.api.v2.GetPackageResponse`](#type-com-daml-ledger-api-v2-getpackageresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L59) |
-| [`GetPackageStatus`](#endpoint-com-daml-ledger-api-v2-packageservice-getpackagestatus) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetPackageStatusRequest`](#type-com-daml-ledger-api-v2-getpackagestatusrequest) | [`com.daml.ledger.api.v2.GetPackageStatusResponse`](#type-com-daml-ledger-api-v2-getpackagestatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L62) |
-| [`ListPackages`](#endpoint-com-daml-ledger-api-v2-packageservice-listpackages) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.ListPackagesRequest`](#type-com-daml-ledger-api-v2-listpackagesrequest) | [`com.daml.ledger.api.v2.ListPackagesResponse`](#type-com-daml-ledger-api-v2-listpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L56) |
-| [`ListVettedPackages`](#endpoint-com-daml-ledger-api-v2-packageservice-listvettedpackages) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.ListVettedPackagesRequest`](#type-com-daml-ledger-api-v2-listvettedpackagesrequest) | [`com.daml.ledger.api.v2.ListVettedPackagesResponse`](#type-com-daml-ledger-api-v2-listvettedpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L66) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetPackage`](#endpoint-com-daml-ledger-api-v2-packageservice-getpackage) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetPackageRequest`](#type-com-daml-ledger-api-v2-getpackagerequest) | [`com.daml.ledger.api.v2.GetPackageResponse`](#type-com-daml-ledger-api-v2-getpackageresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L59) |
+| [`GetPackageStatus`](#endpoint-com-daml-ledger-api-v2-packageservice-getpackagestatus) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetPackageStatusRequest`](#type-com-daml-ledger-api-v2-getpackagestatusrequest) | [`com.daml.ledger.api.v2.GetPackageStatusResponse`](#type-com-daml-ledger-api-v2-getpackagestatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L62) |
+| [`ListPackages`](#endpoint-com-daml-ledger-api-v2-packageservice-listpackages) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.ListPackagesRequest`](#type-com-daml-ledger-api-v2-listpackagesrequest) | [`com.daml.ledger.api.v2.ListPackagesResponse`](#type-com-daml-ledger-api-v2-listpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L56) |
+| [`ListVettedPackages`](#endpoint-com-daml-ledger-api-v2-packageservice-listvettedpackages) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.ListVettedPackagesRequest`](#type-com-daml-ledger-api-v2-listvettedpackagesrequest) | [`com.daml.ledger.api.v2.ListVettedPackagesResponse`](#type-com-daml-ledger-api-v2-listvettedpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/package_service.proto#L66) |
 
 <a id="endpoint-com-daml-ledger-api-v2-packageservice-getpackage"></a>
 **Endpoint `PackageService.GetPackage`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -461,6 +491,8 @@ Returns the contents of a single package.
 <a id="endpoint-com-daml-ledger-api-v2-packageservice-getpackagestatus"></a>
 **Endpoint `PackageService.GetPackageStatus`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -492,6 +524,8 @@ Returns the status of a single package.
 <a id="endpoint-com-daml-ledger-api-v2-packageservice-listpackages"></a>
 **Endpoint `PackageService.ListPackages`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -523,6 +557,8 @@ Returns the identifiers of all supported packages.
 <a id="endpoint-com-daml-ledger-api-v2-packageservice-listvettedpackages"></a>
 **Endpoint `PackageService.ListVettedPackages`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -555,21 +591,25 @@ Lists which participant node vetted what packages on which synchronizer.
 <a id="service-com-daml-ledger-api-v2-stateservice"></a>
 ### Service `StateService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L17)
 - Endpoints tracked: `4`
 
 Allows clients to get state from the ledger.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetActiveContracts`](#endpoint-com-daml-ledger-api-v2-stateservice-getactivecontracts) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetActiveContractsRequest`](#type-com-daml-ledger-api-v2-getactivecontractsrequest) | [`com.daml.ledger.api.v2.GetActiveContractsResponse`](#type-com-daml-ledger-api-v2-getactivecontractsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L23) |
-| [`GetConnectedSynchronizers`](#endpoint-com-daml-ledger-api-v2-stateservice-getconnectedsynchronizers) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetConnectedSynchronizersRequest`](#type-com-daml-ledger-api-v2-getconnectedsynchronizersrequest) | [`com.daml.ledger.api.v2.GetConnectedSynchronizersResponse`](#type-com-daml-ledger-api-v2-getconnectedsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L26) |
-| [`GetLatestPrunedOffsets`](#endpoint-com-daml-ledger-api-v2-stateservice-getlatestprunedoffsets) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetLatestPrunedOffsetsRequest`](#type-com-daml-ledger-api-v2-getlatestprunedoffsetsrequest) | [`com.daml.ledger.api.v2.GetLatestPrunedOffsetsResponse`](#type-com-daml-ledger-api-v2-getlatestprunedoffsetsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L33) |
-| [`GetLedgerEnd`](#endpoint-com-daml-ledger-api-v2-stateservice-getledgerend) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetLedgerEndRequest`](#type-com-daml-ledger-api-v2-getledgerendrequest) | [`com.daml.ledger.api.v2.GetLedgerEndResponse`](#type-com-daml-ledger-api-v2-getledgerendresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L30) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetActiveContracts`](#endpoint-com-daml-ledger-api-v2-stateservice-getactivecontracts) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetActiveContractsRequest`](#type-com-daml-ledger-api-v2-getactivecontractsrequest) | [`com.daml.ledger.api.v2.GetActiveContractsResponse`](#type-com-daml-ledger-api-v2-getactivecontractsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L23) |
+| [`GetConnectedSynchronizers`](#endpoint-com-daml-ledger-api-v2-stateservice-getconnectedsynchronizers) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetConnectedSynchronizersRequest`](#type-com-daml-ledger-api-v2-getconnectedsynchronizersrequest) | [`com.daml.ledger.api.v2.GetConnectedSynchronizersResponse`](#type-com-daml-ledger-api-v2-getconnectedsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L26) |
+| [`GetLatestPrunedOffsets`](#endpoint-com-daml-ledger-api-v2-stateservice-getlatestprunedoffsets) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetLatestPrunedOffsetsRequest`](#type-com-daml-ledger-api-v2-getlatestprunedoffsetsrequest) | [`com.daml.ledger.api.v2.GetLatestPrunedOffsetsResponse`](#type-com-daml-ledger-api-v2-getlatestprunedoffsetsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L33) |
+| [`GetLedgerEnd`](#endpoint-com-daml-ledger-api-v2-stateservice-getledgerend) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetLedgerEndRequest`](#type-com-daml-ledger-api-v2-getledgerendrequest) | [`com.daml.ledger.api.v2.GetLedgerEndResponse`](#type-com-daml-ledger-api-v2-getledgerendresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/state_service.proto#L30) |
 
 <a id="endpoint-com-daml-ledger-api-v2-stateservice-getactivecontracts"></a>
 **Endpoint `StateService.GetActiveContracts`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -605,6 +645,8 @@ Returns a stream of the snapshot of the active contracts and incomplete (un)assi
 <a id="endpoint-com-daml-ledger-api-v2-stateservice-getconnectedsynchronizers"></a>
 **Endpoint `StateService.GetConnectedSynchronizers`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -636,6 +678,8 @@ Get the list of connected synchronizers at the time of the query.
 <a id="endpoint-com-daml-ledger-api-v2-stateservice-getlatestprunedoffsets"></a>
 **Endpoint `StateService.GetLatestPrunedOffsets`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -667,6 +711,8 @@ Get the latest successfully pruned ledger offsets
 <a id="endpoint-com-daml-ledger-api-v2-stateservice-getledgerend"></a>
 **Endpoint `StateService.GetLedgerEnd`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -699,6 +745,8 @@ Get the current ledger end.
 <a id="service-com-daml-ledger-api-v2-updateservice"></a>
 ### Service `UpdateService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L30)
 - Endpoints tracked: `3`
 
@@ -715,15 +763,17 @@ Allows clients to read updates (transactions, (un)assignments, topology events) 
  synchronizer: updates which have greater offsets are happened after than updates with smaller
  offsets for the same synchronizer. Across different synchronizers this is not guaranteed.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetUpdateById`](#endpoint-com-daml-ledger-api-v2-updateservice-getupdatebyid) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetUpdateByIdRequest`](#type-com-daml-ledger-api-v2-getupdatebyidrequest) | [`com.daml.ledger.api.v2.GetUpdateResponse`](#type-com-daml-ledger-api-v2-getupdateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L45) |
-| [`GetUpdateByOffset`](#endpoint-com-daml-ledger-api-v2-updateservice-getupdatebyoffset) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetUpdateByOffsetRequest`](#type-com-daml-ledger-api-v2-getupdatebyoffsetrequest) | [`com.daml.ledger.api.v2.GetUpdateResponse`](#type-com-daml-ledger-api-v2-getupdateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L41) |
-| [`GetUpdates`](#endpoint-com-daml-ledger-api-v2-updateservice-getupdates) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetUpdatesRequest`](#type-com-daml-ledger-api-v2-getupdatesrequest) | [`com.daml.ledger.api.v2.GetUpdatesResponse`](#type-com-daml-ledger-api-v2-getupdatesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L37) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetUpdateById`](#endpoint-com-daml-ledger-api-v2-updateservice-getupdatebyid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetUpdateByIdRequest`](#type-com-daml-ledger-api-v2-getupdatebyidrequest) | [`com.daml.ledger.api.v2.GetUpdateResponse`](#type-com-daml-ledger-api-v2-getupdateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L45) |
+| [`GetUpdateByOffset`](#endpoint-com-daml-ledger-api-v2-updateservice-getupdatebyoffset) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetUpdateByOffsetRequest`](#type-com-daml-ledger-api-v2-getupdatebyoffsetrequest) | [`com.daml.ledger.api.v2.GetUpdateResponse`](#type-com-daml-ledger-api-v2-getupdateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L41) |
+| [`GetUpdates`](#endpoint-com-daml-ledger-api-v2-updateservice-getupdates) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetUpdatesRequest`](#type-com-daml-ledger-api-v2-getupdatesrequest) | [`com.daml.ledger.api.v2.GetUpdatesResponse`](#type-com-daml-ledger-api-v2-getupdatesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/update_service.proto#L37) |
 
 <a id="endpoint-com-daml-ledger-api-v2-updateservice-getupdatebyid"></a>
 **Endpoint `UpdateService.GetUpdateById`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -756,6 +806,8 @@ Lookup an update by its ID.
 <a id="endpoint-com-daml-ledger-api-v2-updateservice-getupdatebyoffset"></a>
 **Endpoint `UpdateService.GetUpdateByOffset`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -788,6 +840,8 @@ Lookup an update by its offset.
 <a id="endpoint-com-daml-ledger-api-v2-updateservice-getupdates"></a>
 **Endpoint `UpdateService.GetUpdates`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -824,18 +878,22 @@ Read the ledger's filtered update stream for the specified contents and filters.
 <a id="service-com-daml-ledger-api-v2-versionservice"></a>
 ### Service `VersionService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/version_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/version_service.proto#L16)
 - Endpoints tracked: `1`
 
 Allows clients to retrieve information about the ledger API version
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetLedgerApiVersion`](#endpoint-com-daml-ledger-api-v2-versionservice-getledgerapiversion) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetLedgerApiVersionRequest`](#type-com-daml-ledger-api-v2-getledgerapiversionrequest) | [`com.daml.ledger.api.v2.GetLedgerApiVersionResponse`](#type-com-daml-ledger-api-v2-getledgerapiversionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/version_service.proto#L18) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetLedgerApiVersion`](#endpoint-com-daml-ledger-api-v2-versionservice-getledgerapiversion) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.GetLedgerApiVersionRequest`](#type-com-daml-ledger-api-v2-getledgerapiversionrequest) | [`com.daml.ledger.api.v2.GetLedgerApiVersionResponse`](#type-com-daml-ledger-api-v2-getledgerapiversionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/version_service.proto#L18) |
 
 <a id="endpoint-com-daml-ledger-api-v2-versionservice-getledgerapiversion"></a>
 **Endpoint `VersionService.GetLedgerApiVersion`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

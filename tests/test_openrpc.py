@@ -11,8 +11,6 @@ from pathlib import Path
 from x2mdx.cli import main as cli_main
 from x2mdx.openrpc.lifecycle import build_openrpc_report_from_sources, parse_openrpc
 from x2mdx.openrpc.models import OpenRpcSourceSnapshot
-from x2mdx.openrpc.render import build_pages, build_pages_legacy
-from tests.parity import assert_page_tree_equal
 
 
 def write_text(path: Path, contents: str) -> None:
@@ -345,22 +343,28 @@ class OpenRpcTests(unittest.TestCase):
         self.assertEqual(remote_methods["status"].changed_in_versions, ["1.1.0"])
         self.assertIn("result updated (required fields)", remote_methods["status"].change_details[0]["changes"])
 
-    def test_render_builder_matches_legacy_output(self) -> None:
+    def test_build_report_tracks_explicit_lifecycle_and_replacement_metadata(self) -> None:
         report = build_openrpc_report_from_sources(
             [
                 self._snapshot(
                     version="1.0.0",
-                    spec_id="dapp-api",
-                    display_name="Dapp API",
-                    source_path="api-specs/openrpc-dapp-api.json",
+                    spec_id="payment-api",
+                    display_name="Payment API",
+                    source_path="api-specs/openrpc-payment-api.json",
                     contents="""
                         {
                           "openrpc": "1.2.6",
-                          "info": {"title": "Dapp API", "version": "1.0.0"},
+                          "info": {"title": "Payment API", "version": "1.0.0"},
                           "methods": [
                             {
-                              "name": "status",
-                              "description": "Return provider status.",
+                              "name": "listPayments",
+                              "description": "List payments.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "listLegacyPayments",
+                              "description": "List legacy payments.",
                               "params": [],
                               "result": {"name": "result", "schema": {"type": "string"}}
                             }
@@ -370,29 +374,40 @@ class OpenRpcTests(unittest.TestCase):
                 ),
                 self._snapshot(
                     version="1.1.0",
-                    spec_id="dapp-api",
-                    display_name="Dapp API",
-                    source_path="api-specs/openrpc-dapp-api.json",
+                    spec_id="payment-api",
+                    display_name="Payment API",
+                    source_path="api-specs/openrpc-payment-api.json",
                     contents="""
                         {
                           "openrpc": "1.2.6",
-                          "info": {"title": "Dapp API", "version": "1.1.0"},
+                          "info": {"title": "Payment API", "version": "1.1.0"},
                           "methods": [
                             {
-                              "name": "status",
-                              "description": "Return wallet provider status.",
+                              "name": "listPayments",
+                              "description": "List payments.",
                               "params": [],
                               "result": {"name": "result", "schema": {"type": "string"}}
                             },
                             {
-                              "name": "connect",
-                              "description": "Connect to a provider.",
-                              "params": [
-                                {
-                                  "name": "network",
-                                  "schema": {"type": "string"}
-                                }
-                              ],
+                              "name": "listPaymentsV2",
+                              "x-state": "stable",
+                              "x-replaces": "listPayments",
+                              "description": "List payments with stable v2 output.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "previewPayments",
+                              "x-state": "beta",
+                              "description": "Preview payment listing.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "listLegacyPayments",
+                              "x-state": "deprecated",
+                              "description": "List legacy payments.",
+                              "params": [],
                               "result": {"name": "result", "schema": {"type": "string"}}
                             }
                           ]
@@ -404,18 +419,24 @@ class OpenRpcTests(unittest.TestCase):
             version_filter="unit test versions",
         )
 
-        _legacy_root, legacy_pages = build_pages_legacy(
-            report,
-            output_dir=Path("reference"),
-            overview_title="Wallet Gateway JSON-RPC",
-        )
-        _actual_root, actual_pages = build_pages(
-            report,
-            output_dir=Path("reference"),
-            overview_title="Wallet Gateway JSON-RPC",
-        )
+        spec = next(spec for spec in report.specs if spec.spec_id == "payment-api")
+        methods = {method.method: method for method in spec.methods}
 
-        assert_page_tree_equal(self, actual_pages, legacy_pages)
+        self.assertEqual(methods["listPaymentsV2"].latest["state"], "stable")
+        self.assertEqual(methods["listPaymentsV2"].latest["replaces"], "listPayments")
+        self.assertEqual(methods["previewPayments"].latest["state"], "beta")
+        self.assertEqual(methods["listLegacyPayments"].latest["state"], "deprecated")
+        self.assertEqual(
+            methods["listLegacyPayments"].change_details,
+            [
+                {
+                    "version": "1.1.0",
+                    "changes": [
+                        "lifecycle state changed `-` -> `deprecated`",
+                    ],
+                }
+            ],
+        )
 
     def test_cli_builds_openrpc_pages(self) -> None:
         manifest_path = self._write_manifest()

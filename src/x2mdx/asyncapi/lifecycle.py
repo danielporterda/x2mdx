@@ -346,6 +346,10 @@ def extract_channel_detail(doc: dict[str, Any], channel_name: str, channel_node:
     resolved_channel = resolve_local_ref(doc, channel_node)
     if not isinstance(resolved_channel, dict):
         resolved_channel = {}
+    raw_state = resolved_channel.get("x-state")
+    state = str(raw_state).strip().lower() if isinstance(raw_state, str) and raw_state.strip() else None
+    raw_replaces = resolved_channel.get("x-replaces")
+    replaces = str(raw_replaces).strip() if isinstance(raw_replaces, str) and raw_replaces.strip() else None
 
     actions: list[dict[str, Any]] = []
     for action_name in ("publish", "subscribe"):
@@ -356,6 +360,8 @@ def extract_channel_detail(doc: dict[str, Any], channel_name: str, channel_node:
         "channel": channel_name,
         "anchor": channel_anchor(channel_name),
         "description": str(resolved_channel.get("description") or ""),
+        "state": state,
+        "replaces": replaces,
         "actions": actions,
         "action_names": [action["action"] for action in actions],
     }
@@ -363,6 +369,13 @@ def extract_channel_detail(doc: dict[str, Any], channel_name: str, channel_node:
 
 def render_name_list(names: list[str]) -> str:
     return ", ".join(f"`{name}`" for name in names)
+
+
+def render_optional_token(value: Any) -> str:
+    if value is None:
+        return "`-`"
+    text = str(value).strip()
+    return f"`{text}`" if text else "`-`"
 
 
 def describe_action_changes(previous: dict[str, Any] | None, current: dict[str, Any] | None, *, action_name: str) -> list[str]:
@@ -412,6 +425,14 @@ def describe_action_changes(previous: dict[str, Any] | None, current: dict[str, 
 
 def describe_channel_changes(previous: dict[str, Any], current: dict[str, Any]) -> list[str]:
     changes: list[str] = []
+    if previous.get("state") != current.get("state"):
+        changes.append(
+            f"lifecycle state changed {render_optional_token(previous.get('state'))} -> {render_optional_token(current.get('state'))}"
+        )
+    if previous.get("replaces") != current.get("replaces"):
+        changes.append(
+            f"replacement target changed {render_optional_token(previous.get('replaces'))} -> {render_optional_token(current.get('replaces'))}"
+        )
     if previous["description"] != current["description"]:
         changes.append("channel description updated")
 
@@ -581,4 +602,3 @@ def build_asyncapi_report_from_sources(
         per_version_deltas=per_version_deltas,
         channels=merged_channels,
     )
-

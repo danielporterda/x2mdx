@@ -27,30 +27,34 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`SequencerAuthenticationService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice) | `3` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L12) | Operations related to authentication tokens for calling sequencer operations |
-| [`SequencerChannelService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice) | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L13) | The service that a member can use to establish a bidirectional channel to another member via the sequencer |
-| [`SequencerConnectService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice) | `5` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L11) |  |
-| [`SequencerService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerservice) | `7` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L15) | The service that a member can use to send messages to the synchronizer and receive events from the synchronizer |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`SequencerAuthenticationService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice) | - | `3` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L12) | Operations related to authentication tokens for calling sequencer operations |
+| [`SequencerChannelService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice) | - | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L13) | The service that a member can use to establish a bidirectional channel to another member via the sequencer |
+| [`SequencerConnectService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice) | - | `5` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L11) |  |
+| [`SequencerService`](#service-com-digitalasset-canton-sequencer-api-v30-sequencerservice) | - | `7` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L15) | The service that a member can use to send messages to the synchronizer and receive events from the synchronizer |
 
 <a id="service-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice"></a>
 ### Service `SequencerAuthenticationService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L12)
 - Endpoints tracked: `3`
 
 Operations related to authentication tokens for calling sequencer operations
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`Authenticate`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-authenticate) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.AuthenticateRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-authenticaterequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.AuthenticateResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-authenticateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L18) |
-| [`Challenge`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-challenge) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.ChallengeRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-challengerequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.ChallengeResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-challengeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L15) |
-| [`Logout`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-logout) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.LogoutRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-logoutrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.LogoutResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-logoutresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L20) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`Authenticate`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-authenticate) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.AuthenticateRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-authenticaterequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.AuthenticateResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-authenticateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L18) |
+| [`Challenge`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-challenge) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.ChallengeRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-challengerequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.ChallengeResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-challengeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L15) |
+| [`Logout`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-logout) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.LogoutRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-logoutrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerAuthentication.LogoutResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerauthentication-logoutresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_authentication_service.proto#L20) |
 
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-authenticate"></a>
 **Endpoint `SequencerAuthenticationService.Authenticate`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -83,6 +87,8 @@ If provided with a correctly signed nonce, will return an authentication token
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-challenge"></a>
 **Endpoint `SequencerAuthenticationService.Challenge`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -115,6 +121,8 @@ If provided with a supported protocol version,
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerauthenticationservice-logout"></a>
 **Endpoint `SequencerAuthenticationService.Logout`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -146,19 +154,23 @@ Unconditionally revoke a member's authentication tokens and disconnect it
 <a id="service-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice"></a>
 ### Service `SequencerChannelService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L13)
 - Endpoints tracked: `2`
 
 The service that a member can use to establish a bidirectional channel to another member via the sequencer
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ConnectToSequencerChannel`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice-connecttosequencerchannel) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.ConnectToSequencerChannelRequest`](#type-com-digitalasset-canton-sequencer-api-v30-connecttosequencerchannelrequest) | [`com.digitalasset.canton.sequencer.api.v30.ConnectToSequencerChannelResponse`](#type-com-digitalasset-canton-sequencer-api-v30-connecttosequencerchannelresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L17) |
-| [`Ping`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice-ping) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.PingRequest`](#type-com-digitalasset-canton-sequencer-api-v30-pingrequest) | [`com.digitalasset.canton.sequencer.api.v30.PingResponse`](#type-com-digitalasset-canton-sequencer-api-v30-pingresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L20) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ConnectToSequencerChannel`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice-connecttosequencerchannel) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.ConnectToSequencerChannelRequest`](#type-com-digitalasset-canton-sequencer-api-v30-connecttosequencerchannelrequest) | [`com.digitalasset.canton.sequencer.api.v30.ConnectToSequencerChannelResponse`](#type-com-digitalasset-canton-sequencer-api-v30-connecttosequencerchannelresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L17) |
+| [`Ping`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice-ping) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.PingRequest`](#type-com-digitalasset-canton-sequencer-api-v30-pingrequest) | [`com.digitalasset.canton.sequencer.api.v30.PingResponse`](#type-com-digitalasset-canton-sequencer-api-v30-pingresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_channel_service.proto#L20) |
 
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice-connecttosequencerchannel"></a>
 **Endpoint `SequencerChannelService.ConnectToSequencerChannel`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -192,6 +204,8 @@ Request to connect to a channel and begin interacting with it via bidirectional 
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerchannelservice-ping"></a>
 **Endpoint `SequencerChannelService.Ping`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -223,22 +237,26 @@ Ping to check if the sequencer supports and has enabled channels.
 <a id="service-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice"></a>
 ### Service `SequencerConnectService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L11)
 - Endpoints tracked: `5`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetSynchronizerId`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-getsynchronizerid) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerIdRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizeridrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerIdResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizeridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L13) |
-| [`GetSynchronizerParameters`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-getsynchronizerparameters) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerParametersRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizerparametersrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerParametersResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizerparametersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L14) |
-| [`Handshake`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-handshake) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.HandshakeRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-handshakerequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.HandshakeResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-handshakeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L12) |
-| [`RegisterOnboardingTopologyTransactions`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-registeronboardingtopologytransactions) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.RegisterOnboardingTopologyTransactionsRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-registeronboardingtopologytransactionsrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.RegisterOnboardingTopologyTransactionsResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-registeronboardingtopologytransactionsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L16) |
-| [`VerifyActive`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-verifyactive) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.VerifyActiveRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-verifyactiverequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.VerifyActiveResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-verifyactiveresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L15) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetSynchronizerId`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-getsynchronizerid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerIdRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizeridrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerIdResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizeridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L13) |
+| [`GetSynchronizerParameters`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-getsynchronizerparameters) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerParametersRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizerparametersrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.GetSynchronizerParametersResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-getsynchronizerparametersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L14) |
+| [`Handshake`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-handshake) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.HandshakeRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-handshakerequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.HandshakeResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-handshakeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L12) |
+| [`RegisterOnboardingTopologyTransactions`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-registeronboardingtopologytransactions) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.RegisterOnboardingTopologyTransactionsRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-registeronboardingtopologytransactionsrequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.RegisterOnboardingTopologyTransactionsResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-registeronboardingtopologytransactionsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L16) |
+| [`VerifyActive`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-verifyactive) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.VerifyActiveRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-verifyactiverequest) | [`com.digitalasset.canton.sequencer.api.v30.SequencerConnect.VerifyActiveResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sequencerconnect-verifyactiveresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_connect_service.proto#L15) |
 
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-getsynchronizerid"></a>
 **Endpoint `SequencerConnectService.GetSynchronizerId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -270,6 +288,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-getsynchronizerparameters"></a>
 **Endpoint `SequencerConnectService.GetSynchronizerParameters`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -301,6 +321,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-handshake"></a>
 **Endpoint `SequencerConnectService.Handshake`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -332,6 +354,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-registeronboardingtopologytransactions"></a>
 **Endpoint `SequencerConnectService.RegisterOnboardingTopologyTransactions`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -363,6 +387,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerconnectservice-verifyactive"></a>
 **Endpoint `SequencerConnectService.VerifyActive`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -394,25 +420,29 @@ _No description._
 <a id="service-com-digitalasset-canton-sequencer-api-v30-sequencerservice"></a>
 ### Service `SequencerService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L15)
 - Endpoints tracked: `7`
 
 The service that a member can use to send messages to the synchronizer and
  receive events from the synchronizer
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`AcknowledgeSigned`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-acknowledgesigned) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.AcknowledgeSignedRequest`](#type-com-digitalasset-canton-sequencer-api-v30-acknowledgesignedrequest) | [`com.digitalasset.canton.sequencer.api.v30.AcknowledgeSignedResponse`](#type-com-digitalasset-canton-sequencer-api-v30-acknowledgesignedresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L92) |
-| [`DownloadTopologyStateForInit`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-downloadtopologystateforinit) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitRequest`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinitrequest) | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitResponse`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L96) |
-| [`DownloadTopologyStateForInitHash`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-downloadtopologystateforinithash) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitHashRequest`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinithashrequest) | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitHashResponse`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinithashresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L100) |
-| [`GetTime`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-gettime) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.GetTimeRequest`](#type-com-digitalasset-canton-sequencer-api-v30-gettimerequest) | [`com.digitalasset.canton.sequencer.api.v30.GetTimeResponse`](#type-com-digitalasset-canton-sequencer-api-v30-gettimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L108) |
-| [`GetTrafficStateForMember`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-gettrafficstateformember) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.GetTrafficStateForMemberRequest`](#type-com-digitalasset-canton-sequencer-api-v30-gettrafficstateformemberrequest) | [`com.digitalasset.canton.sequencer.api.v30.GetTrafficStateForMemberResponse`](#type-com-digitalasset-canton-sequencer-api-v30-gettrafficstateformemberresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L103) |
-| [`SendAsync`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-sendasync) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SendAsyncRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sendasyncrequest) | [`com.digitalasset.canton.sequencer.api.v30.SendAsyncResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sendasyncresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L75) |
-| [`Subscribe`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-subscribe) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SubscriptionRequest`](#type-com-digitalasset-canton-sequencer-api-v30-subscriptionrequest) | [`com.digitalasset.canton.sequencer.api.v30.SubscriptionResponse`](#type-com-digitalasset-canton-sequencer-api-v30-subscriptionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L84) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`AcknowledgeSigned`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-acknowledgesigned) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.AcknowledgeSignedRequest`](#type-com-digitalasset-canton-sequencer-api-v30-acknowledgesignedrequest) | [`com.digitalasset.canton.sequencer.api.v30.AcknowledgeSignedResponse`](#type-com-digitalasset-canton-sequencer-api-v30-acknowledgesignedresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L92) |
+| [`DownloadTopologyStateForInit`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-downloadtopologystateforinit) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitRequest`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinitrequest) | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitResponse`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L96) |
+| [`DownloadTopologyStateForInitHash`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-downloadtopologystateforinithash) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitHashRequest`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinithashrequest) | [`com.digitalasset.canton.sequencer.api.v30.DownloadTopologyStateForInitHashResponse`](#type-com-digitalasset-canton-sequencer-api-v30-downloadtopologystateforinithashresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L100) |
+| [`GetTime`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-gettime) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.GetTimeRequest`](#type-com-digitalasset-canton-sequencer-api-v30-gettimerequest) | [`com.digitalasset.canton.sequencer.api.v30.GetTimeResponse`](#type-com-digitalasset-canton-sequencer-api-v30-gettimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L108) |
+| [`GetTrafficStateForMember`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-gettrafficstateformember) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.GetTrafficStateForMemberRequest`](#type-com-digitalasset-canton-sequencer-api-v30-gettrafficstateformemberrequest) | [`com.digitalasset.canton.sequencer.api.v30.GetTrafficStateForMemberResponse`](#type-com-digitalasset-canton-sequencer-api-v30-gettrafficstateformemberresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L103) |
+| [`SendAsync`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-sendasync) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SendAsyncRequest`](#type-com-digitalasset-canton-sequencer-api-v30-sendasyncrequest) | [`com.digitalasset.canton.sequencer.api.v30.SendAsyncResponse`](#type-com-digitalasset-canton-sequencer-api-v30-sendasyncresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L75) |
+| [`Subscribe`](#endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-subscribe) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.sequencer.api.v30.SubscriptionRequest`](#type-com-digitalasset-canton-sequencer-api-v30-subscriptionrequest) | [`com.digitalasset.canton.sequencer.api.v30.SubscriptionResponse`](#type-com-digitalasset-canton-sequencer-api-v30-subscriptionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/sequencer/api/v30/sequencer_service.proto#L84) |
 
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-acknowledgesigned"></a>
 **Endpoint `SequencerService.AcknowledgeSigned`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -449,6 +479,8 @@ Allows a member to acknowledge that they have read all events up to and includin
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-downloadtopologystateforinit"></a>
 **Endpoint `SequencerService.DownloadTopologyStateForInit`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -481,6 +513,8 @@ Download the topology state for a member up to including the topology transactio
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-downloadtopologystateforinithash"></a>
 **Endpoint `SequencerService.DownloadTopologyStateForInitHash`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -513,6 +547,8 @@ Returns a hash of a result equivalent to DownloadTopologyStateForInit call
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-gettime"></a>
 **Endpoint `SequencerService.GetTime`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -546,6 +582,8 @@ Return a "current" sequencing time such that, when a `SendAsync` operation is
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-gettrafficstateformember"></a>
 **Endpoint `SequencerService.GetTrafficStateForMember`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -577,6 +615,8 @@ Return the currently known traffic state for a member. Callers must be authorize
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-sendasync"></a>
 **Endpoint `SequencerService.SendAsync`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -666,6 +706,8 @@ Submit a request to the sequencer.
 <a id="endpoint-com-digitalasset-canton-sequencer-api-v30-sequencerservice-subscribe"></a>
 **Endpoint `SequencerService.Subscribe`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

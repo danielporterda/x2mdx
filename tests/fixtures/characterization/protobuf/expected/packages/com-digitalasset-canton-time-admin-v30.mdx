@@ -24,26 +24,30 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`SynchronizerTimeService`](#service-com-digitalasset-canton-time-admin-v30-synchronizertimeservice) | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L12) |  |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`SynchronizerTimeService`](#service-com-digitalasset-canton-time-admin-v30-synchronizertimeservice) | - | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L12) |  |
 
 <a id="service-com-digitalasset-canton-time-admin-v30-synchronizertimeservice"></a>
 ### Service `SynchronizerTimeService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L12)
 - Endpoints tracked: `2`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`AwaitTime`](#endpoint-com-digitalasset-canton-time-admin-v30-synchronizertimeservice-awaittime) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.time.admin.v30.AwaitTimeRequest`](#type-com-digitalasset-canton-time-admin-v30-awaittimerequest) | [`com.digitalasset.canton.time.admin.v30.AwaitTimeResponse`](#type-com-digitalasset-canton-time-admin-v30-awaittimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L16) |
-| [`FetchTime`](#endpoint-com-digitalasset-canton-time-admin-v30-synchronizertimeservice-fetchtime) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.time.admin.v30.FetchTimeRequest`](#type-com-digitalasset-canton-time-admin-v30-fetchtimerequest) | [`com.digitalasset.canton.time.admin.v30.FetchTimeResponse`](#type-com-digitalasset-canton-time-admin-v30-fetchtimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L14) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`AwaitTime`](#endpoint-com-digitalasset-canton-time-admin-v30-synchronizertimeservice-awaittime) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.time.admin.v30.AwaitTimeRequest`](#type-com-digitalasset-canton-time-admin-v30-awaittimerequest) | [`com.digitalasset.canton.time.admin.v30.AwaitTimeResponse`](#type-com-digitalasset-canton-time-admin-v30-awaittimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L16) |
+| [`FetchTime`](#endpoint-com-digitalasset-canton-time-admin-v30-synchronizertimeservice-fetchtime) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.time.admin.v30.FetchTimeRequest`](#type-com-digitalasset-canton-time-admin-v30-fetchtimerequest) | [`com.digitalasset.canton.time.admin.v30.FetchTimeResponse`](#type-com-digitalasset-canton-time-admin-v30-fetchtimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/time/admin/v30/synchronizer_time_service.proto#L14) |
 
 <a id="endpoint-com-digitalasset-canton-time-admin-v30-synchronizertimeservice-awaittime"></a>
 **Endpoint `SynchronizerTimeService.AwaitTime`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -75,6 +79,8 @@ await for the supplied time to be reached on the target synchronizer
 <a id="endpoint-com-digitalasset-canton-time-admin-v30-synchronizertimeservice-fetchtime"></a>
 **Endpoint `SynchronizerTimeService.FetchTime`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

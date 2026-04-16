@@ -5,7 +5,12 @@
 {{ paragraph(report.info_description) }}
 {% endif %}
 
-{% call shared.standard_reference_layout(toc_rows=channel_summary_rows, version_rows=version_timeline_rows) %}
+{{ shared.status_toc(channel_summary_rows, legend=channel_summary_legend) }}
+
+{{ shared.version_change_summary(version_timeline_rows) }}
+
+{{ heading(2, "Reference") }}
+
 {% for channel in channels %}
 
 {{ anchor(channel.anchor) }}
@@ -34,4 +39,3 @@
 {% endif %}
 {% endfor %}
 {% endfor %}
-{% endcall %}

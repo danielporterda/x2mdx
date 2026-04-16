@@ -1,0 +1,69 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "Payment API",
+    "version": "1.1.0"
+  },
+  "methods": [
+    {
+      "name": "listLegacyPayments",
+      "x-state": "deprecated",
+      "description": "List legacy payments.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "listPayments",
+      "description": "List payments.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "listPaymentsV2",
+      "x-state": "stable",
+      "x-replaces": "listPayments",
+      "description": "List payments with stable v2 output.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "previewPayments",
+      "x-state": "beta",
+      "description": "Preview payment listing.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "alphaPayments",
+      "x-state": "alpha",
+      "description": "Alpha payment listing.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

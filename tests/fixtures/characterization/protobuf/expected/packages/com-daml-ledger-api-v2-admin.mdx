@@ -30,18 +30,20 @@ description: "Descriptor-backed protobuf API history for package com.daml.ledger
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`CommandInspectionService`](#service-com-daml-ledger-api-v2-admin-commandinspectionservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/command_inspection_service.proto#L23) | Status: experimental interface, will change before it is deemed production ready The inspection service provides meth... |
-| [`IdentityProviderConfigService`](#service-com-daml-ledger-api-v2-admin-identityproviderconfigservice) | `5` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L37) | Identity Provider Config Service makes it possible for participant node administrators to setup and manage additional... |
-| [`PackageManagementService`](#service-com-daml-ledger-api-v2-admin-packagemanagementservice) | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L21) | Status: experimental interface, will change before it is deemed production ready Query the Daml-LF packages supported... |
-| [`ParticipantPruningService`](#service-com-daml-ledger-api-v2-admin-participantpruningservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/participant_pruning_service.proto#L23) | Status: experimental interface, will change before it is deemed production ready Prunes/truncates the "oldest" transa... |
-| [`PartyManagementService`](#service-com-daml-ledger-api-v2-admin-partymanagementservice) | `8` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L37) | This service allows inspecting the party management state of the ledger known to the participant and managing the par... |
-| [`UserManagementService`](#service-com-daml-ledger-api-v2-admin-usermanagementservice) | `9` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L43) | Service to manage users and their rights for interacting with the Ledger API served by a participant node. The author... |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`CommandInspectionService`](#service-com-daml-ledger-api-v2-admin-commandinspectionservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/command_inspection_service.proto#L23) | Status: experimental interface, will change before it is deemed production ready The inspection service provides meth... |
+| [`IdentityProviderConfigService`](#service-com-daml-ledger-api-v2-admin-identityproviderconfigservice) | - | `5` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L37) | Identity Provider Config Service makes it possible for participant node administrators to setup and manage additional... |
+| [`PackageManagementService`](#service-com-daml-ledger-api-v2-admin-packagemanagementservice) | - | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L21) | Status: experimental interface, will change before it is deemed production ready Query the Daml-LF packages supported... |
+| [`ParticipantPruningService`](#service-com-daml-ledger-api-v2-admin-participantpruningservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/participant_pruning_service.proto#L23) | Status: experimental interface, will change before it is deemed production ready Prunes/truncates the "oldest" transa... |
+| [`PartyManagementService`](#service-com-daml-ledger-api-v2-admin-partymanagementservice) | - | `8` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L37) | This service allows inspecting the party management state of the ledger known to the participant and managing the par... |
+| [`UserManagementService`](#service-com-daml-ledger-api-v2-admin-usermanagementservice) | - | `9` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L43) | Service to manage users and their rights for interacting with the Ledger API served by a participant node. The author... |
 
 <a id="service-com-daml-ledger-api-v2-admin-commandinspectionservice"></a>
 ### Service `CommandInspectionService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/command_inspection_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/command_inspection_service.proto#L23)
 - Endpoints tracked: `1`
 
@@ -52,13 +54,15 @@ Status: experimental interface, will change before it is deemed production
  to look under the hood of a running system.
  In V2 Ledger API this service is not available.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetCommandStatus`](#endpoint-com-daml-ledger-api-v2-admin-commandinspectionservice-getcommandstatus) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetCommandStatusRequest`](#type-com-daml-ledger-api-v2-admin-getcommandstatusrequest) | [`com.daml.ledger.api.v2.admin.GetCommandStatusResponse`](#type-com-daml-ledger-api-v2-admin-getcommandstatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/command_inspection_service.proto#L29) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetCommandStatus`](#endpoint-com-daml-ledger-api-v2-admin-commandinspectionservice-getcommandstatus) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetCommandStatusRequest`](#type-com-daml-ledger-api-v2-admin-getcommandstatusrequest) | [`com.daml.ledger.api.v2.admin.GetCommandStatusResponse`](#type-com-daml-ledger-api-v2-admin-getcommandstatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/command_inspection_service.proto#L29) |
 
 <a id="endpoint-com-daml-ledger-api-v2-admin-commandinspectionservice-getcommandstatus"></a>
 **Endpoint `CommandInspectionService.GetCommandStatus`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -94,6 +98,8 @@ Inquire about the status of a command.
 <a id="service-com-daml-ledger-api-v2-admin-identityproviderconfigservice"></a>
 ### Service `IdentityProviderConfigService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L37)
 - Endpoints tracked: `5`
 
@@ -121,17 +127,19 @@ Identity Provider Config Service makes it possible for participant node administ
  In order to update the properties represented by the ``IdentityProviderConfig`` message use the ``UpdateIdentityProviderConfig`` RPC.
  The only fields that can be modified are those marked as ``Modifiable``.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`CreateIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-createidentityproviderconfig) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.CreateIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-createidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.CreateIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-createidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L40) |
-| [`DeleteIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-deleteidentityproviderconfig) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.DeleteIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-deleteidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.DeleteIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-deleteidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L53) |
-| [`GetIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-getidentityproviderconfig) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-getidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.GetIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-getidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L43) |
-| [`ListIdentityProviderConfigs`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-listidentityproviderconfigs) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListIdentityProviderConfigsRequest`](#type-com-daml-ledger-api-v2-admin-listidentityproviderconfigsrequest) | [`com.daml.ledger.api.v2.admin.ListIdentityProviderConfigsResponse`](#type-com-daml-ledger-api-v2-admin-listidentityproviderconfigsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L50) |
-| [`UpdateIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-updateidentityproviderconfig) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-updateidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.UpdateIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-updateidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L47) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`CreateIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-createidentityproviderconfig) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.CreateIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-createidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.CreateIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-createidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L40) |
+| [`DeleteIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-deleteidentityproviderconfig) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.DeleteIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-deleteidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.DeleteIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-deleteidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L53) |
+| [`GetIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-getidentityproviderconfig) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-getidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.GetIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-getidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L43) |
+| [`ListIdentityProviderConfigs`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-listidentityproviderconfigs) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListIdentityProviderConfigsRequest`](#type-com-daml-ledger-api-v2-admin-listidentityproviderconfigsrequest) | [`com.daml.ledger.api.v2.admin.ListIdentityProviderConfigsResponse`](#type-com-daml-ledger-api-v2-admin-listidentityproviderconfigsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L50) |
+| [`UpdateIdentityProviderConfig`](#endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-updateidentityproviderconfig) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateIdentityProviderConfigRequest`](#type-com-daml-ledger-api-v2-admin-updateidentityproviderconfigrequest) | [`com.daml.ledger.api.v2.admin.UpdateIdentityProviderConfigResponse`](#type-com-daml-ledger-api-v2-admin-updateidentityproviderconfigresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/identity_provider_config_service.proto#L47) |
 
 <a id="endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-createidentityproviderconfig"></a>
 **Endpoint `IdentityProviderConfigService.CreateIdentityProviderConfig`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -164,6 +172,8 @@ Create a new identity provider configuration.
 <a id="endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-deleteidentityproviderconfig"></a>
 **Endpoint `IdentityProviderConfigService.DeleteIdentityProviderConfig`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -195,6 +205,8 @@ Delete an existing identity provider configuration.
 <a id="endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-getidentityproviderconfig"></a>
 **Endpoint `IdentityProviderConfigService.GetIdentityProviderConfig`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -226,6 +238,8 @@ Get the identity provider configuration data by id.
 <a id="endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-listidentityproviderconfigs"></a>
 **Endpoint `IdentityProviderConfigService.ListIdentityProviderConfigs`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -257,6 +271,8 @@ List all existing identity provider configurations.
 <a id="endpoint-com-daml-ledger-api-v2-admin-identityproviderconfigservice-updateidentityproviderconfig"></a>
 **Endpoint `IdentityProviderConfigService.UpdateIdentityProviderConfig`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -289,6 +305,8 @@ Update selected modifiable attribute of an identity provider config resource des
 <a id="service-com-daml-ledger-api-v2-admin-packagemanagementservice"></a>
 ### Service `PackageManagementService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L21)
 - Endpoints tracked: `4`
 
@@ -299,16 +317,18 @@ Status: experimental interface, will change before it is deemed production
  DAR files. We use 'backing participant' to refer to this specific participant
  in the methods of this API.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ListKnownPackages`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-listknownpackages) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListKnownPackagesRequest`](#type-com-daml-ledger-api-v2-admin-listknownpackagesrequest) | [`com.daml.ledger.api.v2.admin.ListKnownPackagesResponse`](#type-com-daml-ledger-api-v2-admin-listknownpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L23) |
-| [`UpdateVettedPackages`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-updatevettedpackages) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateVettedPackagesRequest`](#type-com-daml-ledger-api-v2-admin-updatevettedpackagesrequest) | [`com.daml.ledger.api.v2.admin.UpdateVettedPackagesResponse`](#type-com-daml-ledger-api-v2-admin-updatevettedpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L41) |
-| [`UploadDarFile`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-uploaddarfile) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UploadDarFileRequest`](#type-com-daml-ledger-api-v2-admin-uploaddarfilerequest) | [`com.daml.ledger.api.v2.admin.UploadDarFileResponse`](#type-com-daml-ledger-api-v2-admin-uploaddarfileresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L30) |
-| [`ValidateDarFile`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-validatedarfile) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ValidateDarFileRequest`](#type-com-daml-ledger-api-v2-admin-validatedarfilerequest) | [`com.daml.ledger.api.v2.admin.ValidateDarFileResponse`](#type-com-daml-ledger-api-v2-admin-validatedarfileresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L38) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ListKnownPackages`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-listknownpackages) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListKnownPackagesRequest`](#type-com-daml-ledger-api-v2-admin-listknownpackagesrequest) | [`com.daml.ledger.api.v2.admin.ListKnownPackagesResponse`](#type-com-daml-ledger-api-v2-admin-listknownpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L23) |
+| [`UpdateVettedPackages`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-updatevettedpackages) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateVettedPackagesRequest`](#type-com-daml-ledger-api-v2-admin-updatevettedpackagesrequest) | [`com.daml.ledger.api.v2.admin.UpdateVettedPackagesResponse`](#type-com-daml-ledger-api-v2-admin-updatevettedpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L41) |
+| [`UploadDarFile`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-uploaddarfile) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UploadDarFileRequest`](#type-com-daml-ledger-api-v2-admin-uploaddarfilerequest) | [`com.daml.ledger.api.v2.admin.UploadDarFileResponse`](#type-com-daml-ledger-api-v2-admin-uploaddarfileresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L30) |
+| [`ValidateDarFile`](#endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-validatedarfile) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ValidateDarFileRequest`](#type-com-daml-ledger-api-v2-admin-validatedarfilerequest) | [`com.daml.ledger.api.v2.admin.ValidateDarFileResponse`](#type-com-daml-ledger-api-v2-admin-validatedarfileresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/package_management_service.proto#L38) |
 
 <a id="endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-listknownpackages"></a>
 **Endpoint `PackageManagementService.ListKnownPackages`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -340,6 +360,8 @@ Returns the details of all Daml-LF packages known to the backing participant.
 <a id="endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-updatevettedpackages"></a>
 **Endpoint `PackageManagementService.UpdateVettedPackages`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -371,6 +393,8 @@ Update the vetted packages of this participant
 <a id="endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-uploaddarfile"></a>
 **Endpoint `PackageManagementService.UploadDarFile`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -406,6 +430,8 @@ Upload a DAR file to the participant.
 <a id="endpoint-com-daml-ledger-api-v2-admin-packagemanagementservice-validatedarfile"></a>
 **Endpoint `PackageManagementService.ValidateDarFile`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -442,6 +468,8 @@ Validates the DAR and checks the upgrade compatibility of the DAR's packages
 <a id="service-com-daml-ledger-api-v2-admin-participantpruningservice"></a>
 ### Service `ParticipantPruningService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/participant_pruning_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/participant_pruning_service.proto#L23)
 - Endpoints tracked: `1`
 
@@ -457,13 +485,15 @@ Prunes/truncates the "oldest" transactions from the participant (the participant
  1. keeping the "inactive" portion of the ledger to a manageable size and
  2. removing inactive state to honor the right to be forgotten.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`Prune`](#endpoint-com-daml-ledger-api-v2-admin-participantpruningservice-prune) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.PruneRequest`](#type-com-daml-ledger-api-v2-admin-prunerequest) | [`com.daml.ledger.api.v2.admin.PruneResponse`](#type-com-daml-ledger-api-v2-admin-pruneresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/participant_pruning_service.proto#L26) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`Prune`](#endpoint-com-daml-ledger-api-v2-admin-participantpruningservice-prune) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.PruneRequest`](#type-com-daml-ledger-api-v2-admin-prunerequest) | [`com.daml.ledger.api.v2.admin.PruneResponse`](#type-com-daml-ledger-api-v2-admin-pruneresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/participant_pruning_service.proto#L26) |
 
 <a id="endpoint-com-daml-ledger-api-v2-admin-participantpruningservice-prune"></a>
 **Endpoint `ParticipantPruningService.Prune`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -496,6 +526,8 @@ Prune the ledger specifying the offset before and at which ledger transactions s
 <a id="service-com-daml-ledger-api-v2-admin-partymanagementservice"></a>
 ### Service `PartyManagementService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L37)
 - Endpoints tracked: `8`
 
@@ -521,20 +553,22 @@ This service allows inspecting the party management state of the ledger known to
  A party details resource, once it has been created, can be modified using the ``UpdatePartyDetails`` RPC.
  The only fields that can be modified are those marked as ``Modifiable``.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`AllocateExternalParty`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-allocateexternalparty) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.AllocateExternalPartyRequest`](#type-com-daml-ledger-api-v2-admin-allocateexternalpartyrequest) | [`com.daml.ledger.api.v2.admin.AllocateExternalPartyResponse`](#type-com-daml-ledger-api-v2-admin-allocateexternalpartyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L85) |
-| [`AllocateParty`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-allocateparty) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.AllocatePartyRequest`](#type-com-daml-ledger-api-v2-admin-allocatepartyrequest) | [`com.daml.ledger.api.v2.admin.AllocatePartyResponse`](#type-com-daml-ledger-api-v2-admin-allocatepartyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L70) |
-| [`GenerateExternalPartyTopology`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-generateexternalpartytopology) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GenerateExternalPartyTopologyRequest`](#type-com-daml-ledger-api-v2-admin-generateexternalpartytopologyrequest) | [`com.daml.ledger.api.v2.admin.GenerateExternalPartyTopologyResponse`](#type-com-daml-ledger-api-v2-admin-generateexternalpartytopologyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L104) |
-| [`GetParticipantId`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-getparticipantid) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetParticipantIdRequest`](#type-com-daml-ledger-api-v2-admin-getparticipantidrequest) | [`com.daml.ledger.api.v2.admin.GetParticipantIdResponse`](#type-com-daml-ledger-api-v2-admin-getparticipantidresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L42) |
-| [`GetParties`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-getparties) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetPartiesRequest`](#type-com-daml-ledger-api-v2-admin-getpartiesrequest) | [`com.daml.ledger.api.v2.admin.GetPartiesResponse`](#type-com-daml-ledger-api-v2-admin-getpartiesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L46) |
-| [`ListKnownParties`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-listknownparties) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListKnownPartiesRequest`](#type-com-daml-ledger-api-v2-admin-listknownpartiesrequest) | [`com.daml.ledger.api.v2.admin.ListKnownPartiesResponse`](#type-com-daml-ledger-api-v2-admin-listknownpartiesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L51) |
-| [`UpdatePartyDetails`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-updatepartydetails) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdatePartyDetailsRequest`](#type-com-daml-ledger-api-v2-admin-updatepartydetailsrequest) | [`com.daml.ledger.api.v2.admin.UpdatePartyDetailsResponse`](#type-com-daml-ledger-api-v2-admin-updatepartydetailsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L89) |
-| [`UpdatePartyIdentityProviderId`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-updatepartyidentityproviderid) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdatePartyIdentityProviderIdRequest`](#type-com-daml-ledger-api-v2-admin-updatepartyidentityprovideridrequest) | [`com.daml.ledger.api.v2.admin.UpdatePartyIdentityProviderIdResponse`](#type-com-daml-ledger-api-v2-admin-updatepartyidentityprovideridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L92) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`AllocateExternalParty`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-allocateexternalparty) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.AllocateExternalPartyRequest`](#type-com-daml-ledger-api-v2-admin-allocateexternalpartyrequest) | [`com.daml.ledger.api.v2.admin.AllocateExternalPartyResponse`](#type-com-daml-ledger-api-v2-admin-allocateexternalpartyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L85) |
+| [`AllocateParty`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-allocateparty) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.AllocatePartyRequest`](#type-com-daml-ledger-api-v2-admin-allocatepartyrequest) | [`com.daml.ledger.api.v2.admin.AllocatePartyResponse`](#type-com-daml-ledger-api-v2-admin-allocatepartyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L70) |
+| [`GenerateExternalPartyTopology`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-generateexternalpartytopology) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GenerateExternalPartyTopologyRequest`](#type-com-daml-ledger-api-v2-admin-generateexternalpartytopologyrequest) | [`com.daml.ledger.api.v2.admin.GenerateExternalPartyTopologyResponse`](#type-com-daml-ledger-api-v2-admin-generateexternalpartytopologyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L104) |
+| [`GetParticipantId`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-getparticipantid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetParticipantIdRequest`](#type-com-daml-ledger-api-v2-admin-getparticipantidrequest) | [`com.daml.ledger.api.v2.admin.GetParticipantIdResponse`](#type-com-daml-ledger-api-v2-admin-getparticipantidresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L42) |
+| [`GetParties`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-getparties) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetPartiesRequest`](#type-com-daml-ledger-api-v2-admin-getpartiesrequest) | [`com.daml.ledger.api.v2.admin.GetPartiesResponse`](#type-com-daml-ledger-api-v2-admin-getpartiesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L46) |
+| [`ListKnownParties`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-listknownparties) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListKnownPartiesRequest`](#type-com-daml-ledger-api-v2-admin-listknownpartiesrequest) | [`com.daml.ledger.api.v2.admin.ListKnownPartiesResponse`](#type-com-daml-ledger-api-v2-admin-listknownpartiesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L51) |
+| [`UpdatePartyDetails`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-updatepartydetails) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdatePartyDetailsRequest`](#type-com-daml-ledger-api-v2-admin-updatepartydetailsrequest) | [`com.daml.ledger.api.v2.admin.UpdatePartyDetailsResponse`](#type-com-daml-ledger-api-v2-admin-updatepartydetailsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L89) |
+| [`UpdatePartyIdentityProviderId`](#endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-updatepartyidentityproviderid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdatePartyIdentityProviderIdRequest`](#type-com-daml-ledger-api-v2-admin-updatepartyidentityprovideridrequest) | [`com.daml.ledger.api.v2.admin.UpdatePartyIdentityProviderIdResponse`](#type-com-daml-ledger-api-v2-admin-updatepartyidentityprovideridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/party_management_service.proto#L92) |
 
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-allocateexternalparty"></a>
 **Endpoint `PartyManagementService.AllocateExternalParty`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -578,6 +612,8 @@ Alpha 3.3: Endpoint to allocate a new external party on a synchronizer
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-allocateparty"></a>
 **Endpoint `PartyManagementService.AllocateParty`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -625,6 +661,8 @@ Allocates a new party on a ledger and adds it to the set managed by the particip
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-generateexternalpartytopology"></a>
 **Endpoint `PartyManagementService.GenerateExternalPartyTopology`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -665,6 +703,8 @@ Alpha 3.3: Convenience endpoint to generate topology transactions for external s
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-getparticipantid"></a>
 **Endpoint `PartyManagementService.GetParticipantId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -699,6 +739,8 @@ Return the identifier of the participant.
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-getparties"></a>
 **Endpoint `PartyManagementService.GetParties`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -731,6 +773,8 @@ Get the party details of the given parties. Only known parties will be
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-listknownparties"></a>
 **Endpoint `PartyManagementService.ListKnownParties`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -764,6 +808,8 @@ List the parties known by the participant.
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-updatepartydetails"></a>
 **Endpoint `PartyManagementService.UpdatePartyDetails`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -796,6 +842,8 @@ Update selected modifiable participant-local attributes of a party details resou
 <a id="endpoint-com-daml-ledger-api-v2-admin-partymanagementservice-updatepartyidentityproviderid"></a>
 **Endpoint `PartyManagementService.UpdatePartyIdentityProviderId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -827,6 +875,8 @@ Update the assignment of a party from one IDP to another.
 <a id="service-com-daml-ledger-api-v2-admin-usermanagementservice"></a>
 ### Service `UserManagementService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L43)
 - Endpoints tracked: `9`
 
@@ -859,21 +909,23 @@ Service to manage users and their rights for interacting with the Ledger API
  In order to update the properties represented by the ``User`` message use the ``UpdateUser`` RPC. The only fields that can be modified are those marked as ``Modifiable``.
  In order to grant or revoke user rights use ``GrantRights' and ``RevokeRights`` RPCs.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`CreateUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-createuser) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.CreateUserRequest`](#type-com-daml-ledger-api-v2-admin-createuserrequest) | [`com.daml.ledger.api.v2.admin.CreateUserResponse`](#type-com-daml-ledger-api-v2-admin-createuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L45) |
-| [`DeleteUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-deleteuser) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.DeleteUserRequest`](#type-com-daml-ledger-api-v2-admin-deleteuserrequest) | [`com.daml.ledger.api.v2.admin.DeleteUserResponse`](#type-com-daml-ledger-api-v2-admin-deleteuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L54) |
-| [`GetUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-getuser) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetUserRequest`](#type-com-daml-ledger-api-v2-admin-getuserrequest) | [`com.daml.ledger.api.v2.admin.GetUserResponse`](#type-com-daml-ledger-api-v2-admin-getuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L48) |
-| [`GrantUserRights`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-grantuserrights) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GrantUserRightsRequest`](#type-com-daml-ledger-api-v2-admin-grantuserrightsrequest) | [`com.daml.ledger.api.v2.admin.GrantUserRightsResponse`](#type-com-daml-ledger-api-v2-admin-grantuserrightsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L61) |
-| [`ListUserRights`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-listuserrights) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListUserRightsRequest`](#type-com-daml-ledger-api-v2-admin-listuserrightsrequest) | [`com.daml.ledger.api.v2.admin.ListUserRightsResponse`](#type-com-daml-ledger-api-v2-admin-listuserrightsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L68) |
-| [`ListUsers`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-listusers) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListUsersRequest`](#type-com-daml-ledger-api-v2-admin-listusersrequest) | [`com.daml.ledger.api.v2.admin.ListUsersResponse`](#type-com-daml-ledger-api-v2-admin-listusersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L57) |
-| [`RevokeUserRights`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-revokeuserrights) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.RevokeUserRightsRequest`](#type-com-daml-ledger-api-v2-admin-revokeuserrightsrequest) | [`com.daml.ledger.api.v2.admin.RevokeUserRightsResponse`](#type-com-daml-ledger-api-v2-admin-revokeuserrightsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L65) |
-| [`UpdateUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-updateuser) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateUserRequest`](#type-com-daml-ledger-api-v2-admin-updateuserrequest) | [`com.daml.ledger.api.v2.admin.UpdateUserResponse`](#type-com-daml-ledger-api-v2-admin-updateuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L51) |
-| [`UpdateUserIdentityProviderId`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-updateuseridentityproviderid) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateUserIdentityProviderIdRequest`](#type-com-daml-ledger-api-v2-admin-updateuseridentityprovideridrequest) | [`com.daml.ledger.api.v2.admin.UpdateUserIdentityProviderIdResponse`](#type-com-daml-ledger-api-v2-admin-updateuseridentityprovideridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L71) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`CreateUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-createuser) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.CreateUserRequest`](#type-com-daml-ledger-api-v2-admin-createuserrequest) | [`com.daml.ledger.api.v2.admin.CreateUserResponse`](#type-com-daml-ledger-api-v2-admin-createuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L45) |
+| [`DeleteUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-deleteuser) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.DeleteUserRequest`](#type-com-daml-ledger-api-v2-admin-deleteuserrequest) | [`com.daml.ledger.api.v2.admin.DeleteUserResponse`](#type-com-daml-ledger-api-v2-admin-deleteuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L54) |
+| [`GetUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-getuser) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GetUserRequest`](#type-com-daml-ledger-api-v2-admin-getuserrequest) | [`com.daml.ledger.api.v2.admin.GetUserResponse`](#type-com-daml-ledger-api-v2-admin-getuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L48) |
+| [`GrantUserRights`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-grantuserrights) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.GrantUserRightsRequest`](#type-com-daml-ledger-api-v2-admin-grantuserrightsrequest) | [`com.daml.ledger.api.v2.admin.GrantUserRightsResponse`](#type-com-daml-ledger-api-v2-admin-grantuserrightsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L61) |
+| [`ListUserRights`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-listuserrights) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListUserRightsRequest`](#type-com-daml-ledger-api-v2-admin-listuserrightsrequest) | [`com.daml.ledger.api.v2.admin.ListUserRightsResponse`](#type-com-daml-ledger-api-v2-admin-listuserrightsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L68) |
+| [`ListUsers`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-listusers) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.ListUsersRequest`](#type-com-daml-ledger-api-v2-admin-listusersrequest) | [`com.daml.ledger.api.v2.admin.ListUsersResponse`](#type-com-daml-ledger-api-v2-admin-listusersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L57) |
+| [`RevokeUserRights`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-revokeuserrights) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.RevokeUserRightsRequest`](#type-com-daml-ledger-api-v2-admin-revokeuserrightsrequest) | [`com.daml.ledger.api.v2.admin.RevokeUserRightsResponse`](#type-com-daml-ledger-api-v2-admin-revokeuserrightsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L65) |
+| [`UpdateUser`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-updateuser) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateUserRequest`](#type-com-daml-ledger-api-v2-admin-updateuserrequest) | [`com.daml.ledger.api.v2.admin.UpdateUserResponse`](#type-com-daml-ledger-api-v2-admin-updateuserresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L51) |
+| [`UpdateUserIdentityProviderId`](#endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-updateuseridentityproviderid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.admin.UpdateUserIdentityProviderIdRequest`](#type-com-daml-ledger-api-v2-admin-updateuseridentityprovideridrequest) | [`com.daml.ledger.api.v2.admin.UpdateUserIdentityProviderIdResponse`](#type-com-daml-ledger-api-v2-admin-updateuseridentityprovideridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/admin/user_management_service.proto#L71) |
 
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-createuser"></a>
 **Endpoint `UserManagementService.CreateUser`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -905,6 +957,8 @@ Create a new user.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-deleteuser"></a>
 **Endpoint `UserManagementService.DeleteUser`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -936,6 +990,8 @@ Delete an existing user and all its rights.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-getuser"></a>
 **Endpoint `UserManagementService.GetUser`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -967,6 +1023,8 @@ Get the user data of a specific user or the authenticated user.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-grantuserrights"></a>
 **Endpoint `UserManagementService.GrantUserRights`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -999,6 +1057,8 @@ Grant rights to a user.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-listuserrights"></a>
 **Endpoint `UserManagementService.ListUserRights`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1030,6 +1090,8 @@ List the set of all rights granted to a user.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-listusers"></a>
 **Endpoint `UserManagementService.ListUsers`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1061,6 +1123,8 @@ List all existing users.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-revokeuserrights"></a>
 **Endpoint `UserManagementService.RevokeUserRights`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1093,6 +1157,8 @@ Revoke rights from a user.
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-updateuser"></a>
 **Endpoint `UserManagementService.UpdateUser`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1124,6 +1190,8 @@ Update selected modifiable attribute of a user resource described by the ``User`
 <a id="endpoint-com-daml-ledger-api-v2-admin-usermanagementservice-updateuseridentityproviderid"></a>
 **Endpoint `UserManagementService.UpdateUserIdentityProviderId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

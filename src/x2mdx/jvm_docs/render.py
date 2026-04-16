@@ -12,6 +12,7 @@ from typing import Any
 
 from x2mdx.jvm_docs.models import JvmDocArtifactLifecycle, JvmDocLifecycleReport, JvmDocSymbolLifecycle
 from x2mdx.output import Page
+from x2mdx.presentation import LifecycleStatus, StatusRow, status_legend_items, status_row_context
 from x2mdx.templating import markdown_page
 
 STATUS_MARKERS = {
@@ -80,6 +81,20 @@ def summarize_changes(artifact: JvmDocArtifactLifecycle) -> dict[str, int]:
 
 
 def format_lifecycle_value(value: str | None) -> str:
+    if not value:
+        return "-"
+    return f"`{md_code(value)}`"
+
+
+def format_explicit_state(value: str | None, *, deprecated_version: str | None = None) -> str:
+    if value:
+        return f"`{md_code(value)}`"
+    if deprecated_version is not None:
+        return "`deprecated`"
+    return "-"
+
+
+def format_replacement_value(value: str | None) -> str:
     if not value:
         return "-"
     return f"`{md_code(value)}`"
@@ -273,7 +288,7 @@ def build_type_entries(
     members_by_type: dict[str, list[JvmDocSymbolLifecycle]] = defaultdict(list)
     type_flags: dict[str, dict[str, bool]] = {
         symbol.symbol_key: {
-            "deprecated": symbol.deprecated_version is not None,
+            "deprecated": symbol.deprecated_version is not None or symbol.lifecycle_state == "deprecated",
             "removed": symbol.removed_version is not None,
         }
         for symbol in type_symbols
@@ -346,6 +361,8 @@ def build_type_entries(
                 [
                     f"[Open]({upstream_link})" if upstream_link else "-",
                     f"`{md_code(member_label)}`",
+                    format_explicit_state(member.lifecycle_state, deprecated_version=member.deprecated_version),
+                    format_replacement_value(member.replaces),
                     format_lifecycle_value(member.introduced_version),
                     format_lifecycle_value(member.deprecated_version),
                     format_lifecycle_value(member.removed_version),
@@ -360,9 +377,14 @@ def build_type_entries(
                 "type_text": type_symbol.symbol,
                 "summary": md_text(type_symbol.latest_summary or ""),
                 "summary_preview": summary_preview(type_symbol.latest_summary or ""),
+                "lifecycle_state": format_explicit_state(
+                    type_symbol.lifecycle_state,
+                    deprecated_version=deprecated_version,
+                ),
+                "replaces": format_replacement_value(type_symbol.replaces),
                 "introduced": format_lifecycle_value(type_symbol.introduced_version),
-                "deprecated": format_lifecycle_value(type_symbol.deprecated_version),
-                "removed": format_lifecycle_value(type_symbol.removed_version),
+                "deprecated": format_lifecycle_value(deprecated_version),
+                "removed": format_lifecycle_value(removed_version),
                 "status_kind": status_kind,
                 "status_version": status_version,
                 "status_cell": status_cell(status_kind, status_version),
@@ -422,19 +444,44 @@ def build_package_rows_and_pages(
                 description="Generated package reference page from local Javadoc/Scaladoc snapshots",
                 template_name="jvm_docs/package.md.j2",
                 type_reference_rows=[
-                    [
-                        f"[`{md_text(type_label(str(entry['type_text']), package_name))}`](#{entry['anchor']})",
-                        str(entry["status_cell"]),
-                        str(entry["summary_preview"] or "-"),
-                    ]
+                    status_row_context(
+                        StatusRow(
+                            link=f"[`{md_text(type_label(str(entry['type_text']), package_name))}`](#{entry['anchor']})",
+                            summary=str(entry["summary_preview"] or "-"),
+                            lifecycle=LifecycleStatus.from_values(
+                                introduced=entry["symbol"].introduced_version,
+                                state=entry["symbol"].lifecycle_state
+                                or ("deprecated" if entry["deprecated"] != "-" else None),
+                                deprecated=None if entry["deprecated"] == "-" else str(entry["deprecated"]).strip("`"),
+                                removed=None if entry["removed"] == "-" else str(entry["removed"]).strip("`"),
+                            ),
+                        )
+                    )
                     for entry in package_entries
                 ],
-                type_toc_legend=status_legend(),
+                type_toc_legend=status_legend_items(
+                    [
+                        StatusRow(
+                            link="",
+                            summary="",
+                            lifecycle=LifecycleStatus.from_values(
+                                introduced=entry["symbol"].introduced_version,
+                                state=entry["symbol"].lifecycle_state
+                                or ("deprecated" if entry["deprecated"] != "-" else None),
+                                deprecated=None if entry["deprecated"] == "-" else str(entry["deprecated"]).strip("`"),
+                                removed=None if entry["removed"] == "-" else str(entry["removed"]).strip("`"),
+                            ),
+                        )
+                        for entry in package_entries
+                    ]
+                ),
                 package_entries=[
                     {
                         "anchor": str(entry["anchor"]),
                         "heading": f"`{md_code(type_label(str(entry['type_text']), package_name))}`",
                         "lifecycle_items": [
+                            f"Lifecycle state: {entry['lifecycle_state']}",
+                            f"Replaces: {entry['replaces']}",
                             f"Introduced: {entry['introduced']}",
                             f"Deprecated: {entry['deprecated']}",
                             f"Removed: {entry['removed']}",
@@ -491,6 +538,8 @@ def build_artifact_page(
             f"[Open]({latest_doc_link(symbol)})" if latest_doc_link(symbol) else "-",
             f"`{md_code(symbol.symbol)}`",
             f"`{md_code(symbol.kind)}`",
+            format_explicit_state(symbol.lifecycle_state, deprecated_version=symbol.deprecated_version),
+            format_replacement_value(symbol.replaces),
             format_lifecycle_value(symbol.introduced_version),
             format_lifecycle_value(symbol.deprecated_version),
             format_lifecycle_value(symbol.removed_version),

@@ -14,9 +14,12 @@ def module_doc(
     name: str,
     *,
     descr: str,
-    deprecated: str | None = None,
+    warning: str | list[str] | None = None,
+    deprecated: str | list[str] | None = None,
 ) -> dict[str, object]:
-    warns: list[dict[str, str]] = []
+    warns: list[dict[str, object]] = []
+    if warning:
+        warns.append({"WarnData": warning})
     if deprecated:
         warns.append({"DeprecatedData": deprecated})
     return {
@@ -132,8 +135,34 @@ class DamlJsonTests(unittest.TestCase):
         second = self._write_json(
             "snapshots/1.1.0/modules.json",
             [
-                module_doc("DA.List", descr="List module in 1.1.0", deprecated="Use DA.NonEmpty instead."),
-                module_doc("DA.NonEmpty", descr="NonEmpty module in 1.1.0"),
+                module_doc(
+                    "DA.List",
+                    descr="List module in 1.1.0",
+                    deprecated=[
+                        "List helpers are deprecated for new code.",
+                        "Replaced by: DA.NonEmpty::module::DA.NonEmpty.",
+                    ],
+                ),
+                module_doc(
+                    "DA.NonEmpty",
+                    descr="NonEmpty module in 1.1.0",
+                ),
+                module_doc(
+                    "DA.ExceptionLike",
+                    descr="Exception-like helpers in 1.1.0",
+                    deprecated=[
+                        "Exceptions are deprecated, prefer `failWithStatus`, and avoid using catch.",
+                        "Use `-Wno-deprecated-exceptions` to disable this warning.",
+                    ],
+                ),
+                module_doc(
+                    "DA.Alpha",
+                    descr="Alpha module in 1.1.0",
+                    warning=[
+                        "DA.Alpha is an alpha feature. It can change without notice.",
+                        "use -Wno-da-alpha-is-alpha in build-options to disable this warning",
+                    ],
+                ),
             ],
         )
         manifest = {
@@ -165,6 +194,7 @@ class DamlJsonTests(unittest.TestCase):
         self.assertIn("DA.Legacy", module_names)
         self.assertIn("DA.List", module_names)
         self.assertIn("DA.NonEmpty", module_names)
+        self.assertIn("DA.ExceptionLike", module_names)
 
     def test_cli_builds_index_and_module_pages(self) -> None:
         manifest_path = self._write_manifest()
@@ -191,11 +221,29 @@ class DamlJsonTests(unittest.TestCase):
         index_text = (output_dir / "index.mdx").read_text(encoding="utf-8")
         list_text = (output_dir / "da-list.mdx").read_text(encoding="utf-8")
         legacy_text = (output_dir / "da-legacy.mdx").read_text(encoding="utf-8")
+        nonempty_text = (output_dir / "da-nonempty.mdx").read_text(encoding="utf-8")
+        exception_text = (output_dir / "da-exceptionlike.mdx").read_text(encoding="utf-8")
+        alpha_text = (output_dir / "da-alpha.mdx").read_text(encoding="utf-8")
 
         self.assertIn("Utility Credential API", index_text)
         self.assertIn("[DA.List](daml-standard-library/da-list)", index_text)
         self.assertIn("removed in `1.1.0`", index_text)
+        self.assertIn(">Alpha</span>", index_text)
+        self.assertIn(">Deprecated</span>", index_text)
+        self.assertIn(
+            "DAML authors write source WARNING/DEPRECATED notes; generated WarnData/DeprecatedData are the transport consumed here.",
+            index_text,
+        )
         self.assertIn("Deprecated since: `1.1.0`", list_text)
+        self.assertIn("Lifecycle state: `deprecated`", list_text)
+        self.assertIn("Replaces: `DA.NonEmpty::module::DA.NonEmpty`", list_text)
+        self.assertIn("List helpers are deprecated for new code.", list_text)
+        self.assertIn("Lifecycle state: `-`", nonempty_text)
+        self.assertIn("Replaces: `-`", nonempty_text)
+        self.assertIn("Lifecycle state: `deprecated`", exception_text)
+        self.assertIn("Replaces: `-`", exception_text)
+        self.assertIn("Exceptions are deprecated, prefer `failWithStatus`, and avoid using catch.", exception_text)
+        self.assertIn("Lifecycle state: `alpha`", alpha_text)
         self.assertIn("historical reference", legacy_text)
 
     def test_cli_renders_utilities_style_adts_and_templates(self) -> None:

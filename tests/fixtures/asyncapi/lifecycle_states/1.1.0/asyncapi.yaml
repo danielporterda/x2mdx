@@ -1,0 +1,106 @@
+asyncapi: 2.6.0
+info:
+  title: Lifecycle Example WebSocket API
+  version: 1.1.0
+channels:
+  /legacy:
+    description: Legacy updates.
+    x-state: deprecated
+    subscribe:
+      operationId: onLegacy
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/LegacyEvent'
+  /payments:
+    description: Payment updates.
+    subscribe:
+      operationId: onPayments
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/PaymentEvent'
+  /payments/preview:
+    x-state: beta
+    subscribe:
+      operationId: onPaymentsPreview
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/PaymentPreviewEvent'
+  /payments/alpha:
+    x-state: alpha
+    subscribe:
+      operationId: onPaymentsAlpha
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/PaymentAlphaEvent'
+  /payments/v2:
+    x-state: stable
+    x-replaces: /payments
+    subscribe:
+      operationId: onPaymentsV2
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/PaymentEventV2'
+components:
+  schemas:
+    LegacyEvent:
+      type: object
+      properties:
+        value:
+          type: string
+    PaymentEvent:
+      type: object
+      required: [paymentId]
+      properties:
+        paymentId:
+          type: string
+    PaymentEventV2:
+      type: object
+      required: [paymentId, status]
+      properties:
+        paymentId:
+          type: string
+        status:
+          type: string
+    PaymentPreviewEvent:
+      type: object
+      required: [previewId]
+      properties:
+        previewId:
+          type: string
+    PaymentAlphaEvent:
+      type: object
+      required: [alphaId]
+      properties:
+        alphaId:
+          type: string
+  messages:
+    LegacyEvent:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/LegacyEvent'
+    PaymentEvent:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PaymentEvent'
+    PaymentEventV2:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PaymentEventV2'
+    PaymentPreviewEvent:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PaymentPreviewEvent'
+    PaymentAlphaEvent:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PaymentAlphaEvent'

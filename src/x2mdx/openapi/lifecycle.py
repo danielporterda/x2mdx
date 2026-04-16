@@ -112,6 +112,12 @@ def extract_entities(doc: dict[str, Any]) -> dict[str, dict[str, Any]]:
                 method_name = str(method).lower()
                 if method_name not in HTTP_METHODS or not isinstance(operation, dict):
                     continue
+                raw_state = operation.get("x-state")
+                explicit_state = str(raw_state).strip().lower() if isinstance(raw_state, str) and raw_state.strip() else None
+                raw_replaces = operation.get("x-replaces")
+                replaces = str(raw_replaces).strip() if isinstance(raw_replaces, str) and raw_replaces.strip() else None
+                deprecated = bool(operation.get("deprecated", False))
+                lifecycle_state = explicit_state or ("deprecated" if deprecated else None)
                 operation_key = f"operation::{method_name.upper()}::{path}"
                 entities[operation_key] = {
                     "entity_key": operation_key,
@@ -121,6 +127,10 @@ def extract_entities(doc: dict[str, Any]) -> dict[str, dict[str, Any]]:
                     "method": method_name.upper(),
                     "path": path,
                     "operation_id": operation.get("operationId"),
+                    "state": lifecycle_state,
+                    "state_source": "x-state" if explicit_state is not None else ("deprecated" if deprecated else None),
+                    "replaces": replaces,
+                    "deprecated": deprecated,
                 }
 
     components = doc.get("components", {})
@@ -414,6 +424,12 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
             method_name = str(method).lower()
             if method_name not in HTTP_METHODS or not isinstance(operation, dict):
                 continue
+            raw_state = operation.get("x-state")
+            explicit_state = str(raw_state).strip().lower() if isinstance(raw_state, str) and raw_state.strip() else None
+            raw_replaces = operation.get("x-replaces")
+            replaces = str(raw_replaces).strip() if isinstance(raw_replaces, str) and raw_replaces.strip() else None
+            deprecated = bool(operation.get("deprecated", False))
+            lifecycle_state = explicit_state or ("deprecated" if deprecated else None)
 
             parameters: list[dict[str, Any]] = []
             operation_parameters = operation.get("parameters", [])
@@ -502,6 +518,10 @@ def extract_latest_operation_details(doc: dict[str, Any]) -> list[dict[str, Any]
                     "method": method_name.upper(),
                     "path": path,
                     "operation_id": operation.get("operationId"),
+                    "state": lifecycle_state,
+                    "state_source": "x-state" if explicit_state is not None else ("deprecated" if deprecated else None),
+                    "replaces": replaces,
+                    "deprecated": deprecated,
                     "summary": operation.get("summary", ""),
                     "description": operation.get("description", ""),
                     "tags": [str(tag) for tag in tags],

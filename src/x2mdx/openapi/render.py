@@ -20,7 +20,10 @@ from x2mdx.presentation import (
     LifecycleStatus,
     ProtocolInteraction,
     ProtocolSubject,
+    StatusRow,
     VersionDeltaRow,
+    status_legend_items,
+    status_row_context,
     version_delta_row_cells,
 )
 from x2mdx.templating import markdown_page, render_template
@@ -147,6 +150,14 @@ def summarize_operation_transition(previous: dict[str, Any] | None, current: dic
     if (previous.get("operation_id") or "") != (current.get("operation_id") or ""):
         changes.append(
             f"operation id changed {md_code(previous.get('operation_id') or '-')} -> {md_code(current.get('operation_id') or '-')}"
+        )
+    if (previous.get("state") or "") != (current.get("state") or ""):
+        changes.append(
+            f"lifecycle state changed {md_code(previous.get('state') or '-')} -> {md_code(current.get('state') or '-')}"
+        )
+    if (previous.get("replaces") or "") != (current.get("replaces") or ""):
+        changes.append(
+            f"replacement target changed {md_code(previous.get('replaces') or '-')} -> {md_code(current.get('replaces') or '-')}"
         )
     if (previous.get("summary") or "") != (current.get("summary") or ""):
         changes.append(f"summary changed {md_code(previous.get('summary') or '-')} -> {md_code(current.get('summary') or '-')}")
@@ -301,6 +312,85 @@ def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
     return rows
 
 
+def _version_index(spec: OpenApiSpecLifecycle) -> dict[str, int]:
+    return {version: index for index, version in enumerate(spec.versions_present)}
+
+
+def _earliest_version(spec: OpenApiSpecLifecycle, values: list[str]) -> str | None:
+    if not values:
+        return None
+    index = _version_index(spec)
+    return min(values, key=lambda value: index.get(value, len(index)))
+
+
+def _latest_version(spec: OpenApiSpecLifecycle, values: list[str]) -> str | None:
+    if not values:
+        return None
+    index = _version_index(spec)
+    return max(values, key=lambda value: index.get(value, -1))
+
+
+def _path_status_summary(operations: list[dict[str, Any]]) -> str:
+    kind = path_kind_value(operations)
+    summary = path_summary_text(operations)
+    if kind != "-" and summary != "-":
+        return f"{kind}: {summary}"
+    if kind != "-":
+        return kind
+    return summary
+
+
+def _path_states(operations: list[dict[str, Any]]) -> tuple[str, ...]:
+    order = {"alpha": 0, "beta": 1, "stable": 2, "deprecated": 3}
+    seen: list[str] = []
+    for operation in operations:
+        state = str(operation.get("state") or "").strip().lower()
+        if state in order and state not in seen:
+            seen.append(state)
+    return tuple(sorted(seen, key=order.get))
+
+
+def table_of_contents_status_rows(spec: OpenApiSpecLifecycle) -> list[StatusRow]:
+    lifecycle_by_key = {
+        record.entity_key: record
+        for record in spec.entity_lifecycle
+        if record.entity_type == "operation"
+    }
+    rows: list[StatusRow] = []
+    for path, operations in group_operations_by_path(spec.latest_operation_details).items():
+        lifecycles = [
+            lifecycle
+            for operation in operations
+            if (lifecycle := lifecycle_by_key.get(str(operation.get("entity_key", "") or ""))) is not None
+        ]
+        if not lifecycles:
+            continue
+        introduced = _earliest_version(spec, [lifecycle.introduced_version for lifecycle in lifecycles])
+        changed_versions = sorted(
+            {
+                version
+                for lifecycle in lifecycles
+                for version in lifecycle.changed_in_versions
+            },
+            key=lambda version: _version_index(spec).get(version, len(spec.versions_present)),
+        )
+        removed_candidates = [lifecycle.removed_version for lifecycle in lifecycles if lifecycle.removed_version]
+        removed = _latest_version(spec, removed_candidates) if len(removed_candidates) == len(lifecycles) else None
+        rows.append(
+            StatusRow(
+                link=endpoint_path_anchor_link(path),
+                summary=_path_status_summary(operations),
+                lifecycle=LifecycleStatus.from_values(
+                    introduced=introduced,
+                    changed_versions=changed_versions,
+                    states=_path_states(operations),
+                    removed=removed,
+                ),
+            )
+        )
+    return rows
+
+
 def endpoint_header(operation: dict[str, Any]) -> str:
     return md_code(endpoint_name(operation))
 
@@ -442,6 +532,8 @@ def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
             item
             for item in [
                 f"Operation ID: {md_code(operation['operation_id'])}" if operation.get("operation_id") else "",
+                f"Lifecycle state: {md_code(operation['state'])}" if operation.get("state") else "",
+                f"Replaces: {md_code(operation['replaces'])}" if operation.get("replaces") else "",
                 f"Summary: {md_text(operation['summary'])}" if operation.get("summary") else "",
                 f"Description: {md_text(operation['description'])}" if operation.get("description") else "",
                 f"Tags: {md_code(', '.join(operation['tags']))}" if operation.get("tags") else "",
@@ -590,6 +682,7 @@ def render_endpoint_reference_subjects(subjects: list[ProtocolSubject], max_endp
                 "anchor_id": subject.anchor,
                 "header": md_code(subject.title),
                 "methods": [interaction.label for interaction in subject.interactions],
+                "version_changes": [list(row) for row in subject.version_changes],
                 "operations": [
                     {
                         "anchor_id": endpoint_anchor_id(f"{interaction.label.strip('`')} {subject.title}"),
@@ -685,6 +778,7 @@ def build_spec_page_legacy(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Pa
     counts = lifecycle_counts(spec)
     interesting = interesting_entities(spec)
     toc_rows = table_of_contents_rows(spec)
+    toc_status_rows = table_of_contents_status_rows(spec)
     latest_operations = spec.latest_entities.get("operations", [])
     latest_components = spec.latest_entities.get("components", [])
     latest_paths = spec.latest_entities.get("paths", [])
@@ -692,9 +786,10 @@ def build_spec_page_legacy(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Pa
 
     body = render_template(
         "openapi/spec.md.j2",
-        table_of_contents_rows=toc_rows[:MAX_TABLE_OF_CONTENTS_ROWS],
+        table_of_contents_rows=[status_row_context(row) for row in toc_status_rows[:MAX_TABLE_OF_CONTENTS_ROWS]],
         table_of_contents_total=len(toc_rows),
         table_of_contents_limit=MAX_TABLE_OF_CONTENTS_ROWS,
+        table_of_contents_legend=status_legend_items(toc_status_rows),
         endpoint_reference=render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS),
         version_timeline_rows=[
             [
@@ -771,6 +866,7 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     counts = lifecycle_counts(spec)
     interesting = interesting_entities(spec)
     toc_rows = table_of_contents_rows(spec)
+    toc_status_rows = table_of_contents_status_rows(spec)
     latest_operations = spec.latest_entities.get("operations", [])
     latest_components = spec.latest_entities.get("components", [])
     latest_paths = spec.latest_entities.get("paths", [])
@@ -811,9 +907,10 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
 
     body = render_template(
         "openapi/spec.md.j2",
-        table_of_contents_rows=[list(row) for row in page_model.toc_rows[:MAX_TABLE_OF_CONTENTS_ROWS]],
+        table_of_contents_rows=[status_row_context(row) for row in toc_status_rows[:MAX_TABLE_OF_CONTENTS_ROWS]],
         table_of_contents_total=len(page_model.toc_rows),
         table_of_contents_limit=MAX_TABLE_OF_CONTENTS_ROWS,
+        table_of_contents_legend=status_legend_items(toc_status_rows),
         endpoint_reference=render_endpoint_reference_subjects(subjects, MAX_ENDPOINTS),
         version_timeline_rows=[version_delta_row_cells(row) for row in page_model.version_rows],
         interesting_rows=[

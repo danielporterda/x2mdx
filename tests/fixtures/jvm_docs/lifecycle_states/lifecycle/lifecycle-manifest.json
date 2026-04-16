@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "symbols": {
+    "com.example.Foo": {
+      "state": "beta"
+    },
+    "com.example.Foo#newMethod()": {
+      "state": "stable",
+      "replaces": "com.example.Foo#oldMethod()"
+    },
+    "com.example.scala.Baz": {
+      "state": "alpha"
+    }
+  }
+}

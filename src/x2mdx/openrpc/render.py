@@ -17,8 +17,8 @@ from x2mdx.presentation import (
     ProtocolSubject,
     StatusRow,
     VersionDeltaRow,
-    status_legend,
-    status_row_cells,
+    status_legend_items,
+    status_row_context,
     version_delta_row_cells,
 )
 from x2mdx.templating import markdown_page
@@ -84,6 +84,24 @@ def build_overview_page_legacy(
     link_prefix: str | None = None,
 ) -> Page:
     normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
+    status_rows = tuple(
+        StatusRow(
+            link=f"[`{escape_md_cell(spec.display_name)}`]("
+            + (
+                f"{normalized_link_prefix}/{spec_page_link(spec, spec_dir_name=spec_dir_name)}"
+                if normalized_link_prefix
+                else spec_page_link(spec, spec_dir_name=spec_dir_name)
+            )
+            + ")",
+            summary=spec_summary_text(spec),
+            lifecycle=LifecycleStatus.from_values(
+                introduced=spec.introduced_version,
+                changed_versions=spec.changed_in_versions,
+                removed=spec.removed_version,
+            ),
+        )
+        for spec in report.specs
+    )
     return markdown_page(
         path=overview_name,
         title=overview_title,
@@ -97,31 +115,8 @@ def build_overview_page_legacy(
             f"Version filter: `{report.version_filter}`",
             f"Generated at: `{report.generated_at_utc}`",
         ],
-        spec_summary_legend=status_legend(include_deprecated=False),
-        spec_rows=[
-            [
-                f"[`{escape_md_cell(spec.display_name)}`]("
-                + (
-                    f"{normalized_link_prefix}/{spec_page_link(spec, spec_dir_name=spec_dir_name)}"
-                    if normalized_link_prefix
-                    else spec_page_link(spec, spec_dir_name=spec_dir_name)
-                )
-                + ")",
-                status_row_cells(
-                    StatusRow(
-                        link="",
-                        summary="",
-                        lifecycle=LifecycleStatus.from_values(
-                            introduced=spec.introduced_version,
-                            changed_versions=spec.changed_in_versions,
-                            removed=spec.removed_version,
-                        ),
-                    )
-                )[1],
-                spec_summary_text(spec),
-            ]
-            for spec in report.specs
-        ],
+        spec_summary_legend=status_legend_items(status_rows),
+        spec_rows=[status_row_context(row) for row in status_rows],
     )
 
 
@@ -171,14 +166,19 @@ def build_overview_page(
         template_name="openrpc/overview.md.j2",
         overview_title=page_model.title,
         overview_items=list(page_model.metadata_items),
-        spec_summary_legend=status_legend(include_deprecated=False),
-        spec_rows=[status_row_cells(row) for row in page_model.status_rows],
+        spec_summary_legend=status_legend_items(page_model.status_rows),
+        spec_rows=[status_row_context(row) for row in page_model.status_rows],
     )
 
 
 def _method_context_legacy(method: OpenRpcMethodLifecycle) -> dict[str, Any]:
     latest = method.latest
-    lifecycle_lines = [f"- Introduced: `{method.introduced_version}`"]
+    lifecycle_lines: list[str] = []
+    if latest.get("state"):
+        lifecycle_lines.append(f"- Lifecycle state: {md_code(latest['state'])}")
+    if latest.get("replaces"):
+        lifecycle_lines.append(f"- Replaces: {md_code(latest['replaces'])}")
+    lifecycle_lines.append(f"- Introduced: `{method.introduced_version}`")
     if method.change_details:
         lifecycle_lines.append("Changed in: " + ", ".join(md_code(entry["version"]) for entry in method.change_details))
     if method.removed_version:
@@ -222,7 +222,12 @@ def _method_context_legacy(method: OpenRpcMethodLifecycle) -> dict[str, Any]:
 
 def _method_subject(method: OpenRpcMethodLifecycle) -> ProtocolSubject:
     latest = method.latest
-    lifecycle_items = [f"- Introduced: `{method.introduced_version}`"]
+    lifecycle_items: list[str] = []
+    if latest.get("state"):
+        lifecycle_items.append(f"- Lifecycle state: {md_code(latest['state'])}")
+    if latest.get("replaces"):
+        lifecycle_items.append(f"- Replaces: {md_code(latest['replaces'])}")
+    lifecycle_items.append(f"- Introduced: `{method.introduced_version}`")
     if method.change_details:
         lifecycle_items.append("Changed in: " + ", ".join(md_code(entry["version"]) for entry in method.change_details))
     if method.removed_version:
@@ -282,6 +287,7 @@ def _method_subject(method: OpenRpcMethodLifecycle) -> ProtocolSubject:
         lifecycle=LifecycleStatus.from_values(
             introduced=method.introduced_version,
             changed_versions=[str(entry["version"]) for entry in method.change_details],
+            state=str(latest.get("state") or "") or None,
             removed=method.removed_version,
         ),
         lifecycle_items=tuple(lifecycle_items),
@@ -335,6 +341,19 @@ def build_spec_page_legacy(
     overview_link = f"../{Path(overview_name).with_suffix('').as_posix()}"
     if normalized_link_prefix is not None:
         overview_link = normalized_link_prefix or "/"
+    status_rows = tuple(
+        StatusRow(
+            link=f"[{md_code(method.method)}](#{method.anchor})",
+            summary=method_summary_text(method),
+            lifecycle=LifecycleStatus.from_values(
+                introduced=method.introduced_version,
+                changed_versions=[str(entry["version"]) for entry in method.change_details],
+                state=str(method.latest.get("state") or "") or None,
+                removed=method.removed_version,
+            ),
+        )
+        for method in spec.methods
+    )
     return markdown_page(
         path=f"{spec_dir_name}/{Path(spec_page_name(spec)).as_posix()}",
         title=spec.display_name,
@@ -358,25 +377,8 @@ def build_spec_page_legacy(
             ]
             for version in spec.versions_present
         ],
-        method_summary_legend=status_legend(include_deprecated=False),
-        method_summary_rows=[
-            [
-                f"[{md_code(method.method)}](#{method.anchor})",
-                status_row_cells(
-                    StatusRow(
-                        link="",
-                        summary="",
-                        lifecycle=LifecycleStatus.from_values(
-                            introduced=method.introduced_version,
-                            changed_versions=[str(entry["version"]) for entry in method.change_details],
-                            removed=method.removed_version,
-                        ),
-                    )
-                )[1],
-                method_summary_text(method),
-            ]
-            for method in spec.methods
-        ],
+        method_summary_legend=status_legend_items(status_rows),
+        method_summary_rows=[status_row_context(row) for row in status_rows],
         methods=[_method_context_legacy(method) for method in spec.methods],
     )
 
@@ -445,8 +447,8 @@ def build_spec_page(
         overview_link=overview_link,
         metadata_items=list(page_model.metadata_items),
         version_timeline_rows=[version_delta_row_cells(row, include_active=True) for row in page_model.version_rows],
-        method_summary_legend=status_legend(include_deprecated=False),
-        method_summary_rows=[status_row_cells(row) for row in page_model.status_rows],
+        method_summary_legend=status_legend_items(page_model.status_rows),
+        method_summary_rows=[status_row_context(row) for row in page_model.status_rows],
         methods=method_contexts,
     )
 

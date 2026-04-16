@@ -34,6 +34,9 @@ SERVICE_METHOD_FIELD_NUMBER = 2
 
 SCALAR_TYPE_NAMES: dict[int, str] = {}
 LABEL_NAMES: dict[int, str] = {}
+EXPLICIT_STATES = {"alpha", "beta", "stable", "deprecated"}
+CUSTOM_STATE_OPTION = "docs.lifecycle.state"
+CUSTOM_REPLACES_OPTION = "docs.lifecycle.replaces"
 
 
 def ensure_runtime_dependencies() -> None:
@@ -127,6 +130,74 @@ def metadata_for(overlay: dict[str, Any], kind: str, entity_id: str) -> dict[str
     return value if isinstance(value, dict) else {}
 
 
+def normalize_explicit_state(value: Any) -> str | None:
+    text = str(value or "").strip().lower()
+    if text in EXPLICIT_STATES:
+        return text
+    return None
+
+
+def uninterpreted_option_name(option: Any) -> str:
+    parts: list[str] = []
+    for part in getattr(option, "name", []):
+        name_part = str(getattr(part, "name_part", "")).strip()
+        if name_part:
+            parts.append(name_part)
+    return ".".join(parts)
+
+
+def uninterpreted_option_value(option: Any) -> str | None:
+    identifier_value = str(getattr(option, "identifier_value", "")).strip()
+    if identifier_value:
+        return identifier_value
+    string_value = getattr(option, "string_value", b"")
+    if isinstance(string_value, bytes) and string_value:
+        return string_value.decode("utf-8", errors="replace").strip()
+    aggregate_value = str(getattr(option, "aggregate_value", "")).strip()
+    if aggregate_value:
+        return aggregate_value
+    positive_int_value = getattr(option, "positive_int_value", None)
+    if positive_int_value not in {None, 0}:
+        return str(positive_int_value)
+    return None
+
+
+def explicit_lifecycle_metadata(options: Any) -> dict[str, Any]:
+    metadata: dict[str, Any] = {}
+    for option in getattr(options, "uninterpreted_option", []):
+        name = uninterpreted_option_name(option)
+        value = uninterpreted_option_value(option)
+        if not value:
+            continue
+        if name == CUSTOM_STATE_OPTION:
+            if state := normalize_explicit_state(value):
+                metadata["state"] = state
+        elif name == CUSTOM_REPLACES_OPTION:
+            metadata["replaces"] = value
+    if getattr(options, "deprecated", False) and "state" not in metadata:
+        metadata["state"] = "deprecated"
+    return metadata
+
+
+def merged_metadata(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
+    metadata = dict(base)
+    for key, value in overlay.items():
+        if value is None:
+            continue
+        if key == "state":
+            normalized = normalize_explicit_state(value)
+            if normalized:
+                metadata[key] = normalized
+            continue
+        if key == "replaces":
+            text = str(value).strip()
+            if text:
+                metadata[key] = text
+            continue
+        metadata[key] = value
+    return metadata
+
+
 def load_descriptor_set_from_image(image_path: str) -> Any:
     ensure_runtime_dependencies()
     descriptor_set = descriptor_pb2.FileDescriptorSet()
@@ -203,6 +274,11 @@ class DescriptorSnapshotBuilder:
 
     def metadata(self, kind: str, entity_id: str) -> dict[str, Any]:
         return metadata_for(self.metadata_overlay, kind, entity_id)
+
+    def lifecycle_metadata(self, kind: str, entity_id: str, *, options: Any | None = None) -> dict[str, Any]:
+        parsed = explicit_lifecycle_metadata(options) if options is not None else {}
+        overlay = self.metadata(kind, entity_id)
+        return merged_metadata(parsed, overlay)
 
     def repo_path(self, import_path: str) -> str:
         return self.import_to_repo_path[import_path]
@@ -497,7 +573,7 @@ class DescriptorSnapshotBuilder:
             "description": description,
             "line": line,
             "sourceUrl": self.file_source_url(file_proto.name, line),
-            "metadata": self.metadata("endpoints", endpoint_id),
+            "metadata": self.lifecycle_metadata("endpoints", endpoint_id, options=method_proto.options),
             "requestType": strip_leading_dot(method_proto.input_type),
             "responseType": strip_leading_dot(method_proto.output_type),
             "clientStreaming": bool(method_proto.client_streaming),
@@ -519,7 +595,7 @@ class DescriptorSnapshotBuilder:
             "description": description,
             "line": line,
             "sourceUrl": self.file_source_url(file_proto.name, line),
-            "metadata": self.metadata("services", service_full_name),
+            "metadata": self.lifecycle_metadata("services", service_full_name, options=service_proto.options),
             "endpointIds": [],
         }
         self.services[service_full_name] = service_doc

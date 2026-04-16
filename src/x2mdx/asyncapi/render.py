@@ -17,7 +17,10 @@ from x2mdx.presentation import (
     LifecycleStatus,
     ProtocolInteraction,
     ProtocolSubject,
+    StatusRow,
     VersionDeltaRow,
+    status_legend_items,
+    status_row_context,
     version_delta_row_cells,
 )
 from x2mdx.templating import markdown_page
@@ -74,11 +77,28 @@ def compact_text(text: str, *, limit: int = 120) -> str:
     return normalized[: limit - 3].rstrip() + "..."
 
 
+def _channel_status_summary(channel: AsyncApiChannelLifecycle) -> str:
+    action_kind = action_list(channel)
+    description = escape_md_cell(compact_text(str(channel.latest.get("description") or "")))
+    if action_kind != "-" and description != "-":
+        return f"{action_kind}: {description}"
+    if action_kind != "-":
+        return action_kind
+    return description
+
+
 def _channel_context_legacy(channel: AsyncApiChannelLifecycle) -> dict[str, Any]:
-    lifecycle_bits = [
-        f"Actions: {action_list(channel)}",
-        f"Introduced: `{channel.introduced_version}`",
-    ]
+    lifecycle_bits = []
+    if channel.latest.get("state"):
+        lifecycle_bits.append(f"Lifecycle state: {md_code(channel.latest['state'])}")
+    if channel.latest.get("replaces"):
+        lifecycle_bits.append(f"Replaces: {md_code(channel.latest['replaces'])}")
+    lifecycle_bits.extend(
+        [
+            f"Actions: {action_list(channel)}",
+            f"Introduced: `{channel.introduced_version}`",
+        ]
+    )
     if channel.change_details:
         lifecycle_bits.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in channel.change_details))
     if channel.removed_version:
@@ -141,6 +161,19 @@ def build_page_legacy(
     page_title: str,
     page_description: str,
 ) -> Page:
+    status_rows = tuple(
+        StatusRow(
+            link=channel_link(channel.channel),
+            summary=_channel_status_summary(channel),
+            lifecycle=LifecycleStatus.from_values(
+                introduced=channel.introduced_version,
+                changed_versions=[str(entry["version"]) for entry in channel.change_details],
+                state=str(channel.latest.get("state") or "") or None,
+                removed=channel.removed_version,
+            ),
+        )
+        for channel in report.channels
+    )
     return markdown_page(
         path=Path(output_path).as_posix(),
         title=page_title,
@@ -156,27 +189,24 @@ def build_page_legacy(
             ]
             for version in report.versions
         ],
-        channel_summary_rows=[
-            [
-                channel_link(channel.channel),
-                action_list(channel),
-                escape_md_cell(compact_text(str(channel.latest.get("description") or ""))),
-                md_code(channel.introduced_version),
-                escape_md_cell(render_change_summary(channel.change_details)),
-                "-",
-                md_code(channel.removed_version) if channel.removed_version else "-",
-            ]
-            for channel in report.channels
-        ],
+        channel_summary_rows=[status_row_context(row) for row in status_rows],
+        channel_summary_legend=status_legend_items(status_rows),
         channels=[_channel_context_legacy(channel) for channel in report.channels],
     )
 
 
 def _channel_subject(channel: AsyncApiChannelLifecycle) -> ProtocolSubject:
-    lifecycle_items = [
-        f"Actions: {action_list(channel)}",
-        f"Introduced: `{channel.introduced_version}`",
-    ]
+    lifecycle_items: list[str] = []
+    if channel.latest.get("state"):
+        lifecycle_items.append(f"Lifecycle state: {md_code(channel.latest['state'])}")
+    if channel.latest.get("replaces"):
+        lifecycle_items.append(f"Replaces: {md_code(channel.latest['replaces'])}")
+    lifecycle_items.extend(
+        [
+            f"Actions: {action_list(channel)}",
+            f"Introduced: `{channel.introduced_version}`",
+        ]
+    )
     if channel.change_details:
         lifecycle_items.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in channel.change_details))
     if channel.removed_version:
@@ -239,6 +269,7 @@ def _channel_subject(channel: AsyncApiChannelLifecycle) -> ProtocolSubject:
         lifecycle=LifecycleStatus.from_values(
             introduced=channel.introduced_version,
             changed_versions=[str(entry["version"]) for entry in channel.change_details],
+            state=str(channel.latest.get("state") or "") or None,
             removed=channel.removed_version,
         ),
         lifecycle_items=tuple(lifecycle_items),
@@ -301,17 +332,17 @@ def build_page(
             )
             for version in report.versions
         ),
-        toc_rows=tuple(
-            (
-                channel_link(channel.title),
-                channel.kind,
-                channel.summary,
-                md_code(channel.lifecycle.introduced or "-"),
-                "<br/>".join(f"{version}: {changes}" for version, changes in channel.version_changes)
-                if channel.version_changes
-                else "-",
-                "-",
-                md_code(channel.lifecycle.removed) if channel.lifecycle.removed else "-",
+        status_rows=tuple(
+            StatusRow(
+                link=channel_link(channel.title),
+                summary=(
+                    f"{channel.kind}: {channel.summary}"
+                    if channel.kind != "-" and channel.summary != "-"
+                    else channel.kind
+                    if channel.kind != "-"
+                    else channel.summary
+                ),
+                lifecycle=channel.lifecycle,
             )
             for channel in channels
         ),
@@ -323,6 +354,7 @@ def build_page(
         template_name="asyncapi/page.md.j2",
         report=report,
         version_timeline_rows=[version_delta_row_cells(row) for row in page_model.version_rows],
-        channel_summary_rows=[list(row) for row in page_model.toc_rows],
+        channel_summary_rows=[status_row_context(row) for row in page_model.status_rows],
+        channel_summary_legend=status_legend_items(page_model.status_rows),
         channels=[_channel_context(channel) for channel in channels],
     )

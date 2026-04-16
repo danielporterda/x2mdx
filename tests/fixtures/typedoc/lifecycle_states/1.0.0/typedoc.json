@@ -1,0 +1,174 @@
+{
+  "id": 0,
+  "name": "@daml/types",
+  "packageName": "@daml/types",
+  "kind": 1,
+  "variant": "project",
+  "children": [
+    {
+      "id": 1,
+      "name": "Thing",
+      "variant": "declaration",
+      "kind": 2097152,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "Thing alias docs."
+          }
+        ]
+      },
+      "sources": [
+        {
+          "fileName": "index.d.ts",
+          "line": 1,
+          "character": 1
+        }
+      ],
+      "type": {
+        "type": "intrinsic",
+        "name": "string"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Thing",
+      "variant": "declaration",
+      "kind": 32,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "Thing variable docs."
+          }
+        ]
+      },
+      "sources": [
+        {
+          "fileName": "index.d.ts",
+          "line": 2,
+          "character": 1
+        }
+      ],
+      "type": {
+        "type": "intrinsic",
+        "name": "string"
+      }
+    },
+    {
+      "id": 10,
+      "name": "LegacyWidget",
+      "variant": "declaration",
+      "kind": 256,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "Legacy widget docs."
+          }
+        ]
+      },
+      "children": [],
+      "groups": [],
+      "sources": [
+        {
+          "fileName": "index.d.ts",
+          "line": 10,
+          "character": 1
+        }
+      ],
+      "typeParameters": [
+        {
+          "id": 1010,
+          "name": "T",
+          "kind": 131072,
+          "flags": {}
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "listPayments",
+      "variant": "declaration",
+      "kind": 64,
+      "flags": {},
+      "sources": [
+        {
+          "fileName": "index.d.ts",
+          "line": 20,
+          "character": 1
+        }
+      ],
+      "signatures": [
+        {
+          "id": 21,
+          "name": "listPayments",
+          "variant": "signature",
+          "kind": 4096,
+          "flags": {},
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "List payments."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "index.d.ts",
+              "line": 21,
+              "character": 1
+            }
+          ],
+          "parameters": [
+            {
+              "id": 22,
+              "name": "value",
+              "variant": "param",
+              "kind": 32768,
+              "flags": {},
+              "type": {
+                "type": "intrinsic",
+                "name": "string"
+              }
+            }
+          ],
+          "type": {
+            "type": "reference",
+            "name": "Widget"
+          }
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "title": "Interfaces",
+      "children": [
+        10
+      ]
+    },
+    {
+      "title": "Type Aliases",
+      "children": [
+        1
+      ]
+    },
+    {
+      "title": "Variables",
+      "children": [
+        2
+      ]
+    },
+    {
+      "title": "Functions",
+      "children": [
+        20
+      ]
+    }
+  ]
+}

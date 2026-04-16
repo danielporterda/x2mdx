@@ -10,12 +10,31 @@ from x2mdx.typedoc.lifecycle import build_typedoc_report_from_sources
 from x2mdx.typedoc.snapshots import load_typedoc_sources
 
 
-def comment(summary: str | None = None, *, internal: bool = False) -> dict[str, object]:
+def comment(
+    summary: str | None = None,
+    *,
+    internal: bool = False,
+    modifier_tags: list[str] | None = None,
+    block_tags: list[tuple[str, str]] | None = None,
+) -> dict[str, object]:
     payload: dict[str, object] = {"summary": []}
     if summary:
         payload["summary"] = [{"kind": "text", "text": summary}]
+    tags: list[str] = []
     if internal:
-        payload["modifierTags"] = ["@internal"]
+        tags.append("@internal")
+    if modifier_tags:
+        tags.extend(modifier_tags)
+    if tags:
+        payload["modifierTags"] = tags
+    if block_tags:
+        payload["blockTags"] = [
+            {
+                "tag": tag_name,
+                "content": [{"kind": "text", "text": text}] if text else [],
+            }
+            for tag_name, text in block_tags
+        ]
     return payload
 
 
@@ -29,6 +48,8 @@ def interface_export(
     *,
     summary: str,
     member_specs: list[tuple[int, str, str, str, bool]] | None = None,
+    modifier_tags: list[str] | None = None,
+    block_tags: list[tuple[str, str]] | None = None,
 ) -> dict[str, object]:
     children = []
     for member_id, member_name, member_type, member_summary, internal in member_specs or []:
@@ -49,7 +70,7 @@ def interface_export(
         "variant": "declaration",
         "kind": 256,
         "flags": {},
-        "comment": comment(summary),
+        "comment": comment(summary, modifier_tags=modifier_tags, block_tags=block_tags),
         "children": children,
         "groups": [{"title": "Properties", "children": [child["id"] for child in children]}] if children else [],
         "sources": source(export_id),
@@ -57,27 +78,43 @@ def interface_export(
     }
 
 
-def type_alias_export(export_id: int, name: str, summary: str, rendered_type: str) -> dict[str, object]:
+def type_alias_export(
+    export_id: int,
+    name: str,
+    summary: str,
+    rendered_type: str,
+    *,
+    modifier_tags: list[str] | None = None,
+    block_tags: list[tuple[str, str]] | None = None,
+) -> dict[str, object]:
     return {
         "id": export_id,
         "name": name,
         "variant": "declaration",
         "kind": 2097152,
         "flags": {},
-        "comment": comment(summary),
+        "comment": comment(summary, modifier_tags=modifier_tags, block_tags=block_tags),
         "sources": source(export_id),
         "type": {"type": "intrinsic", "name": rendered_type},
     }
 
 
-def variable_export(export_id: int, name: str, summary: str, rendered_type: str) -> dict[str, object]:
+def variable_export(
+    export_id: int,
+    name: str,
+    summary: str,
+    rendered_type: str,
+    *,
+    modifier_tags: list[str] | None = None,
+    block_tags: list[tuple[str, str]] | None = None,
+) -> dict[str, object]:
     return {
         "id": export_id,
         "name": name,
         "variant": "declaration",
         "kind": 32,
         "flags": {},
-        "comment": comment(summary),
+        "comment": comment(summary, modifier_tags=modifier_tags, block_tags=block_tags),
         "sources": source(export_id),
         "type": {"type": "intrinsic", "name": rendered_type},
     }
@@ -91,6 +128,8 @@ def function_export(
     parameter_type: str = "string",
     return_type: str = "Widget",
     internal: bool = False,
+    modifier_tags: list[str] | None = None,
+    block_tags: list[tuple[str, str]] | None = None,
 ) -> dict[str, object]:
     signature = {
         "id": export_id + 1,
@@ -98,7 +137,7 @@ def function_export(
         "variant": "signature",
         "kind": 4096,
         "flags": {},
-        "comment": comment(summary, internal=internal),
+        "comment": comment(summary, internal=internal, modifier_tags=modifier_tags, block_tags=block_tags),
         "sources": source(export_id + 1),
         "parameters": [
             {
@@ -258,6 +297,101 @@ class TypeDocTests(unittest.TestCase):
             [{"version": "1.1.0", "changes": ["call signatures updated"]}],
         )
 
+    def test_build_report_tracks_lifecycle_tags_and_replacement_metadata(self) -> None:
+        first = self._write_json(
+            "snapshots/1.0.0/lifecycle-typedoc.json",
+            typedoc_document(
+                [
+                    type_alias_export(1, "Thing", "Thing alias docs.", "string"),
+                    variable_export(2, "Thing", "Thing variable docs.", "string"),
+                    interface_export(10, "LegacyWidget", summary="Legacy widget docs."),
+                    function_export(20, "listPayments", summary="List payments."),
+                ]
+            ),
+        )
+        second = self._write_json(
+            "snapshots/1.1.0/lifecycle-typedoc.json",
+            typedoc_document(
+                [
+                    type_alias_export(1, "Thing", "Thing alias docs.", "string"),
+                    variable_export(2, "Thing", "Thing variable docs.", "string"),
+                    type_alias_export(
+                        3,
+                        "ThingRecord",
+                        "Thing record docs.",
+                        "string",
+                        modifier_tags=["@stable"],
+                        block_tags=[("@replaces", "Type Aliases::Thing")],
+                    ),
+                    variable_export(
+                        4,
+                        "alphaWidget",
+                        "Alpha widget docs.",
+                        "string",
+                        modifier_tags=["@alpha"],
+                    ),
+                    interface_export(
+                        10,
+                        "LegacyWidget",
+                        summary="Legacy widget docs.",
+                        block_tags=[("@deprecated", "Use Widget instead.")],
+                    ),
+                    function_export(20, "listPayments", summary="List payments."),
+                    function_export(
+                        21,
+                        "listPaymentsPreview",
+                        summary="Preview payment listing.",
+                        modifier_tags=["@beta"],
+                    ),
+                    function_export(
+                        22,
+                        "listPaymentsV2",
+                        summary="List payments v2.",
+                        modifier_tags=["@stable"],
+                        block_tags=[("@replaces", "Functions::listPayments")],
+                    ),
+                ]
+            ),
+        )
+        manifest_path = self._write_json(
+            "lifecycle-manifest.json",
+            {
+                "source": "typedoc lifecycle test fixtures",
+                "package_name": "@daml/types",
+                "publish_version": "1.1.0",
+                "versions": [
+                    {"version": "1.0.0", "json_path": str(first)},
+                    {"version": "1.1.0", "json_path": str(second)},
+                ],
+            },
+        )
+
+        report = build_typedoc_report_from_sources(
+            load_typedoc_sources(manifest_path),
+            source_name="typedoc lifecycle test fixtures",
+            version_filter="unit test versions",
+        )
+
+        exports = {(export["name"], export["kind_label"]): export for export in report.exports}
+        self.assertEqual(exports[("ThingRecord", "Type Alias")]["state"], "stable")
+        self.assertEqual(exports[("ThingRecord", "Type Alias")]["replaces"], "Type Aliases::Thing")
+        self.assertEqual(exports[("alphaWidget", "Variable")]["state"], "alpha")
+        self.assertEqual(exports[("listPaymentsPreview", "Function")]["state"], "beta")
+        self.assertEqual(exports[("listPaymentsV2", "Function")]["state"], "stable")
+        self.assertEqual(exports[("listPaymentsV2", "Function")]["replaces"], "Functions::listPayments")
+        self.assertEqual(exports[("LegacyWidget", "Interface")]["state"], "deprecated")
+        self.assertEqual(
+            exports[("LegacyWidget", "Interface")]["change_details"],
+            [
+                {
+                    "version": "1.1.0",
+                    "changes": [
+                        "lifecycle state changed `-` -> `deprecated`",
+                    ],
+                }
+            ],
+        )
+
     def test_cli_builds_single_page_and_filters_internal_members(self) -> None:
         manifest_path = self._write_manifest()
         output_file = self.root / "out" / "typescript.mdx"
@@ -283,10 +417,16 @@ class TypeDocTests(unittest.TestCase):
         self.assertIn("## Table of Contents", text)
         self.assertIn("## Version Change Summary", text)
         self.assertIn("## Reference", text)
-        self.assertIn("[`Thing`](#type-alias-thing)", text)
-        self.assertIn("[`Thing`](#variable-thing)", text)
-        self.assertIn("`1.1.0`: summary updated; members added: `kind`", text)
-        self.assertIn("| Name | Kind | Summary | Introduced | Changed | Deprecated | Removed |", text)
+        self.assertIn("[`Thing` (Type Alias)](#type-alias-thing)", text)
+        self.assertIn("[`Thing` (Variable)](#variable-thing)", text)
+        self.assertIn("summary updated; members added: `kind`", text)
+        self.assertNotIn("🟢", text)
+        self.assertNotIn("🔵", text)
+        self.assertNotIn("🔴", text)
+        self.assertIn(">Active Since</span>", text)
+        self.assertIn(">Changed</span>", text)
+        self.assertIn(">Removed</span>", text)
+        self.assertIn("| NAME | STATUS | SUMMARY |", text)
         self.assertIn("| Version | Added | Changed | Removed |", text)
         self.assertIn("Removed in: `1.1.0`", text)
         self.assertIn("Shown for historical reference.", text)

@@ -1,0 +1,56 @@
+[
+  {
+    "md_name": "DA.List",
+    "md_descr": "List module in 1.0.0",
+    "md_warn": [],
+    "md_adts": [],
+    "md_classes": [],
+    "md_interfaces": [],
+    "md_templates": [],
+    "md_instances": [],
+    "md_functions": [
+      {
+        "fct_name": "example",
+        "fct_type": {
+          "TypeFun": [
+            {
+              "TypeLit": "Int"
+            },
+            {
+              "TypeLit": "Int"
+            }
+          ]
+        },
+        "fct_context": [],
+        "fct_descr": "DA.List example function"
+      }
+    ]
+  },
+  {
+    "md_name": "DA.Legacy",
+    "md_descr": "Legacy module in 1.0.0",
+    "md_warn": [],
+    "md_adts": [],
+    "md_classes": [],
+    "md_interfaces": [],
+    "md_templates": [],
+    "md_instances": [],
+    "md_functions": [
+      {
+        "fct_name": "example",
+        "fct_type": {
+          "TypeFun": [
+            {
+              "TypeLit": "Int"
+            },
+            {
+              "TypeLit": "Int"
+            }
+          ]
+        },
+        "fct_context": [],
+        "fct_descr": "DA.Legacy example function"
+      }
+    ]
+  }
+]

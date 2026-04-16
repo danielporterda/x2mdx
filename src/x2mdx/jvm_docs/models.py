@@ -18,6 +18,7 @@ class JvmDocArtifactSource:
     language: str
     include_prefixes: list[str] = field(default_factory=list)
     versions: list[JvmDocVersionSource] = field(default_factory=list)
+    lifecycle_manifest: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -26,12 +27,15 @@ class JvmDocSymbolLifecycle:
     language: str
     kind: str
     symbol: str
+    canonical_id: str
     introduced_version: str
     deprecated_version: str | None
     removed_version: str | None
     versions_present: list[str]
     doc_links: dict[str, str]
     latest_doc_path: str
+    lifecycle_state: str | None = None
+    replaces: str | None = None
     deprecation_note: str | None = None
     latest_signature: str | None = None
     latest_summary: str | None = None
@@ -58,4 +62,3 @@ class JvmDocLifecycleReport:
     summary: dict[str, int]
     notes: list[str]
     artifacts: list[JvmDocArtifactLifecycle]
-

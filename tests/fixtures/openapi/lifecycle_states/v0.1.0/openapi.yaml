@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: Lifecycle Example API
+  version: 0.1.0
+paths:
+  /legacy-payments:
+    get:
+      operationId: listLegacyPayments
+      summary: Legacy payment listing
+      responses:
+        "200":
+          description: ok
+  /payments:
+    get:
+      operationId: listPayments
+      summary: List payments
+      responses:
+        "200":
+          description: ok

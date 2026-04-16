@@ -49,6 +49,34 @@ def compact_text(text: str, *, limit: int = 120) -> str:
     return normalized[: limit - 3].rstrip() + "..."
 
 
+def explicit_lifecycle_state(metadata: dict[str, Any] | None) -> str | None:
+    if not isinstance(metadata, dict):
+        return None
+    value = str(metadata.get("state", "")).strip().lower()
+    if value in {"alpha", "beta", "stable", "deprecated"}:
+        return value
+    return None
+
+
+def replacement_target(metadata: dict[str, Any] | None) -> str | None:
+    if not isinstance(metadata, dict):
+        return None
+    value = str(metadata.get("replaces", "")).strip()
+    return value or None
+
+
+def format_lifecycle_state(metadata: dict[str, Any] | None) -> str:
+    if state := explicit_lifecycle_state(metadata):
+        return f"`{state}`"
+    return "-"
+
+
+def format_replaces(metadata: dict[str, Any] | None) -> str:
+    if value := replacement_target(metadata):
+        return f"`{escape_md(value)}`"
+    return "-"
+
+
 def compact_package_summary(package: dict[str, Any]) -> str:
     parts = [
         f"{package['serviceCount']} services",
@@ -484,6 +512,10 @@ def render_overview_page(
             f"Messages: `{latest['stats']['messages']}`",
             f"Enums: `{latest['stats']['enums']}`",
         ],
+        notes=[
+            "Lifecycle state and replacement metadata come only from explicit protobuf metadata, not endpoint history or description text.",
+            "Removed means the first configured release after the last observed presence.",
+        ],
         package_toc_legend=render_status_legend(include_deprecated=False),
         package_toc_rows=toc_rows,
         package_groups=grouped_packages,
@@ -538,9 +570,11 @@ def render_package_page(
     service_contexts: list[dict[str, Any]] = []
     service_rows: list[list[str]] = []
     for service in sorted(service_buckets.values(), key=lambda item: item["name"]):
+        service_metadata = ctx["services"].get(service["id"], {}).get("metadata", {})
         service_rows.append(
             [
                 f"[`{escape_md(service['name'])}`](#{service_anchor(service['id'])})",
+                format_lifecycle_state(service_metadata),
                 f"`{len(service['endpointIds'])}`",
                 md_link("file", service.get("sourceUrl")),
                 escape_md_cell(compact_text(service.get("description", ""))),
@@ -551,6 +585,8 @@ def render_package_page(
                 "anchor": service_anchor(service["id"]),
                 "heading": f"Service `{service['name']}`",
                 "summary_items": [
+                    f"Lifecycle state: {format_lifecycle_state(service_metadata)}",
+                    f"Replaces: {format_replaces(service_metadata)}",
                     f"Source: {md_link(service['file'], service.get('sourceUrl'))}",
                     f"Endpoints tracked: `{len(service['endpointIds'])}`",
                 ],
@@ -558,6 +594,8 @@ def render_package_page(
                 "endpoint_rows": [
                     [
                         f"[`{escape_md(endpoint_docs[endpoint_id]['name'])}`](#{endpoint_anchor(endpoint_id)})",
+                        format_lifecycle_state(endpoint_docs[endpoint_id].get("metadata")),
+                        format_replaces(endpoint_docs[endpoint_id].get("metadata")),
                         f"`{lifecycle_map[endpoint_id]['introducedIn']}`",
                         f"`{lifecycle_map[endpoint_id]['lastChangedIn']}`",
                         f"`{lifecycle_map[endpoint_id]['removedIn'] or ''}`",
@@ -572,6 +610,8 @@ def render_package_page(
                         "anchor": endpoint_anchor(endpoint_id),
                         "title": f"{endpoint_docs[endpoint_id]['service']}.{endpoint_docs[endpoint_id]['name']}",
                         "summary_items": [
+                            f"Lifecycle state: {format_lifecycle_state(endpoint_docs[endpoint_id].get('metadata'))}",
+                            f"Replaces: {format_replaces(endpoint_docs[endpoint_id].get('metadata'))}",
                             f"Introduced in: `{lifecycle_map[endpoint_id]['introducedIn']}`",
                             f"Last changed in: `{lifecycle_map[endpoint_id]['lastChangedIn']}`",
                             f"Removed in: `{lifecycle_map[endpoint_id]['removedIn'] or '-'}`",
