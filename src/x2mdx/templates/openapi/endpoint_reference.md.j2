@@ -6,6 +6,7 @@
 {% if path_group.methods | length > 1 %}
 {{ bullet_list(["Methods: " ~ (path_group.methods | join(", "))]) }}
 {% endif %}
+{{ shared.version_changes(path_group.version_changes) }}
 {% for operation in path_group.operations %}
 {{ anchor(operation.anchor_id) }}
 {% if path_group.methods | length == 1 %}

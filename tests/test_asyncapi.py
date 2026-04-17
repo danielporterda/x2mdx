@@ -321,6 +321,195 @@ class AsyncApiTests(unittest.TestCase):
         self.assertEqual(report.per_version_deltas["1.1.0"]["changed_count"], 1)
         self.assertEqual(report.per_version_deltas["1.1.0"]["removed_count"], 1)
 
+    def test_build_report_tracks_explicit_lifecycle_and_replacement_metadata(self) -> None:
+        report = build_asyncapi_report_from_sources(
+            [
+                self._snapshot(
+                    "1.0.0",
+                    "published/1.0.0/asyncapi.yaml",
+                    """
+                    asyncapi: 2.6.0
+                    info:
+                      title: Lifecycle Example WebSocket API
+                      version: 1.0.0
+                    channels:
+                      /payments:
+                        description: Payment updates.
+                        subscribe:
+                          operationId: onPayments
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/PaymentEvent'
+                      /legacy:
+                        description: Legacy updates.
+                        subscribe:
+                          operationId: onLegacy
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/LegacyEvent'
+                    components:
+                      schemas:
+                        PaymentEvent:
+                          type: object
+                          required: [paymentId]
+                          properties:
+                            paymentId:
+                              type: string
+                        LegacyEvent:
+                          type: object
+                          properties:
+                            value:
+                              type: string
+                      messages:
+                        PaymentEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/PaymentEvent'
+                        LegacyEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/LegacyEvent'
+                    """,
+                ),
+                self._snapshot(
+                    "1.1.0",
+                    "published/1.1.0/asyncapi.yaml",
+                    """
+                    asyncapi: 2.6.0
+                    info:
+                      title: Lifecycle Example WebSocket API
+                      version: 1.1.0
+                    channels:
+                      /payments:
+                        description: Payment updates.
+                        subscribe:
+                          operationId: onPayments
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/PaymentEvent'
+                      /payments/v2:
+                        x-state: stable
+                        x-replaces: /payments
+                        subscribe:
+                          operationId: onPaymentsV2
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/PaymentEventV2'
+                      /payments/preview:
+                        x-state: beta
+                        subscribe:
+                          operationId: onPaymentsPreview
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/PaymentPreviewEvent'
+                      /payments/alpha:
+                        x-state: alpha
+                        subscribe:
+                          operationId: onPaymentsAlpha
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/PaymentAlphaEvent'
+                      /legacy:
+                        description: Legacy updates.
+                        x-state: deprecated
+                        subscribe:
+                          operationId: onLegacy
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            $ref: '#/components/messages/LegacyEvent'
+                    components:
+                      schemas:
+                        PaymentEvent:
+                          type: object
+                          required: [paymentId]
+                          properties:
+                            paymentId:
+                              type: string
+                        PaymentEventV2:
+                          type: object
+                          required: [paymentId, status]
+                          properties:
+                            paymentId:
+                              type: string
+                            status:
+                              type: string
+                        PaymentPreviewEvent:
+                          type: object
+                          required: [previewId]
+                          properties:
+                            previewId:
+                              type: string
+                        PaymentAlphaEvent:
+                          type: object
+                          required: [alphaId]
+                          properties:
+                            alphaId:
+                              type: string
+                        LegacyEvent:
+                          type: object
+                          properties:
+                            value:
+                              type: string
+                      messages:
+                        PaymentEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/PaymentEvent'
+                        PaymentEventV2:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/PaymentEventV2'
+                        PaymentPreviewEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/PaymentPreviewEvent'
+                        PaymentAlphaEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/PaymentAlphaEvent'
+                        LegacyEvent:
+                          contentType: application/json
+                          payload:
+                            $ref: '#/components/schemas/LegacyEvent'
+                    """,
+                ),
+            ],
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        channels = {channel.channel: channel for channel in report.channels}
+        self.assertEqual(channels["/payments/v2"].latest["state"], "stable")
+        self.assertEqual(channels["/payments/v2"].latest["replaces"], "/payments")
+        self.assertEqual(channels["/payments/alpha"].latest["state"], "alpha")
+        self.assertEqual(channels["/payments/preview"].latest["state"], "beta")
+        self.assertEqual(channels["/legacy"].latest["state"], "deprecated")
+        self.assertEqual(
+            channels["/legacy"].change_details,
+            [
+                {
+                    "version": "1.1.0",
+                    "changes": [
+                        "lifecycle state changed `-` -> `deprecated`",
+                    ],
+                }
+            ],
+        )
+
     def test_cli_builds_asyncapi_page_and_updates_docs_json(self) -> None:
         manifest_path = self._write_manifest()
         output_file = self.root / "docs" / "reference" / "asyncapi.mdx"

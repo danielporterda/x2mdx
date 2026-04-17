@@ -343,6 +343,101 @@ class OpenRpcTests(unittest.TestCase):
         self.assertEqual(remote_methods["status"].changed_in_versions, ["1.1.0"])
         self.assertIn("result updated (required fields)", remote_methods["status"].change_details[0]["changes"])
 
+    def test_build_report_tracks_explicit_lifecycle_and_replacement_metadata(self) -> None:
+        report = build_openrpc_report_from_sources(
+            [
+                self._snapshot(
+                    version="1.0.0",
+                    spec_id="payment-api",
+                    display_name="Payment API",
+                    source_path="api-specs/openrpc-payment-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Payment API", "version": "1.0.0"},
+                          "methods": [
+                            {
+                              "name": "listPayments",
+                              "description": "List payments.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "listLegacyPayments",
+                              "description": "List legacy payments.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            }
+                          ]
+                        }
+                    """,
+                ),
+                self._snapshot(
+                    version="1.1.0",
+                    spec_id="payment-api",
+                    display_name="Payment API",
+                    source_path="api-specs/openrpc-payment-api.json",
+                    contents="""
+                        {
+                          "openrpc": "1.2.6",
+                          "info": {"title": "Payment API", "version": "1.1.0"},
+                          "methods": [
+                            {
+                              "name": "listPayments",
+                              "description": "List payments.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "listPaymentsV2",
+                              "x-state": "stable",
+                              "x-replaces": "listPayments",
+                              "description": "List payments with stable v2 output.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "previewPayments",
+                              "x-state": "beta",
+                              "description": "Preview payment listing.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            },
+                            {
+                              "name": "listLegacyPayments",
+                              "x-state": "deprecated",
+                              "description": "List legacy payments.",
+                              "params": [],
+                              "result": {"name": "result", "schema": {"type": "string"}}
+                            }
+                          ]
+                        }
+                    """,
+                ),
+            ],
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        spec = next(spec for spec in report.specs if spec.spec_id == "payment-api")
+        methods = {method.method: method for method in spec.methods}
+
+        self.assertEqual(methods["listPaymentsV2"].latest["state"], "stable")
+        self.assertEqual(methods["listPaymentsV2"].latest["replaces"], "listPayments")
+        self.assertEqual(methods["previewPayments"].latest["state"], "beta")
+        self.assertEqual(methods["listLegacyPayments"].latest["state"], "deprecated")
+        self.assertEqual(
+            methods["listLegacyPayments"].change_details,
+            [
+                {
+                    "version": "1.1.0",
+                    "changes": [
+                        "lifecycle state changed `-` -> `deprecated`",
+                    ],
+                }
+            ],
+        )
+
     def test_cli_builds_openrpc_pages(self) -> None:
         manifest_path = self._write_manifest()
         output_dir = self.root / "out"

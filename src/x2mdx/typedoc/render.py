@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from x2mdx.output import Page
+from x2mdx.presentation import LifecycleStatus, StatusRow, status_legend_items, status_row_context
 from x2mdx.templating import markdown_page
 
 
@@ -27,6 +28,10 @@ def render_change_summary(change_details: list[dict[str, object]]) -> str:
 def render_summary_cell(text: str) -> str:
     summary = text.strip()
     return escape_md_cell(summary) if summary else "-"
+
+
+def toc_link_label(export: dict[str, object]) -> str:
+    return f"[`{escape_md_cell(str(export['name']))}` ({escape_md_cell(str(export['kind_label']))})](#{export['anchor']})"
 
 
 def version_change_summary_rows(exports: list[dict[str, object]], versions: list[str]) -> list[list[str]]:
@@ -84,10 +89,12 @@ def _signature_docs(signature_docs: list[dict[str, Any]]) -> list[dict[str, Any]
 
 
 def _export_context(export: dict[str, Any]) -> dict[str, Any]:
-    lifecycle_bits = [
-        f"Kind: `{export['kind_label']}`",
-        f"Introduced: `{export['introduced_in']}`",
-    ]
+    lifecycle_bits = [f"Kind: `{export['kind_label']}`"]
+    if export.get("state"):
+        lifecycle_bits.append(f"Lifecycle state: `{export['state']}`")
+    if export.get("replaces"):
+        lifecycle_bits.append(f"Replaces: `{export['replaces']}`")
+    lifecycle_bits.append(f"Introduced: `{export['introduced_in']}`")
     if export["change_details"]:
         lifecycle_bits.append("Changed in: " + ", ".join(f"`{entry['version']}`" for entry in export["change_details"]))
     if export["removed_in"]:
@@ -146,17 +153,35 @@ def build_page(
         template_name="typedoc/page.md.j2",
         report=report,
         toc_rows=[
-            [
-                f"[`{escape_md_cell(export['name'])}`](#{export['anchor']})",
-                escape_md_cell(export["kind_label"]),
-                render_summary_cell(str(export["summary"])),
-                f"`{export['introduced_in']}`",
-                escape_md_cell(render_change_summary(export["change_details"])),
-                "-",
-                f"`{export['removed_in']}`" if export["removed_in"] else "-",
-            ]
+            status_row_context(
+                StatusRow(
+                    link=toc_link_label(export),
+                    summary=render_summary_cell(str(export["summary"])),
+                    lifecycle=LifecycleStatus.from_values(
+                        introduced=str(export["introduced_in"]),
+                        changed_versions=[str(entry["version"]) for entry in export["change_details"]],
+                        state=str(export.get("state") or "") or None,
+                        removed=str(export["removed_in"]) if export["removed_in"] else None,
+                    ),
+                )
+            )
             for export in report.exports
         ],
+        toc_legend=status_legend_items(
+            [
+                StatusRow(
+                    link="",
+                    summary="",
+                    lifecycle=LifecycleStatus.from_values(
+                        introduced=str(export["introduced_in"]),
+                        changed_versions=[str(entry["version"]) for entry in export["change_details"]],
+                        state=str(export.get("state") or "") or None,
+                        removed=str(export["removed_in"]) if export["removed_in"] else None,
+                    ),
+                )
+                for export in report.exports
+            ]
+        ),
         version_change_summary_rows=version_change_summary_rows(report.exports, report.versions),
         grouped_exports=grouped_exports,
     )

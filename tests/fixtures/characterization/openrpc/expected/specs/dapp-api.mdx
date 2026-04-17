@@ -23,22 +23,22 @@ An OpenRPC specification for the dapp to interact with a Wallet Provider.
 
 ## Table of Contents
 
-🟢 Active Since  🔵 Changed  🔴 Removed
+<span style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.85em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span>Active Since</span>
 
 | NAME | STATUS | SUMMARY |
 | --- | --- | --- |
-| [`accountsChanged`](#method-accountschanged) | 🟢 `v0.20` | - |
-| [`connect`](#method-connect) | 🟢 `v0.20` | Ensures ledger connectivity and returns the connected network information along with the session information. |
-| [`disconnect`](#method-disconnect) | 🟢 `v0.20` | Invoke a disconnect of the wallet provider session. |
-| [`getActiveNetwork`](#method-getactivenetwork) | 🟢 `v0.20` | Returns the active network. |
-| [`getPrimaryAccount`](#method-getprimaryaccount) | 🟢 `v0.20` | Returns the primary account. |
-| [`ledgerApi`](#method-ledgerapi) | 🟢 `v0.20` | Proxy for the JSON-API endpoints. Injects authorization headers automatically. |
-| [`listAccounts`](#method-listaccounts) | 🟢 `v0.20` | Lists the addresses (wallets) with their properties; including which network they are associated to and with signing provider is used. |
-| [`prepareExecute`](#method-prepareexecute) | 🟢 `v0.20` | Prepares a transaction for subsequent signing & execution. |
-| [`prepareExecuteAndWait`](#method-prepareexecuteandwait) | 🟢 `v0.20` | Like prepareExecute, but waits for the transaction to be executed on the ledger. |
-| [`signMessage`](#method-signmessage) | 🟢 `v0.20` | Signs a message. |
-| [`status`](#method-status) | 🟢 `v0.20` | Returns the current status of the wallet provider session. |
-| [`txChanged`](#method-txchanged) | 🟢 `v0.20` | - |
+| [`accountsChanged`](#method-accountschanged) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | - |
+| [`connect`](#method-connect) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Ensures ledger connectivity and returns the connected network information along with the session information. |
+| [`disconnect`](#method-disconnect) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Invoke a disconnect of the wallet provider session. |
+| [`getActiveNetwork`](#method-getactivenetwork) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Returns the active network. |
+| [`getPrimaryAccount`](#method-getprimaryaccount) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Returns the primary account. |
+| [`ledgerApi`](#method-ledgerapi) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Proxy for the JSON-API endpoints. Injects authorization headers automatically. |
+| [`listAccounts`](#method-listaccounts) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Lists the addresses (wallets) with their properties; including which network they are associated to and with signing provider is used. |
+| [`prepareExecute`](#method-prepareexecute) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Prepares a transaction for subsequent signing & execution. |
+| [`prepareExecuteAndWait`](#method-prepareexecuteandwait) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Like prepareExecute, but waits for the transaction to be executed on the ledger. |
+| [`signMessage`](#method-signmessage) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Signs a message. |
+| [`status`](#method-status) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Returns the current status of the wallet provider session. |
+| [`txChanged`](#method-txchanged) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | - |
 
 ## Methods
 

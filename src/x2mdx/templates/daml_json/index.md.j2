@@ -3,6 +3,12 @@
 
 {{ paragraph("This page is generated from versioned Daml docs JSON snapshots.") }}
 
-{% call shared.standard_reference_layout(toc_rows=module_toc_rows, version_rows=version_change_summary_rows) %}
+{{ shared.status_toc(module_status_rows, legend=module_status_legend) }}
+
+{{ shared.version_change_summary(version_change_summary_rows) }}
+
+{{ heading(2, "Reference") }}
+
 {{ bullet_list(module_links) }}
-{% endcall %}
+
+{{ shared.bullet_section("Notes", notes) }}

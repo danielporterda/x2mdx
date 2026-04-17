@@ -7,8 +7,10 @@ import re
 from pathlib import Path
 from typing import Any
 
+from x2mdx.daml_json.lifecycle import structured_warning_context
 from x2mdx.daml_json.models import DamlDocsReport
 from x2mdx.output import Page
+from x2mdx.presentation import LifecycleStatus, StatusRow, status_legend_items, status_row_context
 from x2mdx.templating import markdown_page, render_template
 
 EXCLUDED_MODULE_NAMES = frozenset(
@@ -60,44 +62,6 @@ def render_doc_blocks(descr: Any) -> str:
         if raw:
             blocks.append(raw)
     return "\n\n".join(blocks)
-
-
-def extract_tagged_warning_messages(warns: Any, tag: str) -> list[str]:
-    values: list[Any]
-    if warns is None:
-        values = []
-    elif isinstance(warns, list):
-        values = warns
-    else:
-        values = [warns]
-
-    out: list[str] = []
-
-    def append_texts(node: Any) -> None:
-        if isinstance(node, list):
-            for item in node:
-                append_texts(item)
-            return
-        if node is None:
-            return
-        text = str(node).strip()
-        if text:
-            out.append(text)
-
-    for entry in values:
-        if not isinstance(entry, dict):
-            continue
-        if tag in entry:
-            append_texts(entry[tag])
-
-    deduped: list[str] = []
-    seen: set[str] = set()
-    for item in out:
-        if item in seen:
-            continue
-        seen.add(item)
-        deduped.append(item)
-    return deduped
 
 
 def module_display_name(module_name: str) -> str:
@@ -217,12 +181,16 @@ def render_instance(inst: dict[str, Any]) -> str:
 
 
 def render_warn_blocks(warns: Any) -> list[str]:
-    warning_messages = extract_tagged_warning_messages(warns, "WarnData")
-    deprecation_messages = extract_tagged_warning_messages(warns, "DeprecatedData")
+    context = structured_warning_context(warns)
     blocks: list[str] = []
-    for message in warning_messages:
+    if context.state:
+        structured_lines = [f"Lifecycle state: `{context.state}`"]
+        if context.replaces:
+            structured_lines.append(f"Replaces: `{context.replaces}`")
+        blocks.append("\n".join(["<Warning>", *structured_lines, "</Warning>"]))
+    for message in context.warning_messages:
         blocks.append("\n".join(["<Warning>", message, "</Warning>"]))
-    for message in deprecation_messages:
+    for message in context.deprecation_messages:
         blocks.append("\n".join(["<Warning>", f"Deprecated: {message}", "</Warning>"]))
     return blocks
 
@@ -514,10 +482,9 @@ def module_template_context(
     anchor = module_doc.get("md_anchor")
     descr = render_doc_blocks(module_doc.get("md_descr"))
 
-    module_warnings = extract_tagged_warning_messages(module_doc.get("md_warn"), "WarnData")
-    module_deprecations = extract_tagged_warning_messages(module_doc.get("md_warn"), "DeprecatedData")
-    module_alpha_warning = next((msg for msg in module_warnings if "alpha" in msg.lower()), None)
-    module_deprecation_warning = module_deprecations[0] if module_deprecations else None
+    warning_context = structured_warning_context(module_doc.get("md_warn"))
+    module_warnings = list(warning_context.warning_messages)
+    module_deprecations = list(warning_context.deprecation_messages)
 
     module_status = "active"
     introduced_in = "-"
@@ -533,18 +500,21 @@ def module_template_context(
         if isinstance(raw_removed, str) and raw_removed.strip():
             removed_in = raw_removed.strip()
 
-    lifecycle = "Stable."
+    lifecycle_state = warning_context.state
+    lifecycle = "Unspecified."
     if module_status == "removed":
         lifecycle = "Removed."
-    elif module_alpha_warning:
-        lifecycle = "Alpha (experimental)."
-    elif module_deprecation_warning:
+    elif lifecycle_state == "alpha":
+        lifecycle = "Alpha."
+    elif lifecycle_state == "beta":
+        lifecycle = "Beta."
+    elif lifecycle_state == "stable":
+        lifecycle = "Stable."
+    elif lifecycle_state == "deprecated":
         lifecycle = "Deprecated."
-    elif module_warnings:
-        lifecycle = "Warning."
 
     deprecation_since_line = "Deprecated since: `-`"
-    if module_deprecations and module_deprecation_introduced_in:
+    if lifecycle_state == "deprecated" and module_deprecation_introduced_in:
         deprecation_since_line = f"Deprecated since: `{module_deprecation_introduced_in}`"
 
     primary_warning = ""
@@ -554,10 +524,10 @@ def module_template_context(
             if removed_in != "-"
             else "This module is removed and is shown here for historical reference."
         )
-    elif module_alpha_warning:
-        primary_warning = module_alpha_warning
-    elif module_deprecation_warning:
-        primary_warning = module_deprecation_warning
+    elif module_warnings:
+        primary_warning = module_warnings[0]
+    elif module_deprecations:
+        primary_warning = module_deprecations[0]
 
     sections: list[dict[str, Any]] = []
     if module_doc.get("md_adts"):
@@ -586,6 +556,8 @@ def module_template_context(
                 "body": "\n".join(
                     [
                         f"Status: `{module_status}`",
+                        f"Lifecycle state: `{lifecycle_state or '-'}`",
+                        f"Replaces: `{warning_context.replaces or '-'}`",
                         f"Introduced in: `{introduced_in}`",
                         f"Removed in: `{removed_in}`",
                         f"Warnings: `{len(module_warnings)}`",
@@ -658,11 +630,12 @@ def build_pages(
         )
 
     module_links: list[str] = []
-    module_toc_rows: list[list[str]] = []
+    module_status_rows: list[dict[str, object]] = []
     for source_name, display_name, target in module_entries:
         status_suffix = ""
         lifecycle = report.module_lifecycle.get(source_name, {})
         deprecation_version = report.module_deprecation_first_seen.get(source_name)
+        warning_context = structured_warning_context(modules_by_name[source_name].get("md_warn"))
         if lifecycle.get("status") == "removed":
             removed_in = lifecycle.get("removed_in")
             if isinstance(removed_in, str) and removed_in.strip():
@@ -675,16 +648,19 @@ def build_pages(
             module_link = (output_dir / target).relative_to(root).with_suffix("").as_posix()
         module_links.append(f"[{display_name}]({module_link}){status_suffix}")
         module_doc = modules_by_name[source_name]
-        module_toc_rows.append(
-            [
-                f"[`{display_name}`]({module_link})",
-                "`Module`",
-                escape_md_cell(module_summary_preview(module_doc)),
-                f"`{lifecycle.get('introduced_in') or '-'}`",
-                "-",
-                f"`{deprecation_version}`" if deprecation_version else "-",
-                f"`{lifecycle.get('removed_in')}`" if lifecycle.get("removed_in") else "-",
-            ]
+        module_status_rows.append(
+            status_row_context(
+                StatusRow(
+                    link=f"[`{display_name}`]({module_link})",
+                    summary=escape_md_cell(module_summary_preview(module_doc)),
+                    lifecycle=LifecycleStatus.from_values(
+                        introduced=lifecycle.get("introduced_in"),
+                        state=warning_context.state,
+                        deprecated=deprecation_version,
+                        removed=lifecycle.get("removed_in"),
+                    ),
+                )
+            )
         )
 
     version_change_summary_rows = [
@@ -705,9 +681,28 @@ def build_pages(
             description=f"Reference documentation for {overview_title} modules.",
             template_name="daml_json/index.md.j2",
             overview_title=overview_title,
-            module_toc_rows=module_toc_rows,
+            module_status_rows=module_status_rows,
+            module_status_legend=status_legend_items(
+                [
+                    StatusRow(
+                        link="",
+                        summary="",
+                        lifecycle=LifecycleStatus.from_values(
+                            introduced=report.module_lifecycle.get(source_name, {}).get("introduced_in"),
+                            state=structured_warning_context(modules_by_name[source_name].get("md_warn")).state,
+                            deprecated=report.module_deprecation_first_seen.get(source_name),
+                            removed=report.module_lifecycle.get(source_name, {}).get("removed_in"),
+                        ),
+                    )
+                    for source_name, _display_name, _target in module_entries
+                ]
+            ),
             version_change_summary_rows=version_change_summary_rows,
             module_links=module_links,
+            notes=[
+                "DAML authors write source WARNING/DEPRECATED notes; generated WarnData/DeprecatedData are the transport consumed here.",
+                "Other warning and deprecation text still renders verbatim, but it does not create structured lifecycle metadata.",
+            ],
         ),
     )
     return root, pages

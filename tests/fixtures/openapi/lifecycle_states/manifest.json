@@ -1,0 +1,18 @@
+{
+  "source": "local OpenAPI lifecycle and replacement verification fixtures",
+  "captured_on": "2026-04-15",
+  "versions": [
+    {
+      "version": "v0.1.0",
+      "source_path": "published/lifecycle-example/openapi.yaml",
+      "status": "captured",
+      "fixture_path": "v0.1.0/openapi.yaml"
+    },
+    {
+      "version": "v0.2.0",
+      "source_path": "published/lifecycle-example/openapi.yaml",
+      "status": "captured",
+      "fixture_path": "v0.2.0/openapi.yaml"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import re
+from dataclasses import dataclass
 from typing import Any
 
 from x2mdx.daml_json.models import DamlDocsReport, DamlDocsSources
@@ -11,6 +12,32 @@ from x2mdx.daml_json.models import DamlDocsReport, DamlDocsSources
 SNAPSHOT_VERSION_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)-snapshot\.(\d{8})\.(\d+)$")
 RC_VERSION_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)-rc(\d+)$")
 STABLE_VERSION_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+WARN_LIFECYCLE_RE = re.compile(
+    r"^\s*Lifecycle:\s*(Alpha|Beta|Stable)\.\s*(?:Replaces:\s*(.+?)\.(?:\s+|$))?(?P<remainder>.*)$",
+    re.S,
+)
+DEPRECATED_LIFECYCLE_RE = re.compile(
+    r"^\s*Lifecycle:\s*Deprecated\.\s*(?P<remainder>.*)$",
+    re.S,
+)
+ALPHA_WARNING_RE = re.compile(r"^\s*.+?\s+is an alpha feature\. It can change without notice\.\s*$", re.S)
+DEPRECATED_REPLACEMENT_RE = re.compile(r"^\s*Replaced by:\s*(.+?)\.\s*$", re.S)
+
+
+@dataclass(frozen=True)
+class StructuredWarningMessage:
+    state: str | None = None
+    replaces: str | None = None
+    remainder: str = ""
+    structured: bool = False
+
+
+@dataclass(frozen=True)
+class StructuredWarningContext:
+    state: str | None
+    replaces: str | None
+    warning_messages: tuple[str, ...]
+    deprecation_messages: tuple[str, ...]
 
 
 def version_sort_key(version: str) -> tuple[Any, ...]:
@@ -68,6 +95,69 @@ def extract_tagged_warning_messages(warns: Any, tag: str) -> list[str]:
     return deduped
 
 
+def parse_structured_warning_message(tag: str, message: str) -> StructuredWarningMessage:
+    text = str(message).strip()
+    if not text:
+        return StructuredWarningMessage()
+    if tag == "WarnData":
+        match = WARN_LIFECYCLE_RE.fullmatch(text)
+        if match:
+            state = match.group(1).lower()
+            replaces = (match.group(2) or "").strip() or None
+            remainder = match.group("remainder").strip()
+            return StructuredWarningMessage(state=state, replaces=replaces, remainder=remainder, structured=True)
+        if ALPHA_WARNING_RE.fullmatch(text):
+            return StructuredWarningMessage(state="alpha", remainder=text, structured=True)
+        return StructuredWarningMessage(remainder=text)
+    if tag == "DeprecatedData":
+        match = DEPRECATED_LIFECYCLE_RE.fullmatch(text)
+        if match:
+            remainder = match.group("remainder").strip()
+            return StructuredWarningMessage(state="deprecated", remainder=remainder, structured=True)
+        replacement_match = DEPRECATED_REPLACEMENT_RE.fullmatch(text)
+        if replacement_match:
+            replaces = replacement_match.group(1).strip() or None
+            return StructuredWarningMessage(state="deprecated", replaces=replaces, structured=True)
+        return StructuredWarningMessage(state="deprecated", remainder=text, structured=True)
+    return StructuredWarningMessage(remainder=text)
+
+
+def structured_warning_context(warns: Any) -> StructuredWarningContext:
+    state: str | None = None
+    replaces: str | None = None
+    warning_messages: list[str] = []
+    deprecation_messages: list[str] = []
+
+    for message in extract_tagged_warning_messages(warns, "WarnData"):
+        parsed = parse_structured_warning_message("WarnData", message)
+        if parsed.structured:
+            state = state or parsed.state
+            replaces = replaces or parsed.replaces
+            if parsed.remainder:
+                warning_messages.append(parsed.remainder)
+            continue
+        if parsed.remainder:
+            warning_messages.append(parsed.remainder)
+
+    for message in extract_tagged_warning_messages(warns, "DeprecatedData"):
+        parsed = parse_structured_warning_message("DeprecatedData", message)
+        if parsed.structured:
+            state = state or parsed.state
+            replaces = replaces or parsed.replaces
+            if parsed.remainder:
+                deprecation_messages.append(parsed.remainder)
+            continue
+        if parsed.remainder:
+            deprecation_messages.append(parsed.remainder)
+
+    return StructuredWarningContext(
+        state=state,
+        replaces=replaces,
+        warning_messages=tuple(warning_messages),
+        deprecation_messages=tuple(deprecation_messages),
+    )
+
+
 def _compute_deprecation_first_seen(version_modules: list[tuple[str, list[dict[str, Any]]]]) -> dict[str, str]:
     first_seen: dict[str, str] = {}
     for version, modules in version_modules:
@@ -75,7 +165,7 @@ def _compute_deprecation_first_seen(version_modules: list[tuple[str, list[dict[s
             module_name = _module_name(module)
             if not module_name or module_name in first_seen:
                 continue
-            if extract_tagged_warning_messages(module.get("md_warn"), "DeprecatedData"):
+            if structured_warning_context(module.get("md_warn")).state == "deprecated":
                 first_seen[module_name] = version
     return first_seen
 
@@ -171,4 +261,3 @@ def build_daml_doc_report_from_sources(
         module_lifecycle=lifecycle,
         module_deprecation_first_seen=deprecation_first_seen,
     )
-

@@ -388,9 +388,15 @@ def extract_method_detail(
         params = method.get("params")
         if not isinstance(params, list):
             params = []
+        raw_state = method.get("x-state")
+        state = str(raw_state).strip().lower() if isinstance(raw_state, str) and raw_state.strip() else None
+        raw_replaces = method.get("x-replaces")
+        replaces = str(raw_replaces).strip() if isinstance(raw_replaces, str) and raw_replaces.strip() else None
         detail = {
             "name": name,
             "anchor": method_anchor(name),
+            "state": state,
+            "replaces": replaces,
             "summary": str(method.get("summary") or ""),
             "description": str(method.get("description") or ""),
             "params": [extract_param_detail(doc_index, current_source_path, param) for param in params if isinstance(param, dict)],
@@ -398,6 +404,8 @@ def extract_method_detail(
         }
         detail["fingerprint"] = sha256_json(
             {
+                "state": detail["state"],
+                "replaces": detail["replaces"],
                 "summary": detail["summary"],
                 "description": detail["description"],
                 "params": detail["params"],
@@ -410,6 +418,13 @@ def extract_method_detail(
 
 def render_name_list(names: list[str]) -> str:
     return ", ".join(f"`{name}`" for name in names)
+
+
+def render_optional_token(value: Any) -> str:
+    if value is None:
+        return "`-`"
+    text = str(value).strip()
+    return f"`{text}`" if text else "`-`"
 
 
 def describe_param_changes(previous: dict[str, Any], current: dict[str, Any]) -> list[str]:
@@ -427,6 +442,14 @@ def describe_param_changes(previous: dict[str, Any], current: dict[str, Any]) ->
 
 def describe_method_changes(previous: dict[str, Any], current: dict[str, Any]) -> list[str]:
     changes: list[str] = []
+    if previous.get("state") != current.get("state"):
+        changes.append(
+            f"lifecycle state changed {render_optional_token(previous.get('state'))} -> {render_optional_token(current.get('state'))}"
+        )
+    if previous.get("replaces") != current.get("replaces"):
+        changes.append(
+            f"replacement target changed {render_optional_token(previous.get('replaces'))} -> {render_optional_token(current.get('replaces'))}"
+        )
     if previous["summary"] != current["summary"]:
         changes.append("summary updated")
     if previous["description"] != current["description"]:
@@ -640,4 +663,3 @@ def build_openrpc_report_from_sources(
         publish_version=selected_publish_version,
         specs=specs,
     )
-

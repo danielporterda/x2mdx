@@ -25,26 +25,30 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`BftOrderingService`](#service-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/synchronizer/src/main/protobuf/com/digitalasset/canton/synchronizer/sequencing/sequencer/bftordering/v30/bft_ordering_service.proto#L16) | Signed integer types are used, even though they are always non-negative in network-sent data, to match the Java gRPC... |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`BftOrderingService`](#service-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/synchronizer/src/main/protobuf/com/digitalasset/canton/synchronizer/sequencing/sequencer/bftordering/v30/bft_ordering_service.proto#L16) | Signed integer types are used, even though they are always non-negative in network-sent data, to match the Java gRPC... |
 
 <a id="service-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingservice"></a>
 ### Service `BftOrderingService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/synchronizer/src/main/protobuf/com/digitalasset/canton/synchronizer/sequencing/sequencer/bftordering/v30/bft_ordering_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/synchronizer/src/main/protobuf/com/digitalasset/canton/synchronizer/sequencing/sequencer/bftordering/v30/bft_ordering_service.proto#L16)
 - Endpoints tracked: `1`
 
 Signed integer types are used, even though they are always non-negative in network-sent data, to match the Java gRPC
   implementation, which uses signed integers because the JVM doesn't support unsigned integers.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`Receive`](#endpoint-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingservice-receive) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.synchronizer.sequencing.sequencer.bftordering.v30.BftOrderingMessage`](#type-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingmessage) | [`com.digitalasset.canton.synchronizer.sequencing.sequencer.bftordering.v30.BftOrderingMessage`](#type-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingmessage) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/synchronizer/src/main/protobuf/com/digitalasset/canton/synchronizer/sequencing/sequencer/bftordering/v30/bft_ordering_service.proto#L17) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`Receive`](#endpoint-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingservice-receive) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.synchronizer.sequencing.sequencer.bftordering.v30.BftOrderingMessage`](#type-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingmessage) | [`com.digitalasset.canton.synchronizer.sequencing.sequencer.bftordering.v30.BftOrderingMessage`](#type-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingmessage) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/synchronizer/src/main/protobuf/com/digitalasset/canton/synchronizer/sequencing/sequencer/bftordering/v30/bft_ordering_service.proto#L17) |
 
 <a id="endpoint-com-digitalasset-canton-synchronizer-sequencing-sequencer-bftordering-v30-bftorderingservice-receive"></a>
 **Endpoint `BftOrderingService.Receive`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

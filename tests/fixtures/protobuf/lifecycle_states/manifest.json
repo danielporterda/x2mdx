@@ -1,0 +1,28 @@
+{
+  "source": "checked-in protobuf lifecycle fixtures",
+  "repo": {
+    "remote": "https://github.com/example/repo.git",
+    "web_url": "https://github.com/example/repo"
+  },
+  "metadata_path": "metadata.json",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "date": "2026-01-01",
+      "descriptor_image_path": "snapshots/1.0.0/image.bin.gz",
+      "import_to_repo_path": {
+        "com/example/service.proto": "community/example/src/main/protobuf/com/example/service.proto"
+      }
+    },
+    {
+      "version": "1.1.0",
+      "tag": "v1.1.0",
+      "date": "2026-02-01",
+      "descriptor_image_path": "snapshots/1.1.0/image.bin.gz",
+      "import_to_repo_path": {
+        "com/example/service.proto": "community/example/src/main/protobuf/com/example/service.proto"
+      }
+    }
+  ]
+}

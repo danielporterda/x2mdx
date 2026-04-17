@@ -1,0 +1,21 @@
+{
+  "source": "local OpenRPC lifecycle and replacement verification fixtures",
+  "publish_version": "1.1.0",
+  "specs": [
+    {
+      "spec_id": "payment-api",
+      "display_name": "Payment API",
+      "source_path": "api-specs/openrpc-payment-api.json",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "fixture_path": "1.0.0/payment-api.json"
+        },
+        {
+          "version": "1.1.0",
+          "fixture_path": "1.1.0/payment-api.json"
+        }
+      ]
+    }
+  ]
+}

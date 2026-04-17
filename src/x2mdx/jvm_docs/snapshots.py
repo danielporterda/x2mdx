@@ -11,12 +11,33 @@ import yaml
 from x2mdx.jvm_docs.lifecycle import version_key
 from x2mdx.jvm_docs.models import JvmDocArtifactSource, JvmDocVersionSource
 
+DEFAULT_LIFECYCLE_MANIFEST = {
+    "schemaVersion": 1,
+    "symbols": {},
+}
+
 
 def _load_data(path: Path) -> Any:
     raw = path.read_text(encoding="utf-8")
     if path.suffix.lower() == ".json":
         return json.loads(raw)
     return yaml.safe_load(raw)
+
+
+def _load_lifecycle_manifest(path: Path | None) -> dict[str, object]:
+    data = json.loads(json.dumps(DEFAULT_LIFECYCLE_MANIFEST))
+    if path is None or not path.exists():
+        return data
+    raw = _load_data(path)
+    if not isinstance(raw, dict):
+        return data
+    symbols = raw.get("symbols")
+    if isinstance(symbols, dict):
+        data["symbols"] = symbols
+    schema_version = raw.get("schemaVersion")
+    if isinstance(schema_version, int):
+        data["schemaVersion"] = schema_version
+    return data
 
 
 def load_jvm_doc_manifest(path: Path) -> dict[str, Any]:
@@ -48,6 +69,7 @@ def load_jvm_doc_sources(
         language = entry.get("language")
         versions = entry.get("versions")
         include_prefixes = entry.get("include_prefixes") or []
+        lifecycle_manifest_path = entry.get("lifecycle_manifest_path")
         if not isinstance(group, str) or not group:
             continue
         if not isinstance(artifact, str) or not artifact:
@@ -79,6 +101,12 @@ def load_jvm_doc_sources(
         if not version_sources:
             continue
 
+        resolved_lifecycle_manifest_path: Path | None = None
+        if isinstance(lifecycle_manifest_path, str) and lifecycle_manifest_path:
+            resolved_lifecycle_manifest_path = Path(lifecycle_manifest_path)
+            if not resolved_lifecycle_manifest_path.is_absolute():
+                resolved_lifecycle_manifest_path = root / resolved_lifecycle_manifest_path
+
         version_sources.sort(key=lambda source: version_key(source.version))
         artifact_sources.append(
             JvmDocArtifactSource(
@@ -87,6 +115,7 @@ def load_jvm_doc_sources(
                 language=language,
                 include_prefixes=[str(prefix) for prefix in include_prefixes if isinstance(prefix, str)],
                 versions=version_sources,
+                lifecycle_manifest=_load_lifecycle_manifest(resolved_lifecycle_manifest_path),
             )
         )
 

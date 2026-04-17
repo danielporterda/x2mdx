@@ -24,28 +24,32 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`StatusService`](#service-com-digitalasset-canton-admin-health-v30-statusservice) | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L10) |  |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`StatusService`](#service-com-digitalasset-canton-admin-health-v30-statusservice) | - | `4` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L10) |  |
 
 <a id="service-com-digitalasset-canton-admin-health-v30-statusservice"></a>
 ### Service `StatusService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L10)
 - Endpoints tracked: `4`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetLastErrorTrace`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-getlasterrortrace) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.GetLastErrorTraceRequest`](#type-com-digitalasset-canton-admin-health-v30-getlasterrortracerequest) | [`com.digitalasset.canton.admin.health.v30.GetLastErrorTraceResponse`](#type-com-digitalasset-canton-admin-health-v30-getlasterrortraceresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L19) |
-| [`GetLastErrors`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-getlasterrors) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.GetLastErrorsRequest`](#type-com-digitalasset-canton-admin-health-v30-getlasterrorsrequest) | [`com.digitalasset.canton.admin.health.v30.GetLastErrorsResponse`](#type-com-digitalasset-canton-admin-health-v30-getlasterrorsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L17) |
-| [`HealthDump`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-healthdump) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.HealthDumpRequest`](#type-com-digitalasset-canton-admin-health-v30-healthdumprequest) | [`com.digitalasset.canton.admin.health.v30.HealthDumpResponse`](#type-com-digitalasset-canton-admin-health-v30-healthdumpresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L12) |
-| [`SetLogLevel`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-setloglevel) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.SetLogLevelRequest`](#type-com-digitalasset-canton-admin-health-v30-setloglevelrequest) | [`com.digitalasset.canton.admin.health.v30.SetLogLevelResponse`](#type-com-digitalasset-canton-admin-health-v30-setloglevelresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L14) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetLastErrorTrace`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-getlasterrortrace) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.GetLastErrorTraceRequest`](#type-com-digitalasset-canton-admin-health-v30-getlasterrortracerequest) | [`com.digitalasset.canton.admin.health.v30.GetLastErrorTraceResponse`](#type-com-digitalasset-canton-admin-health-v30-getlasterrortraceresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L19) |
+| [`GetLastErrors`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-getlasterrors) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.GetLastErrorsRequest`](#type-com-digitalasset-canton-admin-health-v30-getlasterrorsrequest) | [`com.digitalasset.canton.admin.health.v30.GetLastErrorsResponse`](#type-com-digitalasset-canton-admin-health-v30-getlasterrorsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L17) |
+| [`HealthDump`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-healthdump) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.HealthDumpRequest`](#type-com-digitalasset-canton-admin-health-v30-healthdumprequest) | [`com.digitalasset.canton.admin.health.v30.HealthDumpResponse`](#type-com-digitalasset-canton-admin-health-v30-healthdumpresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L12) |
+| [`SetLogLevel`](#endpoint-com-digitalasset-canton-admin-health-v30-statusservice-setloglevel) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.health.v30.SetLogLevelRequest`](#type-com-digitalasset-canton-admin-health-v30-setloglevelrequest) | [`com.digitalasset.canton.admin.health.v30.SetLogLevelResponse`](#type-com-digitalasset-canton-admin-health-v30-setloglevelresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/health/v30/status_service.proto#L14) |
 
 <a id="endpoint-com-digitalasset-canton-admin-health-v30-statusservice-getlasterrortrace"></a>
 **Endpoint `StatusService.GetLastErrorTrace`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -77,6 +81,8 @@ Get the trace of the last errors observed
 <a id="endpoint-com-digitalasset-canton-admin-health-v30-statusservice-getlasterrors"></a>
 **Endpoint `StatusService.GetLastErrors`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -109,6 +115,8 @@ Get the last errors observed on this node
 <a id="endpoint-com-digitalasset-canton-admin-health-v30-statusservice-healthdump"></a>
 **Endpoint `StatusService.HealthDump`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -140,6 +148,8 @@ Streams back a zip file as byte chunks, containing a health dump of the full can
 <a id="endpoint-com-digitalasset-canton-admin-health-v30-statusservice-setloglevel"></a>
 **Endpoint `StatusService.SetLogLevel`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

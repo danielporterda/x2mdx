@@ -1,7 +1,12 @@
 {% import "shared/macros.md.j2" as shared %}
 {{ paragraph("Generated from published `" ~ report.package_name ~ "` TypeDoc snapshots.") }}
 
-{% call shared.standard_reference_layout(toc_rows=toc_rows, version_rows=version_change_summary_rows) %}
+{{ shared.status_toc(toc_rows, legend=toc_legend) }}
+
+{{ shared.version_change_summary(version_change_summary_rows) }}
+
+{{ heading(2, "Reference") }}
+
 {% for group in grouped_exports %}
 
 {{ heading(3, group.title) }}
@@ -48,4 +53,3 @@
 {% endif %}
 {% endfor %}
 {% endfor %}
-{% endcall %}

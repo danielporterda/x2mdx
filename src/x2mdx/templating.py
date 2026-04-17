@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import re
 from functools import lru_cache
 from typing import Any
@@ -90,6 +91,89 @@ def compact_version_sequence(values: list[Any]) -> str:
     return f"{labels[-1]} +{len(labels) - 1}"
 
 
+STATUS_TOKEN_META: dict[str, dict[str, str]] = {
+    "introduced": {"color": "#16a34a", "label": "Active Since"},
+    "changed": {"color": "#2563eb", "label": "Changed"},
+    "alpha": {"color": "#7c3aed", "label": "Alpha"},
+    "beta": {"color": "#d97706", "label": "Beta"},
+    "stable": {"color": "#0f766e", "label": "Stable"},
+    "deprecated": {"color": "#ea580c", "label": "Deprecated"},
+    "removed": {"color": "#dc2626", "label": "Removed"},
+}
+
+
+def _jsx_style(styles: dict[str, str]) -> str:
+    return "{{" + ", ".join(f'{key}: "{value}"' for key, value in styles.items()) + "}}"
+
+
+def _status_dot(kind: str) -> str:
+    color = STATUS_TOKEN_META[kind]["color"]
+    return (
+        '<span aria-hidden="true" '
+        f'style={_jsx_style({"display": "inline-block", "width": "0.72em", "height": "0.72em", "borderRadius": "9999px", "background": color, "flex": "none"})}></span>'
+    )
+
+
+def render_status_badges(tokens: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None) -> str:
+    if not tokens:
+        return "-"
+    rendered: list[str] = []
+    for token in tokens:
+        if not isinstance(token, dict):
+            continue
+        kind = str(token.get("kind") or "").strip().lower()
+        if kind not in STATUS_TOKEN_META:
+            continue
+        raw_label = str(token.get("label") or "").strip()
+        label = raw_label or STATUS_TOKEN_META[kind]["label"]
+        rendered.append(
+            '<span title="{}" style={}>{}{}</span>'.format(
+                html.escape(STATUS_TOKEN_META[kind]["label"], quote=True),
+                _jsx_style(
+                    {
+                        "display": "inline-flex",
+                        "alignItems": "center",
+                        "gap": "0.35em",
+                        "whiteSpace": "nowrap",
+                        "marginRight": "0.65em",
+                    }
+                ),
+                _status_dot(kind),
+                f"<code>{html.escape(label)}</code>",
+            )
+        )
+    return " ".join(rendered) or "-"
+
+
+def render_status_legend_items(items: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None) -> str:
+    if not items:
+        return ""
+    rendered: list[str] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind") or "").strip().lower()
+        if kind not in STATUS_TOKEN_META:
+            continue
+        label = str(item.get("label") or "").strip() or STATUS_TOKEN_META[kind]["label"]
+        rendered.append(
+            '<span style={}>{}{}</span>'.format(
+                _jsx_style(
+                    {
+                        "display": "inline-flex",
+                        "alignItems": "center",
+                        "gap": "0.35em",
+                        "whiteSpace": "nowrap",
+                        "marginRight": "0.85em",
+                    }
+                ),
+                _status_dot(kind),
+                html.escape(label),
+            )
+        )
+    return " ".join(rendered)
+
+
 def render_status_cell(
     *,
     introduced: Any | None = None,
@@ -165,7 +249,9 @@ def template_environment() -> Environment:
         pretty_json=pretty_json,
         compact_version_label=compact_version_label,
         compact_version_sequence=compact_version_sequence,
+        render_status_badges=render_status_badges,
         render_status_cell=render_status_cell,
+        render_status_legend_items=render_status_legend_items,
         render_status_legend=render_status_legend,
     )
     return environment

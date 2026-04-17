@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: Lifecycle Example API
+  version: 0.2.0
+paths:
+  /legacy-payments:
+    get:
+      operationId: listLegacyPayments
+      deprecated: true
+      summary: Legacy payment listing
+      responses:
+        "200":
+          description: ok
+  /payments:
+    get:
+      operationId: listPaymentsV2
+      x-state: stable
+      x-replaces: listPayments
+      summary: List payments
+      responses:
+        "200":
+          description: ok
+  /payments/preview:
+    get:
+      operationId: previewPayments
+      x-state: beta
+      summary: Preview payments
+      responses:
+        "200":
+          description: ok
+  /payments/alpha:
+    get:
+      operationId: alphaPayments
+      x-state: alpha
+      summary: Alpha payments
+      responses:
+        "200":
+          description: ok

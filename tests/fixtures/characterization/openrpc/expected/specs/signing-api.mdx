@@ -23,18 +23,18 @@ An OpenRPC specification for the Signing API which allows the Wallet Gateway to 
 
 ## Table of Contents
 
-🟢 Active Since  🔵 Changed  🔴 Removed
+<span style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.85em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span>Active Since</span>
 
 | NAME | STATUS | SUMMARY |
 | --- | --- | --- |
-| [`createKey`](#method-createkey) | 🟢 `v0.20` | Create a new key at the Wallet Provider. |
-| [`getConfiguration`](#method-getconfiguration) | 🟢 `v0.20` | - |
-| [`getKeys`](#method-getkeys) | 🟢 `v0.20` | Get a list of public keys availabile for signing. |
-| [`getTransaction`](#method-gettransaction) | 🟢 `v0.20` | Get the status of a single transaction by its ID. |
-| [`getTransactions`](#method-gettransactions) | 🟢 `v0.20` | Get the status of multiple transactions, filtering by txIds or publicKeys. Either publicKeys or txIds must be provided. |
-| [`setConfiguration`](#method-setconfiguration) | 🟢 `v0.20` | Set configuration parameters for the Wallet Provider. The paramaters will change depending on the Wallet Provider implementation |
-| [`signTransaction`](#method-signtransaction) | 🟢 `v0.20` | Uses the Wallet Provider to sign a transaction. This will likely be an asynchronous operation. |
-| [`subscribeTransactions`](#method-subscribetransactions) | 🟢 `v0.20` | Subscribe to updates for specific transactions. The server will emit updates when the status of the specified transactions have changed. On initial subscription, the server will emit the current status of all subscribed transactions. |
+| [`createKey`](#method-createkey) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Create a new key at the Wallet Provider. |
+| [`getConfiguration`](#method-getconfiguration) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | - |
+| [`getKeys`](#method-getkeys) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Get a list of public keys availabile for signing. |
+| [`getTransaction`](#method-gettransaction) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Get the status of a single transaction by its ID. |
+| [`getTransactions`](#method-gettransactions) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Get the status of multiple transactions, filtering by txIds or publicKeys. Either publicKeys or txIds must be provided. |
+| [`setConfiguration`](#method-setconfiguration) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Set configuration parameters for the Wallet Provider. The paramaters will change depending on the Wallet Provider implementation |
+| [`signTransaction`](#method-signtransaction) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Uses the Wallet Provider to sign a transaction. This will likely be an asynchronous operation. |
+| [`subscribeTransactions`](#method-subscribetransactions) | <span title="Active Since" style={{display: "inline-flex", alignItems: "center", gap: "0.35em", whiteSpace: "nowrap", marginRight: "0.65em"}}><span aria-hidden="true" style={{display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "9999px", background: "#16a34a", flex: "none"}}></span><code>v0.20</code></span> | Subscribe to updates for specific transactions. The server will emit updates when the status of the specified transactions have changed. On initial subscription, the server will emit the current status of all subscribed transactions. |
 
 ## Methods
 

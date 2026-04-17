@@ -1,0 +1,131 @@
+[
+  {
+    "md_name": "DA.List",
+    "md_descr": "List module in 1.1.0",
+    "md_warn": [
+      {
+        "DeprecatedData": [
+          "List helpers are deprecated for new code.",
+          "Replaced by: DA.NonEmpty::module::DA.NonEmpty."
+        ]
+      }
+    ],
+    "md_adts": [],
+    "md_classes": [],
+    "md_interfaces": [],
+    "md_templates": [],
+    "md_instances": [],
+    "md_functions": [
+      {
+        "fct_name": "example",
+        "fct_type": {
+          "TypeFun": [
+            {
+              "TypeLit": "Int"
+            },
+            {
+              "TypeLit": "Int"
+            }
+          ]
+        },
+        "fct_context": [],
+        "fct_descr": "DA.List example function"
+      }
+    ]
+  },
+  {
+    "md_name": "DA.NonEmpty",
+    "md_descr": "NonEmpty module in 1.1.0",
+    "md_warn": [],
+    "md_adts": [],
+    "md_classes": [],
+    "md_interfaces": [],
+    "md_templates": [],
+    "md_instances": [],
+    "md_functions": [
+      {
+        "fct_name": "example",
+        "fct_type": {
+          "TypeFun": [
+            {
+              "TypeLit": "Int"
+            },
+            {
+              "TypeLit": "Int"
+            }
+          ]
+        },
+        "fct_context": [],
+        "fct_descr": "DA.NonEmpty example function"
+      }
+    ]
+  },
+  {
+    "md_name": "DA.ExceptionLike",
+    "md_descr": "Exception-like helpers in 1.1.0",
+    "md_warn": [
+      {
+        "DeprecatedData": [
+          "Exceptions are deprecated, prefer `failWithStatus`, and avoid using catch.",
+          "Use `-Wno-deprecated-exceptions` to disable this warning."
+        ]
+      }
+    ],
+    "md_adts": [],
+    "md_classes": [],
+    "md_interfaces": [],
+    "md_templates": [],
+    "md_instances": [],
+    "md_functions": [
+      {
+        "fct_name": "example",
+        "fct_type": {
+          "TypeFun": [
+            {
+              "TypeLit": "Int"
+            },
+            {
+              "TypeLit": "Int"
+            }
+          ]
+        },
+        "fct_context": [],
+        "fct_descr": "DA.ExceptionLike example function"
+      }
+    ]
+  },
+  {
+    "md_name": "DA.Alpha",
+    "md_descr": "Alpha module in 1.1.0",
+    "md_warn": [
+      {
+        "WarnData": [
+          "DA.Alpha is an alpha feature. It can change without notice.",
+          "use -Wno-da-alpha-is-alpha in build-options to disable this warning"
+        ]
+      }
+    ],
+    "md_adts": [],
+    "md_classes": [],
+    "md_interfaces": [],
+    "md_templates": [],
+    "md_instances": [],
+    "md_functions": [
+      {
+        "fct_name": "example",
+        "fct_type": {
+          "TypeFun": [
+            {
+              "TypeLit": "Int"
+            },
+            {
+              "TypeLit": "Int"
+            }
+          ]
+        },
+        "fct_context": [],
+        "fct_descr": "DA.Alpha example function"
+      }
+    ]
+  }
+]

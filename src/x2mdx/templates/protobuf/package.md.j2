@@ -14,7 +14,7 @@
 
 {{ heading(2, "Services") }}
 
-{{ table(["Service", "Endpoints", "Source", "Description"], service_rows) }}
+{{ table(["Service", "Lifecycle", "Endpoints", "Source", "Description"], service_rows) }}
 {% for service in services %}
 
 {{ anchor(service.anchor) }}
@@ -24,7 +24,7 @@
 
 {{ paragraph(service.description) }}
 
-{{ table(["Endpoint", "Introduced", "Last Changed", "Removed", "Request", "Response", "Source"], service.endpoint_rows) }}
+{{ table(["Endpoint", "Lifecycle", "Replaces", "Introduced", "Last Changed", "Removed", "Request", "Response", "Source"], service.endpoint_rows) }}
 {% for endpoint in service.endpoint_details %}
 
 {{ anchor(endpoint.anchor) }}

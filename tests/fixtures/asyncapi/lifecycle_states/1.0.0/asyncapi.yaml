@@ -1,0 +1,45 @@
+asyncapi: 2.6.0
+info:
+  title: Lifecycle Example WebSocket API
+  version: 1.0.0
+channels:
+  /legacy:
+    description: Legacy updates.
+    subscribe:
+      operationId: onLegacy
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/LegacyEvent'
+  /payments:
+    description: Payment updates.
+    subscribe:
+      operationId: onPayments
+      bindings:
+        ws:
+          method: GET
+      message:
+        $ref: '#/components/messages/PaymentEvent'
+components:
+  schemas:
+    LegacyEvent:
+      type: object
+      properties:
+        value:
+          type: string
+    PaymentEvent:
+      type: object
+      required: [paymentId]
+      properties:
+        paymentId:
+          type: string
+  messages:
+    LegacyEvent:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/LegacyEvent'
+    PaymentEvent:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PaymentEvent'

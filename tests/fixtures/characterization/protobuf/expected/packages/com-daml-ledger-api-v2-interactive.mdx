@@ -25,13 +25,15 @@ description: "Descriptor-backed protobuf API history for package com.daml.ledger
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`InteractiveSubmissionService`](#service-com-daml-ledger-api-v2-interactive-interactivesubmissionservice) | `6` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L31) | Service allowing interactive construction of command submissions The prepare and execute endpoints allow to submit co... |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`InteractiveSubmissionService`](#service-com-daml-ledger-api-v2-interactive-interactivesubmissionservice) | - | `6` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L31) | Service allowing interactive construction of command submissions The prepare and execute endpoints allow to submit co... |
 
 <a id="service-com-daml-ledger-api-v2-interactive-interactivesubmissionservice"></a>
 ### Service `InteractiveSubmissionService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L31)
 - Endpoints tracked: `6`
 
@@ -44,18 +46,20 @@ Service allowing interactive construction of command submissions
 
  This gives callers the ability to sign the daml transaction with their own signing keys
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ExecuteSubmission`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmission) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionRequest`](#type-com-daml-ledger-api-v2-interactive-executesubmissionrequest) | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionResponse`](#type-com-daml-ledger-api-v2-interactive-executesubmissionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L36) |
-| [`ExecuteSubmissionAndWait`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmissionandwait) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitRequest`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitrequest) | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitResponse`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L40) |
-| [`ExecuteSubmissionAndWaitForTransaction`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmissionandwaitfortransaction) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitForTransactionRequest`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitfortransactionrequest) | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitForTransactionResponse`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitfortransactionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L44) |
-| [`GetPreferredPackageVersion`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-getpreferredpackageversion) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.GetPreferredPackageVersionRequest`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackageversionrequest) | [`com.daml.ledger.api.v2.interactive.GetPreferredPackageVersionResponse`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackageversionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L58) |
-| [`GetPreferredPackages`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-getpreferredpackages) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.GetPreferredPackagesRequest`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackagesrequest) | [`com.daml.ledger.api.v2.interactive.GetPreferredPackagesResponse`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L76) |
-| [`PrepareSubmission`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-preparesubmission) | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.PrepareSubmissionRequest`](#type-com-daml-ledger-api-v2-interactive-preparesubmissionrequest) | [`com.daml.ledger.api.v2.interactive.PrepareSubmissionResponse`](#type-com-daml-ledger-api-v2-interactive-preparesubmissionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L33) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ExecuteSubmission`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmission) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionRequest`](#type-com-daml-ledger-api-v2-interactive-executesubmissionrequest) | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionResponse`](#type-com-daml-ledger-api-v2-interactive-executesubmissionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L36) |
+| [`ExecuteSubmissionAndWait`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmissionandwait) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitRequest`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitrequest) | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitResponse`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L40) |
+| [`ExecuteSubmissionAndWaitForTransaction`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmissionandwaitfortransaction) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitForTransactionRequest`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitfortransactionrequest) | [`com.daml.ledger.api.v2.interactive.ExecuteSubmissionAndWaitForTransactionResponse`](#type-com-daml-ledger-api-v2-interactive-executesubmissionandwaitfortransactionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L44) |
+| [`GetPreferredPackageVersion`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-getpreferredpackageversion) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.GetPreferredPackageVersionRequest`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackageversionrequest) | [`com.daml.ledger.api.v2.interactive.GetPreferredPackageVersionResponse`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackageversionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L58) |
+| [`GetPreferredPackages`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-getpreferredpackages) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.GetPreferredPackagesRequest`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackagesrequest) | [`com.daml.ledger.api.v2.interactive.GetPreferredPackagesResponse`](#type-com-daml-ledger-api-v2-interactive-getpreferredpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L76) |
+| [`PrepareSubmission`](#endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-preparesubmission) | - | - | `3.4.0` | `3.4.0` | `` | [`com.daml.ledger.api.v2.interactive.PrepareSubmissionRequest`](#type-com-daml-ledger-api-v2-interactive-preparesubmissionrequest) | [`com.daml.ledger.api.v2.interactive.PrepareSubmissionResponse`](#type-com-daml-ledger-api-v2-interactive-preparesubmissionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/ledger-api/src/main/protobuf/com/daml/ledger/api/v2/interactive/interactive_submission_service.proto#L33) |
 
 <a id="endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmission"></a>
 **Endpoint `InteractiveSubmissionService.ExecuteSubmission`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -88,6 +92,8 @@ Execute a prepared submission _asynchronously_ on the ledger.
 <a id="endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmissionandwait"></a>
 **Endpoint `InteractiveSubmissionService.ExecuteSubmissionAndWait`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -121,6 +127,8 @@ Similar to ExecuteSubmission but _synchronously_ wait for the completion of the 
 <a id="endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-executesubmissionandwaitfortransaction"></a>
 **Endpoint `InteractiveSubmissionService.ExecuteSubmissionAndWaitForTransaction`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -154,6 +162,8 @@ Similar to ExecuteSubmissionAndWait but additionally returns the transaction
 <a id="endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-getpreferredpackageversion"></a>
 **Endpoint `InteractiveSubmissionService.GetPreferredPackageVersion`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -196,6 +206,8 @@ A preferred package is the highest-versioned package for a provided package-name
 <a id="endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-getpreferredpackages"></a>
 **Endpoint `InteractiveSubmissionService.GetPreferredPackages`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -242,6 +254,8 @@ Compute the preferred packages for the vetting requirements in the request.
 <a id="endpoint-com-daml-ledger-api-v2-interactive-interactivesubmissionservice-preparesubmission"></a>
 **Endpoint `InteractiveSubmissionService.PrepareSubmission`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

@@ -1,0 +1,15 @@
+{
+  "source": "local TypeDoc lifecycle and replacement verification fixtures",
+  "package_name": "@daml/types",
+  "publish_version": "1.1.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "json_path": "1.0.0/typedoc.json"
+    },
+    {
+      "version": "1.1.0",
+      "json_path": "1.1.0/typedoc.json"
+    }
+  ]
+}

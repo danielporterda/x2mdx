@@ -24,13 +24,15 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`VaultService`](#service-com-digitalasset-canton-crypto-admin-v30-vaultservice) | `12` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L27) | * Vault service providing programmatic access to locally stored keys and certificates We have two key-stores: a priva... |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`VaultService`](#service-com-digitalasset-canton-crypto-admin-v30-vaultservice) | - | `12` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L27) | * Vault service providing programmatic access to locally stored keys and certificates We have two key-stores: a priva... |
 
 <a id="service-com-digitalasset-canton-crypto-admin-v30-vaultservice"></a>
 ### Service `VaultService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L27)
 - Endpoints tracked: `12`
 
@@ -51,24 +53,26 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
  In addition, we also provide access to the locally stored certificates which are used
  either by the HTTP/1.1 sequencer client or for legal identity claims.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`DeleteKeyPair`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-deletekeypair) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.DeleteKeyPairRequest`](#type-com-digitalasset-canton-crypto-admin-v30-deletekeypairrequest) | [`com.digitalasset.canton.crypto.admin.v30.DeleteKeyPairResponse`](#type-com-digitalasset-canton-crypto-admin-v30-deletekeypairresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L93) |
-| [`ExportKeyPair`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-exportkeypair) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ExportKeyPairRequest`](#type-com-digitalasset-canton-crypto-admin-v30-exportkeypairrequest) | [`com.digitalasset.canton.crypto.admin.v30.ExportKeyPairResponse`](#type-com-digitalasset-canton-crypto-admin-v30-exportkeypairresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L89) |
-| [`GenerateEncryptionKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-generateencryptionkey) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.GenerateEncryptionKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-generateencryptionkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.GenerateEncryptionKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-generateencryptionkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L50) |
-| [`GenerateSigningKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-generatesigningkey) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.GenerateSigningKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-generatesigningkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.GenerateSigningKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-generatesigningkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L43) |
-| [`GetWrapperKeyId`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-getwrapperkeyid) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.GetWrapperKeyIdRequest`](#type-com-digitalasset-canton-crypto-admin-v30-getwrapperkeyidrequest) | [`com.digitalasset.canton.crypto.admin.v30.GetWrapperKeyIdResponse`](#type-com-digitalasset-canton-crypto-admin-v30-getwrapperkeyidresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L87) |
-| [`ImportKeyPair`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-importkeypair) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ImportKeyPairRequest`](#type-com-digitalasset-canton-crypto-admin-v30-importkeypairrequest) | [`com.digitalasset.canton.crypto.admin.v30.ImportKeyPairResponse`](#type-com-digitalasset-canton-crypto-admin-v30-importkeypairresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L91) |
-| [`ImportPublicKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-importpublickey) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ImportPublicKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-importpublickeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.ImportPublicKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-importpublickeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L72) |
-| [`ListMyKeys`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-listmykeys) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ListMyKeysRequest`](#type-com-digitalasset-canton-crypto-admin-v30-listmykeysrequest) | [`com.digitalasset.canton.crypto.admin.v30.ListMyKeysResponse`](#type-com-digitalasset-canton-crypto-admin-v30-listmykeysresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L36) |
-| [`ListPublicKeys`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-listpublickeys) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ListPublicKeysRequest`](#type-com-digitalasset-canton-crypto-admin-v30-listpublickeysrequest) | [`com.digitalasset.canton.crypto.admin.v30.ListPublicKeysResponse`](#type-com-digitalasset-canton-crypto-admin-v30-listpublickeysresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L80) |
-| [`RegisterKmsEncryptionKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-registerkmsencryptionkey) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsEncryptionKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmsencryptionkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsEncryptionKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmsencryptionkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L57) |
-| [`RegisterKmsSigningKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-registerkmssigningkey) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsSigningKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmssigningkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsSigningKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmssigningkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L64) |
-| [`RotateWrapperKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-rotatewrapperkey) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.RotateWrapperKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-rotatewrapperkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.RotateWrapperKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-rotatewrapperkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L85) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`DeleteKeyPair`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-deletekeypair) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.DeleteKeyPairRequest`](#type-com-digitalasset-canton-crypto-admin-v30-deletekeypairrequest) | [`com.digitalasset.canton.crypto.admin.v30.DeleteKeyPairResponse`](#type-com-digitalasset-canton-crypto-admin-v30-deletekeypairresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L93) |
+| [`ExportKeyPair`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-exportkeypair) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ExportKeyPairRequest`](#type-com-digitalasset-canton-crypto-admin-v30-exportkeypairrequest) | [`com.digitalasset.canton.crypto.admin.v30.ExportKeyPairResponse`](#type-com-digitalasset-canton-crypto-admin-v30-exportkeypairresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L89) |
+| [`GenerateEncryptionKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-generateencryptionkey) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.GenerateEncryptionKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-generateencryptionkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.GenerateEncryptionKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-generateencryptionkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L50) |
+| [`GenerateSigningKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-generatesigningkey) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.GenerateSigningKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-generatesigningkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.GenerateSigningKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-generatesigningkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L43) |
+| [`GetWrapperKeyId`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-getwrapperkeyid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.GetWrapperKeyIdRequest`](#type-com-digitalasset-canton-crypto-admin-v30-getwrapperkeyidrequest) | [`com.digitalasset.canton.crypto.admin.v30.GetWrapperKeyIdResponse`](#type-com-digitalasset-canton-crypto-admin-v30-getwrapperkeyidresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L87) |
+| [`ImportKeyPair`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-importkeypair) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ImportKeyPairRequest`](#type-com-digitalasset-canton-crypto-admin-v30-importkeypairrequest) | [`com.digitalasset.canton.crypto.admin.v30.ImportKeyPairResponse`](#type-com-digitalasset-canton-crypto-admin-v30-importkeypairresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L91) |
+| [`ImportPublicKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-importpublickey) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ImportPublicKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-importpublickeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.ImportPublicKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-importpublickeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L72) |
+| [`ListMyKeys`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-listmykeys) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ListMyKeysRequest`](#type-com-digitalasset-canton-crypto-admin-v30-listmykeysrequest) | [`com.digitalasset.canton.crypto.admin.v30.ListMyKeysResponse`](#type-com-digitalasset-canton-crypto-admin-v30-listmykeysresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L36) |
+| [`ListPublicKeys`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-listpublickeys) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.ListPublicKeysRequest`](#type-com-digitalasset-canton-crypto-admin-v30-listpublickeysrequest) | [`com.digitalasset.canton.crypto.admin.v30.ListPublicKeysResponse`](#type-com-digitalasset-canton-crypto-admin-v30-listpublickeysresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L80) |
+| [`RegisterKmsEncryptionKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-registerkmsencryptionkey) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsEncryptionKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmsencryptionkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsEncryptionKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmsencryptionkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L57) |
+| [`RegisterKmsSigningKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-registerkmssigningkey) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsSigningKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmssigningkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.RegisterKmsSigningKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-registerkmssigningkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L64) |
+| [`RotateWrapperKey`](#endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-rotatewrapperkey) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.crypto.admin.v30.RotateWrapperKeyRequest`](#type-com-digitalasset-canton-crypto-admin-v30-rotatewrapperkeyrequest) | [`com.digitalasset.canton.crypto.admin.v30.RotateWrapperKeyResponse`](#type-com-digitalasset-canton-crypto-admin-v30-rotatewrapperkeyresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/crypto/admin/v30/vault_service.proto#L85) |
 
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-deletekeypair"></a>
 **Endpoint `VaultService.DeleteKeyPair`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -100,6 +104,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-exportkeypair"></a>
 **Endpoint `VaultService.ExportKeyPair`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -131,6 +137,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-generateencryptionkey"></a>
 **Endpoint `VaultService.GenerateEncryptionKey`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -165,6 +173,8 @@ rpc VaultService.GenerateEncryptionKey(com.digitalasset.canton.crypto.admin.v30.
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-generatesigningkey"></a>
 **Endpoint `VaultService.GenerateSigningKey`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -199,6 +209,8 @@ rpc VaultService.GenerateSigningKey(com.digitalasset.canton.crypto.admin.v30.Gen
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-getwrapperkeyid"></a>
 **Endpoint `VaultService.GetWrapperKeyId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -230,6 +242,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-importkeypair"></a>
 **Endpoint `VaultService.ImportKeyPair`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -261,6 +275,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-importpublickey"></a>
 **Endpoint `VaultService.ImportPublicKey`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -296,6 +312,8 @@ rpc VaultService.ImportPublicKey(com.digitalasset.canton.crypto.admin.v30.Import
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-listmykeys"></a>
 **Endpoint `VaultService.ListMyKeys`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -333,6 +351,8 @@ rpc VaultService.ListMyKeys(com.digitalasset.canton.crypto.admin.v30.ListMyKeysR
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-listpublickeys"></a>
 **Endpoint `VaultService.ListPublicKeys`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -368,6 +388,8 @@ rpc VaultService.ListPublicKeys(com.digitalasset.canton.crypto.admin.v30.ListPub
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-registerkmsencryptionkey"></a>
 **Endpoint `VaultService.RegisterKmsEncryptionKey`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -402,6 +424,8 @@ rpc VaultService.RegisterKmsEncryptionKey(com.digitalasset.canton.crypto.admin.v
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-registerkmssigningkey"></a>
 **Endpoint `VaultService.RegisterKmsSigningKey`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -436,6 +460,8 @@ rpc VaultService.RegisterKmsSigningKey(com.digitalasset.canton.crypto.admin.v30.
 <a id="endpoint-com-digitalasset-canton-crypto-admin-v30-vaultservice-rotatewrapperkey"></a>
 **Endpoint `VaultService.RotateWrapperKey`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

@@ -1,0 +1,14 @@
+{
+  "source": "checked-in daml lifecycle fixtures",
+  "publish_version": "1.1.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "json_path": "snapshots/1.0.0/modules.json"
+    },
+    {
+      "version": "1.1.0",
+      "json_path": "snapshots/1.1.0/modules.json"
+    }
+  ]
+}

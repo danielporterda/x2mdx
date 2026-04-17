@@ -37,35 +37,39 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`EnterpriseParticipantReplicationService`](#service-com-digitalasset-canton-admin-participant-v30-enterpriseparticipantreplicationservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/enterprise_participant_replication_service.proto#L8) |  |
-| [`PackageService`](#service-com-digitalasset-canton-admin-participant-v30-packageservice) | `12` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L11) |  |
-| [`ParticipantInspectionService`](#service-com-digitalasset-canton-admin-participant-v30-participantinspectionservice) | `9` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L19) | * Inspection Service Supports inspecting the Participant for details about its ledger. This contains only a subset of... |
-| [`ParticipantRepairService`](#service-com-digitalasset-canton-admin-participant-v30-participantrepairservice) | `12` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L20) | * Perform participant repair operations, including exporting and importing ACS, purging contracts, and migrating sync... |
-| [`ParticipantStatusService`](#service-com-digitalasset-canton-admin-participant-v30-participantstatusservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_status_service.proto#L10) |  |
-| [`PartyManagementService`](#service-com-digitalasset-canton-admin-participant-v30-partymanagementservice) | `6` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L21) | * The PartyManagementService allows modifying party hosting on participants. Note that ACS refers to Active Contract... |
-| [`PingService`](#service-com-digitalasset-canton-admin-participant-v30-pingservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/ping_pong_service.proto#L10) |  |
-| [`PruningService`](#service-com-digitalasset-canton-admin-participant-v30-pruningservice) | `13` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L11) |  |
-| [`ResourceManagementService`](#service-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice) | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L8) |  |
-| [`SynchronizerConnectivityService`](#service-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice) | `11` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L18) | * Synchronizer connectivity service for adding and connecting to synchronizers The synchronizer connectivity service... |
-| [`TrafficControlService`](#service-com-digitalasset-canton-admin-participant-v30-trafficcontrolservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/traffic_control_service.proto#L11) | Service to retrieve information about the traffic state of the participant. |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`EnterpriseParticipantReplicationService`](#service-com-digitalasset-canton-admin-participant-v30-enterpriseparticipantreplicationservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/enterprise_participant_replication_service.proto#L8) |  |
+| [`PackageService`](#service-com-digitalasset-canton-admin-participant-v30-packageservice) | - | `12` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L11) |  |
+| [`ParticipantInspectionService`](#service-com-digitalasset-canton-admin-participant-v30-participantinspectionservice) | - | `9` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L19) | * Inspection Service Supports inspecting the Participant for details about its ledger. This contains only a subset of... |
+| [`ParticipantRepairService`](#service-com-digitalasset-canton-admin-participant-v30-participantrepairservice) | - | `12` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L20) | * Perform participant repair operations, including exporting and importing ACS, purging contracts, and migrating sync... |
+| [`ParticipantStatusService`](#service-com-digitalasset-canton-admin-participant-v30-participantstatusservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_status_service.proto#L10) |  |
+| [`PartyManagementService`](#service-com-digitalasset-canton-admin-participant-v30-partymanagementservice) | - | `6` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L21) | * The PartyManagementService allows modifying party hosting on participants. Note that ACS refers to Active Contract... |
+| [`PingService`](#service-com-digitalasset-canton-admin-participant-v30-pingservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/ping_pong_service.proto#L10) |  |
+| [`PruningService`](#service-com-digitalasset-canton-admin-participant-v30-pruningservice) | - | `13` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L11) |  |
+| [`ResourceManagementService`](#service-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice) | - | `2` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L8) |  |
+| [`SynchronizerConnectivityService`](#service-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice) | - | `11` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L18) | * Synchronizer connectivity service for adding and connecting to synchronizers The synchronizer connectivity service... |
+| [`TrafficControlService`](#service-com-digitalasset-canton-admin-participant-v30-trafficcontrolservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/traffic_control_service.proto#L11) | Service to retrieve information about the traffic state of the participant. |
 
 <a id="service-com-digitalasset-canton-admin-participant-v30-enterpriseparticipantreplicationservice"></a>
 ### Service `EnterpriseParticipantReplicationService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/enterprise_participant_replication_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/enterprise_participant_replication_service.proto#L8)
 - Endpoints tracked: `1`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`SetPassive`](#endpoint-com-digitalasset-canton-admin-participant-v30-enterpriseparticipantreplicationservice-setpassive) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.SetPassiveRequest`](#type-com-digitalasset-canton-admin-participant-v30-setpassiverequest) | [`com.digitalasset.canton.admin.participant.v30.SetPassiveResponse`](#type-com-digitalasset-canton-admin-participant-v30-setpassiveresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/enterprise_participant_replication_service.proto#L9) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`SetPassive`](#endpoint-com-digitalasset-canton-admin-participant-v30-enterpriseparticipantreplicationservice-setpassive) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.SetPassiveRequest`](#type-com-digitalasset-canton-admin-participant-v30-setpassiverequest) | [`com.digitalasset.canton.admin.participant.v30.SetPassiveResponse`](#type-com-digitalasset-canton-admin-participant-v30-setpassiveresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/enterprise_participant_replication_service.proto#L9) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-enterpriseparticipantreplicationservice-setpassive"></a>
 **Endpoint `EnterpriseParticipantReplicationService.SetPassive`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -97,29 +101,33 @@ _No description._
 <a id="service-com-digitalasset-canton-admin-participant-v30-packageservice"></a>
 ### Service `PackageService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L11)
 - Endpoints tracked: `12`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getdar) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-getdarrequest) | [`com.digitalasset.canton.admin.participant.v30.GetDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-getdarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L36) |
-| [`GetDarContents`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getdarcontents) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetDarContentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getdarcontentsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetDarContentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getdarcontentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L42) |
-| [`GetPackageContents`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getpackagecontents) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetPackageContentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getpackagecontentsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetPackageContentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getpackagecontentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L16) |
-| [`GetPackageReferences`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getpackagereferences) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetPackageReferencesRequest`](#type-com-digitalasset-canton-admin-participant-v30-getpackagereferencesrequest) | [`com.digitalasset.canton.admin.participant.v30.GetPackageReferencesResponse`](#type-com-digitalasset-canton-admin-participant-v30-getpackagereferencesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L19) |
-| [`ListDars`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-listdars) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListDarsRequest`](#type-com-digitalasset-canton-admin-participant-v30-listdarsrequest) | [`com.digitalasset.canton.admin.participant.v30.ListDarsResponse`](#type-com-digitalasset-canton-admin-participant-v30-listdarsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L39) |
-| [`ListPackages`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-listpackages) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListPackagesRequest`](#type-com-digitalasset-canton-admin-participant-v30-listpackagesrequest) | [`com.digitalasset.canton.admin.participant.v30.ListPackagesResponse`](#type-com-digitalasset-canton-admin-participant-v30-listpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L13) |
-| [`RemoveDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-removedar) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RemoveDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-removedarrequest) | [`com.digitalasset.canton.admin.participant.v30.RemoveDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-removedarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L33) |
-| [`RemovePackage`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-removepackage) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RemovePackageRequest`](#type-com-digitalasset-canton-admin-participant-v30-removepackagerequest) | [`com.digitalasset.canton.admin.participant.v30.RemovePackageResponse`](#type-com-digitalasset-canton-admin-participant-v30-removepackageresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L23) |
-| [`UnvetDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-unvetdar) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.UnvetDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-unvetdarrequest) | [`com.digitalasset.canton.admin.participant.v30.UnvetDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-unvetdarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L50) |
-| [`UploadDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-uploaddar) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.UploadDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-uploaddarrequest) | [`com.digitalasset.canton.admin.participant.v30.UploadDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-uploaddarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L29) |
-| [`ValidateDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-validatedar) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ValidateDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-validatedarrequest) | [`com.digitalasset.canton.admin.participant.v30.ValidateDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-validatedarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L26) |
-| [`VetDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-vetdar) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.VetDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-vetdarrequest) | [`com.digitalasset.canton.admin.participant.v30.VetDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-vetdarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L45) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getdar) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-getdarrequest) | [`com.digitalasset.canton.admin.participant.v30.GetDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-getdarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L36) |
+| [`GetDarContents`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getdarcontents) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetDarContentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getdarcontentsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetDarContentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getdarcontentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L42) |
+| [`GetPackageContents`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getpackagecontents) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetPackageContentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getpackagecontentsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetPackageContentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getpackagecontentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L16) |
+| [`GetPackageReferences`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getpackagereferences) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetPackageReferencesRequest`](#type-com-digitalasset-canton-admin-participant-v30-getpackagereferencesrequest) | [`com.digitalasset.canton.admin.participant.v30.GetPackageReferencesResponse`](#type-com-digitalasset-canton-admin-participant-v30-getpackagereferencesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L19) |
+| [`ListDars`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-listdars) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListDarsRequest`](#type-com-digitalasset-canton-admin-participant-v30-listdarsrequest) | [`com.digitalasset.canton.admin.participant.v30.ListDarsResponse`](#type-com-digitalasset-canton-admin-participant-v30-listdarsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L39) |
+| [`ListPackages`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-listpackages) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListPackagesRequest`](#type-com-digitalasset-canton-admin-participant-v30-listpackagesrequest) | [`com.digitalasset.canton.admin.participant.v30.ListPackagesResponse`](#type-com-digitalasset-canton-admin-participant-v30-listpackagesresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L13) |
+| [`RemoveDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-removedar) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RemoveDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-removedarrequest) | [`com.digitalasset.canton.admin.participant.v30.RemoveDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-removedarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L33) |
+| [`RemovePackage`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-removepackage) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RemovePackageRequest`](#type-com-digitalasset-canton-admin-participant-v30-removepackagerequest) | [`com.digitalasset.canton.admin.participant.v30.RemovePackageResponse`](#type-com-digitalasset-canton-admin-participant-v30-removepackageresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L23) |
+| [`UnvetDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-unvetdar) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.UnvetDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-unvetdarrequest) | [`com.digitalasset.canton.admin.participant.v30.UnvetDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-unvetdarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L50) |
+| [`UploadDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-uploaddar) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.UploadDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-uploaddarrequest) | [`com.digitalasset.canton.admin.participant.v30.UploadDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-uploaddarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L29) |
+| [`ValidateDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-validatedar) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ValidateDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-validatedarrequest) | [`com.digitalasset.canton.admin.participant.v30.ValidateDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-validatedarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L26) |
+| [`VetDar`](#endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-vetdar) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.VetDarRequest`](#type-com-digitalasset-canton-admin-participant-v30-vetdarrequest) | [`com.digitalasset.canton.admin.participant.v30.VetDarResponse`](#type-com-digitalasset-canton-admin-participant-v30-vetdarresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/package_service.proto#L45) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getdar"></a>
 **Endpoint `PackageService.GetDar`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -151,6 +159,8 @@ Obtain a DAR file by hash -- for inspection &amp; download
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getdarcontents"></a>
 **Endpoint `PackageService.GetDarContents`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -182,6 +192,8 @@ List content of a Dar
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getpackagecontents"></a>
 **Endpoint `PackageService.GetPackageContents`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -213,6 +225,8 @@ Lists all the modules in package on the participant node
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-getpackagereferences"></a>
 **Endpoint `PackageService.GetPackageReferences`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -244,6 +258,8 @@ Get a list of DARs referencing a given package
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-listdars"></a>
 **Endpoint `PackageService.ListDars`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -275,6 +291,8 @@ List all DARs on the participant node - return their hashes and filenames
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-listpackages"></a>
 **Endpoint `PackageService.ListPackages`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -306,6 +324,8 @@ List all Daml-LF archives on the participant node - return their hashes
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-removedar"></a>
 **Endpoint `PackageService.RemoveDar`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -338,6 +358,8 @@ Remove a DAR that is not needed
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-removepackage"></a>
 **Endpoint `PackageService.RemovePackage`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -370,6 +392,8 @@ Remove a package that is not vetted
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-unvetdar"></a>
 **Endpoint `PackageService.UnvetDar`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -403,6 +427,8 @@ Revoke vetting for all packages pertaining to a specific DAR.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-uploaddar"></a>
 **Endpoint `PackageService.UploadDar`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -434,6 +460,8 @@ Upload a DAR file and all packages inside to the participant node
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-validatedar"></a>
 **Endpoint `PackageService.ValidateDar`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -465,6 +493,8 @@ Validate a DAR file and all packages inside to the participant node
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-packageservice-vetdar"></a>
 **Endpoint `PackageService.VetDar`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -496,6 +526,8 @@ Enable vetting for all packages pertaining to a specific DAR
 <a id="service-com-digitalasset-canton-admin-participant-v30-participantinspectionservice"></a>
 ### Service `ParticipantInspectionService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L19)
 - Endpoints tracked: `9`
 
@@ -506,21 +538,23 @@ Enable vetting for all packages pertaining to a specific DAR
  This contains only a subset of the ParticipantInspection commands that can run over the admin-api instead of requiring
  direct access to the participant node instance.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`CountInFlight`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-countinflight) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.CountInFlightRequest`](#type-com-digitalasset-canton-admin-participant-v30-countinflightrequest) | [`com.digitalasset.canton.admin.participant.v30.CountInFlightResponse`](#type-com-digitalasset-canton-admin-participant-v30-countinflightresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L41) |
-| [`GetConfigForSlowCounterParticipants`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-getconfigforslowcounterparticipants) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetConfigForSlowCounterParticipantsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getconfigforslowcounterparticipantsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetConfigForSlowCounterParticipantsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getconfigforslowcounterparticipantsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L36) |
-| [`GetIntervalsBehindForCounterParticipants`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-getintervalsbehindforcounterparticipants) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetIntervalsBehindForCounterParticipantsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getintervalsbehindforcounterparticipantsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetIntervalsBehindForCounterParticipantsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getintervalsbehindforcounterparticipantsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L39) |
-| [`InspectCommitmentContracts`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-inspectcommitmentcontracts) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.InspectCommitmentContractsRequest`](#type-com-digitalasset-canton-admin-participant-v30-inspectcommitmentcontractsrequest) | [`com.digitalasset.canton.admin.participant.v30.InspectCommitmentContractsResponse`](#type-com-digitalasset-canton-admin-participant-v30-inspectcommitmentcontractsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L26) |
-| [`LookupOffsetByTime`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupoffsetbytime) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LookupOffsetByTimeRequest`](#type-com-digitalasset-canton-admin-participant-v30-lookupoffsetbytimerequest) | [`com.digitalasset.canton.admin.participant.v30.LookupOffsetByTimeResponse`](#type-com-digitalasset-canton-admin-participant-v30-lookupoffsetbytimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L22) |
-| [`LookupReceivedAcsCommitments`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupreceivedacscommitments) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LookupReceivedAcsCommitmentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-lookupreceivedacscommitmentsrequest) | [`com.digitalasset.canton.admin.participant.v30.LookupReceivedAcsCommitmentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-lookupreceivedacscommitmentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L31) |
-| [`LookupSentAcsCommitments`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupsentacscommitments) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LookupSentAcsCommitmentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-lookupsentacscommitmentsrequest) | [`com.digitalasset.canton.admin.participant.v30.LookupSentAcsCommitmentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-lookupsentacscommitmentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L28) |
-| [`OpenCommitment`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-opencommitment) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.OpenCommitmentRequest`](#type-com-digitalasset-canton-admin-participant-v30-opencommitmentrequest) | [`com.digitalasset.canton.admin.participant.v30.OpenCommitmentResponse`](#type-com-digitalasset-canton-admin-participant-v30-opencommitmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L25) |
-| [`SetConfigForSlowCounterParticipants`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-setconfigforslowcounterparticipants) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.SetConfigForSlowCounterParticipantsRequest`](#type-com-digitalasset-canton-admin-participant-v30-setconfigforslowcounterparticipantsrequest) | [`com.digitalasset.canton.admin.participant.v30.SetConfigForSlowCounterParticipantsResponse`](#type-com-digitalasset-canton-admin-participant-v30-setconfigforslowcounterparticipantsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L34) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`CountInFlight`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-countinflight) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.CountInFlightRequest`](#type-com-digitalasset-canton-admin-participant-v30-countinflightrequest) | [`com.digitalasset.canton.admin.participant.v30.CountInFlightResponse`](#type-com-digitalasset-canton-admin-participant-v30-countinflightresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L41) |
+| [`GetConfigForSlowCounterParticipants`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-getconfigforslowcounterparticipants) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetConfigForSlowCounterParticipantsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getconfigforslowcounterparticipantsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetConfigForSlowCounterParticipantsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getconfigforslowcounterparticipantsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L36) |
+| [`GetIntervalsBehindForCounterParticipants`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-getintervalsbehindforcounterparticipants) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetIntervalsBehindForCounterParticipantsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getintervalsbehindforcounterparticipantsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetIntervalsBehindForCounterParticipantsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getintervalsbehindforcounterparticipantsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L39) |
+| [`InspectCommitmentContracts`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-inspectcommitmentcontracts) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.InspectCommitmentContractsRequest`](#type-com-digitalasset-canton-admin-participant-v30-inspectcommitmentcontractsrequest) | [`com.digitalasset.canton.admin.participant.v30.InspectCommitmentContractsResponse`](#type-com-digitalasset-canton-admin-participant-v30-inspectcommitmentcontractsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L26) |
+| [`LookupOffsetByTime`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupoffsetbytime) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LookupOffsetByTimeRequest`](#type-com-digitalasset-canton-admin-participant-v30-lookupoffsetbytimerequest) | [`com.digitalasset.canton.admin.participant.v30.LookupOffsetByTimeResponse`](#type-com-digitalasset-canton-admin-participant-v30-lookupoffsetbytimeresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L22) |
+| [`LookupReceivedAcsCommitments`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupreceivedacscommitments) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LookupReceivedAcsCommitmentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-lookupreceivedacscommitmentsrequest) | [`com.digitalasset.canton.admin.participant.v30.LookupReceivedAcsCommitmentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-lookupreceivedacscommitmentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L31) |
+| [`LookupSentAcsCommitments`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupsentacscommitments) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LookupSentAcsCommitmentsRequest`](#type-com-digitalasset-canton-admin-participant-v30-lookupsentacscommitmentsrequest) | [`com.digitalasset.canton.admin.participant.v30.LookupSentAcsCommitmentsResponse`](#type-com-digitalasset-canton-admin-participant-v30-lookupsentacscommitmentsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L28) |
+| [`OpenCommitment`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-opencommitment) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.OpenCommitmentRequest`](#type-com-digitalasset-canton-admin-participant-v30-opencommitmentrequest) | [`com.digitalasset.canton.admin.participant.v30.OpenCommitmentResponse`](#type-com-digitalasset-canton-admin-participant-v30-opencommitmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L25) |
+| [`SetConfigForSlowCounterParticipants`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-setconfigforslowcounterparticipants) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.SetConfigForSlowCounterParticipantsRequest`](#type-com-digitalasset-canton-admin-participant-v30-setconfigforslowcounterparticipantsrequest) | [`com.digitalasset.canton.admin.participant.v30.SetConfigForSlowCounterParticipantsResponse`](#type-com-digitalasset-canton-admin-participant-v30-setconfigforslowcounterparticipantsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_inspection_service.proto#L34) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-countinflight"></a>
 **Endpoint `ParticipantInspectionService.CountInFlight`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -552,6 +586,8 @@ Count in-flight submissions and transactions for a synchronizer
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-getconfigforslowcounterparticipants"></a>
 **Endpoint `ParticipantInspectionService.GetConfigForSlowCounterParticipants`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -583,6 +619,8 @@ Get the current configuration for metrics for slow counter-participants.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-getintervalsbehindforcounterparticipants"></a>
 **Endpoint `ParticipantInspectionService.GetIntervalsBehindForCounterParticipants`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -615,6 +653,8 @@ Get the number of intervals that counter-participants are behind in sending comm
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-inspectcommitmentcontracts"></a>
 **Endpoint `ParticipantInspectionService.InspectCommitmentContracts`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -646,6 +686,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupoffsetbytime"></a>
 **Endpoint `ParticipantInspectionService.LookupOffsetByTime`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -678,6 +720,8 @@ Look up the ledger offset corresponding to the timestamp, specifically the large
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupreceivedacscommitments"></a>
 **Endpoint `ParticipantInspectionService.LookupReceivedAcsCommitments`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -710,6 +754,8 @@ List the counter-participants and their ACS commitments together with the match 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-lookupsentacscommitments"></a>
 **Endpoint `ParticipantInspectionService.LookupSentAcsCommitments`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -741,6 +787,8 @@ Look up the ACS commitments computed and sent by a participant
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-opencommitment"></a>
 **Endpoint `ParticipantInspectionService.OpenCommitment`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -773,6 +821,8 @@ Request metadata about shared contracts used in commitment computation at a spec
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantinspectionservice-setconfigforslowcounterparticipants"></a>
 **Endpoint `ParticipantInspectionService.SetConfigForSlowCounterParticipants`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -805,6 +855,8 @@ Configure metrics for slow counter-participants (i.e., that are behind in sendin
 <a id="service-com-digitalasset-canton-admin-participant-v30-participantrepairservice"></a>
 ### Service `ParticipantRepairService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L20)
 - Endpoints tracked: `12`
 
@@ -815,24 +867,26 @@ Configure metrics for slow counter-participants (i.e., that are behind in sendin
 
  Note that ACS refers to Active Contract Set.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ChangeAssignation`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-changeassignation) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ChangeAssignationRequest`](#type-com-digitalasset-canton-admin-participant-v30-changeassignationrequest) | [`com.digitalasset.canton.admin.participant.v30.ChangeAssignationResponse`](#type-com-digitalasset-canton-admin-participant-v30-changeassignationresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L44) |
-| [`ExportAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-exportacs) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ExportAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-exportacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ExportAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-exportacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L33) |
-| [`ExportAcsOld`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-exportacsold) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ExportAcsOldRequest`](#type-com-digitalasset-canton-admin-participant-v30-exportacsoldrequest) | [`com.digitalasset.canton.admin.participant.v30.ExportAcsOldResponse`](#type-com-digitalasset-canton-admin-participant-v30-exportacsoldresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L24) |
-| [`IgnoreEvents`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-ignoreevents) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.IgnoreEventsRequest`](#type-com-digitalasset-canton-admin-participant-v30-ignoreeventsrequest) | [`com.digitalasset.canton.admin.participant.v30.IgnoreEventsResponse`](#type-com-digitalasset-canton-admin-participant-v30-ignoreeventsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L50) |
-| [`ImportAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-importacs) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ImportAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-importacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ImportAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-importacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L36) |
-| [`ImportAcsOld`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-importacsold) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ImportAcsOldRequest`](#type-com-digitalasset-canton-admin-participant-v30-importacsoldrequest) | [`com.digitalasset.canton.admin.participant.v30.ImportAcsOldResponse`](#type-com-digitalasset-canton-admin-participant-v30-importacsoldresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L30) |
-| [`MigrateSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-migratesynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.MigrateSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-migratesynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.MigrateSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-migratesynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L42) |
-| [`PurgeContracts`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-purgecontracts) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PurgeContractsRequest`](#type-com-digitalasset-canton-admin-participant-v30-purgecontractsrequest) | [`com.digitalasset.canton.admin.participant.v30.PurgeContractsResponse`](#type-com-digitalasset-canton-admin-participant-v30-purgecontractsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L39) |
-| [`PurgeDeactivatedSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-purgedeactivatedsynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PurgeDeactivatedSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-purgedeactivatedsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.PurgeDeactivatedSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-purgedeactivatedsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L47) |
-| [`RepairCommitmentsUsingAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-repaircommitmentsusingacs) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RepairCommitmentsUsingAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-repaircommitmentsusingacsrequest) | [`com.digitalasset.canton.admin.participant.v30.RepairCommitmentsUsingAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-repaircommitmentsusingacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L59) |
-| [`RollbackUnassignment`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-rollbackunassignment) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RollbackUnassignmentRequest`](#type-com-digitalasset-canton-admin-participant-v30-rollbackunassignmentrequest) | [`com.digitalasset.canton.admin.participant.v30.RollbackUnassignmentResponse`](#type-com-digitalasset-canton-admin-participant-v30-rollbackunassignmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L57) |
-| [`UnignoreEvents`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-unignoreevents) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.UnignoreEventsRequest`](#type-com-digitalasset-canton-admin-participant-v30-unignoreeventsrequest) | [`com.digitalasset.canton.admin.participant.v30.UnignoreEventsResponse`](#type-com-digitalasset-canton-admin-participant-v30-unignoreeventsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L54) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ChangeAssignation`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-changeassignation) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ChangeAssignationRequest`](#type-com-digitalasset-canton-admin-participant-v30-changeassignationrequest) | [`com.digitalasset.canton.admin.participant.v30.ChangeAssignationResponse`](#type-com-digitalasset-canton-admin-participant-v30-changeassignationresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L44) |
+| [`ExportAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-exportacs) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ExportAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-exportacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ExportAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-exportacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L33) |
+| [`ExportAcsOld`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-exportacsold) | `deprecated` | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ExportAcsOldRequest`](#type-com-digitalasset-canton-admin-participant-v30-exportacsoldrequest) | [`com.digitalasset.canton.admin.participant.v30.ExportAcsOldResponse`](#type-com-digitalasset-canton-admin-participant-v30-exportacsoldresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L24) |
+| [`IgnoreEvents`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-ignoreevents) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.IgnoreEventsRequest`](#type-com-digitalasset-canton-admin-participant-v30-ignoreeventsrequest) | [`com.digitalasset.canton.admin.participant.v30.IgnoreEventsResponse`](#type-com-digitalasset-canton-admin-participant-v30-ignoreeventsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L50) |
+| [`ImportAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-importacs) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ImportAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-importacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ImportAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-importacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L36) |
+| [`ImportAcsOld`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-importacsold) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ImportAcsOldRequest`](#type-com-digitalasset-canton-admin-participant-v30-importacsoldrequest) | [`com.digitalasset.canton.admin.participant.v30.ImportAcsOldResponse`](#type-com-digitalasset-canton-admin-participant-v30-importacsoldresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L30) |
+| [`MigrateSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-migratesynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.MigrateSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-migratesynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.MigrateSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-migratesynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L42) |
+| [`PurgeContracts`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-purgecontracts) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PurgeContractsRequest`](#type-com-digitalasset-canton-admin-participant-v30-purgecontractsrequest) | [`com.digitalasset.canton.admin.participant.v30.PurgeContractsResponse`](#type-com-digitalasset-canton-admin-participant-v30-purgecontractsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L39) |
+| [`PurgeDeactivatedSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-purgedeactivatedsynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PurgeDeactivatedSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-purgedeactivatedsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.PurgeDeactivatedSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-purgedeactivatedsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L47) |
+| [`RepairCommitmentsUsingAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-repaircommitmentsusingacs) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RepairCommitmentsUsingAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-repaircommitmentsusingacsrequest) | [`com.digitalasset.canton.admin.participant.v30.RepairCommitmentsUsingAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-repaircommitmentsusingacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L59) |
+| [`RollbackUnassignment`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-rollbackunassignment) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RollbackUnassignmentRequest`](#type-com-digitalasset-canton-admin-participant-v30-rollbackunassignmentrequest) | [`com.digitalasset.canton.admin.participant.v30.RollbackUnassignmentResponse`](#type-com-digitalasset-canton-admin-participant-v30-rollbackunassignmentresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L57) |
+| [`UnignoreEvents`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-unignoreevents) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.UnignoreEventsRequest`](#type-com-digitalasset-canton-admin-participant-v30-unignoreeventsrequest) | [`com.digitalasset.canton.admin.participant.v30.UnignoreEventsResponse`](#type-com-digitalasset-canton-admin-participant-v30-unignoreeventsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_repair_service.proto#L54) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-changeassignation"></a>
 **Endpoint `ParticipantRepairService.ChangeAssignation`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -864,6 +918,8 @@ Change the assignation of a bunch of contracts
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-exportacs"></a>
 **Endpoint `ParticipantRepairService.ExportAcs`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -895,6 +951,8 @@ Export the ACS from the participant.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-exportacsold"></a>
 **Endpoint `ParticipantRepairService.ExportAcsOld`**
 
+- Lifecycle state: `deprecated`
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -928,6 +986,8 @@ Export the ACS for the given parties from the participant
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-ignoreevents"></a>
 **Endpoint `ParticipantRepairService.IgnoreEvents`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -959,6 +1019,8 @@ Ignore events that the participant is unable to process
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-importacs"></a>
 **Endpoint `ParticipantRepairService.ImportAcs`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -990,6 +1052,8 @@ Import an existing export into the participant
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-importacsold"></a>
 **Endpoint `ParticipantRepairService.ImportAcsOld`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1022,6 +1086,8 @@ Import an existing export into the participant
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-migratesynchronizer"></a>
 **Endpoint `ParticipantRepairService.MigrateSynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1053,6 +1119,8 @@ Change the assignation of contracts to the given synchronizer and decommission t
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-purgecontracts"></a>
 **Endpoint `ParticipantRepairService.PurgeContracts`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1084,6 +1152,8 @@ Remove the given contracts from the participant
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-purgedeactivatedsynchronizer"></a>
 **Endpoint `ParticipantRepairService.PurgeDeactivatedSynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1115,6 +1185,8 @@ Purge deactivated synchronizer
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-repaircommitmentsusingacs"></a>
 **Endpoint `ParticipantRepairService.RepairCommitmentsUsingAcs`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1146,6 +1218,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-rollbackunassignment"></a>
 **Endpoint `ParticipantRepairService.RollbackUnassignment`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1177,6 +1251,8 @@ Rollback the unassignment of a contract: the contract will be re-assigned back t
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantrepairservice-unignoreevents"></a>
 **Endpoint `ParticipantRepairService.UnignoreEvents`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1209,18 +1285,22 @@ Remove the ignored status from sequenced events
 <a id="service-com-digitalasset-canton-admin-participant-v30-participantstatusservice"></a>
 ### Service `ParticipantStatusService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_status_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_status_service.proto#L10)
 - Endpoints tracked: `1`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ParticipantStatus`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantstatusservice-participantstatus) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ParticipantStatusRequest`](#type-com-digitalasset-canton-admin-participant-v30-participantstatusrequest) | [`com.digitalasset.canton.admin.participant.v30.ParticipantStatusResponse`](#type-com-digitalasset-canton-admin-participant-v30-participantstatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_status_service.proto#L11) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ParticipantStatus`](#endpoint-com-digitalasset-canton-admin-participant-v30-participantstatusservice-participantstatus) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ParticipantStatusRequest`](#type-com-digitalasset-canton-admin-participant-v30-participantstatusrequest) | [`com.digitalasset.canton.admin.participant.v30.ParticipantStatusResponse`](#type-com-digitalasset-canton-admin-participant-v30-participantstatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/participant_status_service.proto#L11) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-participantstatusservice-participantstatus"></a>
 **Endpoint `ParticipantStatusService.ParticipantStatus`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1252,6 +1332,8 @@ _No description._
 <a id="service-com-digitalasset-canton-admin-participant-v30-partymanagementservice"></a>
 ### Service `PartyManagementService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L21)
 - Endpoints tracked: `6`
 
@@ -1263,18 +1345,20 @@ _No description._
  Important: The online and offline party replication endpoints serve distinct workflows,
  and must not be combined.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`AddPartyAsync`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-addpartyasync) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.AddPartyAsyncRequest`](#type-com-digitalasset-canton-admin-participant-v30-addpartyasyncrequest) | [`com.digitalasset.canton.admin.participant.v30.AddPartyAsyncResponse`](#type-com-digitalasset-canton-admin-participant-v30-addpartyasyncresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L33) |
-| [`ClearPartyOnboardingFlag`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-clearpartyonboardingflag) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ClearPartyOnboardingFlagRequest`](#type-com-digitalasset-canton-admin-participant-v30-clearpartyonboardingflagrequest) | [`com.digitalasset.canton.admin.participant.v30.ClearPartyOnboardingFlagResponse`](#type-com-digitalasset-canton-admin-participant-v30-clearpartyonboardingflagresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L86) |
-| [`ExportPartyAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-exportpartyacs) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ExportPartyAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-exportpartyacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ExportPartyAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-exportpartyacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L54) |
-| [`GetAddPartyStatus`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-getaddpartystatus) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetAddPartyStatusRequest`](#type-com-digitalasset-canton-admin-participant-v30-getaddpartystatusrequest) | [`com.digitalasset.canton.admin.participant.v30.GetAddPartyStatusResponse`](#type-com-digitalasset-canton-admin-participant-v30-getaddpartystatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L46) |
-| [`GetHighestOffsetByTimestamp`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-gethighestoffsetbytimestamp) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetHighestOffsetByTimestampRequest`](#type-com-digitalasset-canton-admin-participant-v30-gethighestoffsetbytimestamprequest) | [`com.digitalasset.canton.admin.participant.v30.GetHighestOffsetByTimestampResponse`](#type-com-digitalasset-canton-admin-participant-v30-gethighestoffsetbytimestampresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L69) |
-| [`ImportPartyAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-importpartyacs) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ImportPartyAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-importpartyacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ImportPartyAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-importpartyacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L61) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`AddPartyAsync`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-addpartyasync) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.AddPartyAsyncRequest`](#type-com-digitalasset-canton-admin-participant-v30-addpartyasyncrequest) | [`com.digitalasset.canton.admin.participant.v30.AddPartyAsyncResponse`](#type-com-digitalasset-canton-admin-participant-v30-addpartyasyncresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L33) |
+| [`ClearPartyOnboardingFlag`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-clearpartyonboardingflag) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ClearPartyOnboardingFlagRequest`](#type-com-digitalasset-canton-admin-participant-v30-clearpartyonboardingflagrequest) | [`com.digitalasset.canton.admin.participant.v30.ClearPartyOnboardingFlagResponse`](#type-com-digitalasset-canton-admin-participant-v30-clearpartyonboardingflagresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L86) |
+| [`ExportPartyAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-exportpartyacs) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ExportPartyAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-exportpartyacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ExportPartyAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-exportpartyacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L54) |
+| [`GetAddPartyStatus`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-getaddpartystatus) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetAddPartyStatusRequest`](#type-com-digitalasset-canton-admin-participant-v30-getaddpartystatusrequest) | [`com.digitalasset.canton.admin.participant.v30.GetAddPartyStatusResponse`](#type-com-digitalasset-canton-admin-participant-v30-getaddpartystatusresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L46) |
+| [`GetHighestOffsetByTimestamp`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-gethighestoffsetbytimestamp) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetHighestOffsetByTimestampRequest`](#type-com-digitalasset-canton-admin-participant-v30-gethighestoffsetbytimestamprequest) | [`com.digitalasset.canton.admin.participant.v30.GetHighestOffsetByTimestampResponse`](#type-com-digitalasset-canton-admin-participant-v30-gethighestoffsetbytimestampresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L69) |
+| [`ImportPartyAcs`](#endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-importpartyacs) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ImportPartyAcsRequest`](#type-com-digitalasset-canton-admin-participant-v30-importpartyacsrequest) | [`com.digitalasset.canton.admin.participant.v30.ImportPartyAcsResponse`](#type-com-digitalasset-canton-admin-participant-v30-importpartyacsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/party_management_service.proto#L61) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-addpartyasync"></a>
 **Endpoint `PartyManagementService.AddPartyAsync`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1316,6 +1400,8 @@ Online party replication endpoint.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-clearpartyonboardingflag"></a>
 **Endpoint `PartyManagementService.ClearPartyOnboardingFlag`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1361,6 +1447,8 @@ Offline party replication endpoint.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-exportpartyacs"></a>
 **Endpoint `PartyManagementService.ExportPartyAcs`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1397,6 +1485,8 @@ Offline party replication focused ACS export.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-getaddpartystatus"></a>
 **Endpoint `PartyManagementService.GetAddPartyStatus`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1438,6 +1528,8 @@ Online party replication endpoint.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-gethighestoffsetbytimestamp"></a>
 **Endpoint `PartyManagementService.GetHighestOffsetByTimestamp`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1474,6 +1566,8 @@ For a given timestamp, find the highest ledger offset among all events that have
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-partymanagementservice-importpartyacs"></a>
 **Endpoint `PartyManagementService.ImportPartyAcs`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1509,18 +1603,22 @@ Offline party replication focused ACS import.
 <a id="service-com-digitalasset-canton-admin-participant-v30-pingservice"></a>
 ### Service `PingService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/ping_pong_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/ping_pong_service.proto#L10)
 - Endpoints tracked: `1`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`Ping`](#endpoint-com-digitalasset-canton-admin-participant-v30-pingservice-ping) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PingRequest`](#type-com-digitalasset-canton-admin-participant-v30-pingrequest) | [`com.digitalasset.canton.admin.participant.v30.PingResponse`](#type-com-digitalasset-canton-admin-participant-v30-pingresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/ping_pong_service.proto#L11) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`Ping`](#endpoint-com-digitalasset-canton-admin-participant-v30-pingservice-ping) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PingRequest`](#type-com-digitalasset-canton-admin-participant-v30-pingrequest) | [`com.digitalasset.canton.admin.participant.v30.PingResponse`](#type-com-digitalasset-canton-admin-participant-v30-pingresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/ping_pong_service.proto#L11) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pingservice-ping"></a>
 **Endpoint `PingService.Ping`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1552,30 +1650,34 @@ _No description._
 <a id="service-com-digitalasset-canton-admin-participant-v30-pruningservice"></a>
 ### Service `PruningService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L11)
 - Endpoints tracked: `13`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ClearSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-clearschedule) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.ClearScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-clearschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.ClearScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-clearscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L48) |
-| [`GetNoWaitCommitmentsFrom`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getnowaitcommitmentsfrom) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.GetNoWaitCommitmentsFromRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getnowaitcommitmentsfromrequest) | [`com.digitalasset.canton.admin.pruning.v30.GetNoWaitCommitmentsFromResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getnowaitcommitmentsfromresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L68) |
-| [`GetParticipantSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getparticipantschedule) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.GetParticipantScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getparticipantschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.GetParticipantScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getparticipantscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L54) |
-| [`GetSafePruningOffset`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getsafepruningoffset) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetSafePruningOffsetRequest`](#type-com-digitalasset-canton-admin-participant-v30-getsafepruningoffsetrequest) | [`com.digitalasset.canton.admin.participant.v30.GetSafePruningOffsetResponse`](#type-com-digitalasset-canton-admin-participant-v30-getsafepruningoffsetresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L28) |
-| [`GetSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getschedule) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.GetScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.GetScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L51) |
-| [`Prune`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-prune) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PruneRequest`](#type-com-digitalasset-canton-admin-participant-v30-prunerequest) | [`com.digitalasset.canton.admin.participant.v30.PruneResponse`](#type-com-digitalasset-canton-admin-participant-v30-pruneresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L25) |
-| [`ResetNoWaitCommitmentsFrom`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-resetnowaitcommitmentsfrom) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.ResetNoWaitCommitmentsFromRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-resetnowaitcommitmentsfromrequest) | [`com.digitalasset.canton.admin.pruning.v30.ResetNoWaitCommitmentsFromResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-resetnowaitcommitmentsfromresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L64) |
-| [`SetCron`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setcron) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetCronRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setcronrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetCronResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setcronresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L43) |
-| [`SetMaxDuration`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setmaxduration) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetMaxDurationRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setmaxdurationrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetMaxDurationResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setmaxdurationresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L44) |
-| [`SetNoWaitCommitmentsFrom`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setnowaitcommitmentsfrom) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetNoWaitCommitmentsFromRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setnowaitcommitmentsfromrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetNoWaitCommitmentsFromResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setnowaitcommitmentsfromresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L60) |
-| [`SetParticipantSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setparticipantschedule) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetParticipantScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setparticipantschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.SetParticipantScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setparticipantscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L39) |
-| [`SetRetention`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setretention) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetRetentionRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setretentionrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetRetentionResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setretentionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L45) |
-| [`SetSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setschedule) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.SetScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L36) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ClearSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-clearschedule) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.ClearScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-clearschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.ClearScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-clearscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L48) |
+| [`GetNoWaitCommitmentsFrom`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getnowaitcommitmentsfrom) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.GetNoWaitCommitmentsFromRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getnowaitcommitmentsfromrequest) | [`com.digitalasset.canton.admin.pruning.v30.GetNoWaitCommitmentsFromResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getnowaitcommitmentsfromresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L68) |
+| [`GetParticipantSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getparticipantschedule) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.GetParticipantScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getparticipantschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.GetParticipantScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getparticipantscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L54) |
+| [`GetSafePruningOffset`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getsafepruningoffset) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetSafePruningOffsetRequest`](#type-com-digitalasset-canton-admin-participant-v30-getsafepruningoffsetrequest) | [`com.digitalasset.canton.admin.participant.v30.GetSafePruningOffsetResponse`](#type-com-digitalasset-canton-admin-participant-v30-getsafepruningoffsetresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L28) |
+| [`GetSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getschedule) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.GetScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.GetScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-getscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L51) |
+| [`Prune`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-prune) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.PruneRequest`](#type-com-digitalasset-canton-admin-participant-v30-prunerequest) | [`com.digitalasset.canton.admin.participant.v30.PruneResponse`](#type-com-digitalasset-canton-admin-participant-v30-pruneresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L25) |
+| [`ResetNoWaitCommitmentsFrom`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-resetnowaitcommitmentsfrom) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.ResetNoWaitCommitmentsFromRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-resetnowaitcommitmentsfromrequest) | [`com.digitalasset.canton.admin.pruning.v30.ResetNoWaitCommitmentsFromResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-resetnowaitcommitmentsfromresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L64) |
+| [`SetCron`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setcron) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetCronRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setcronrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetCronResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setcronresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L43) |
+| [`SetMaxDuration`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setmaxduration) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetMaxDurationRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setmaxdurationrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetMaxDurationResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setmaxdurationresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L44) |
+| [`SetNoWaitCommitmentsFrom`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setnowaitcommitmentsfrom) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetNoWaitCommitmentsFromRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setnowaitcommitmentsfromrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetNoWaitCommitmentsFromResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setnowaitcommitmentsfromresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L60) |
+| [`SetParticipantSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setparticipantschedule) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetParticipantScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setparticipantschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.SetParticipantScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setparticipantscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L39) |
+| [`SetRetention`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setretention) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetRetentionRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setretentionrequest) | [`com.digitalasset.canton.admin.pruning.v30.SetRetentionResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setretentionresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L45) |
+| [`SetSchedule`](#endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setschedule) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.pruning.v30.SetScheduleRequest`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setschedulerequest) | [`com.digitalasset.canton.admin.pruning.v30.SetScheduleResponse`](com-digitalasset-canton-admin-pruning-v30#type-com-digitalasset-canton-admin-pruning-v30-setscheduleresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/pruning_service.proto#L36) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-clearschedule"></a>
 **Endpoint `PruningService.ClearSchedule`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1607,6 +1709,8 @@ Disable automatic pruning and remove the persisted schedule configuration.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getnowaitcommitmentsfrom"></a>
 **Endpoint `PruningService.GetNoWaitCommitmentsFrom`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1639,6 +1743,8 @@ Retrieve the configuration of waiting for commitments from counter-participants
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getparticipantschedule"></a>
 **Endpoint `PruningService.GetParticipantSchedule`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1670,6 +1776,8 @@ Retrieve the automatic, participant-specific pruning configuration.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getsafepruningoffset"></a>
 **Endpoint `PruningService.GetSafePruningOffset`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1701,6 +1809,8 @@ Retrieve the safe pruning offset
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-getschedule"></a>
 **Endpoint `PruningService.GetSchedule`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1732,6 +1842,8 @@ Retrieve the automatic pruning configuration.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-prune"></a>
 **Endpoint `PruningService.Prune`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1775,6 +1887,8 @@ Prune the participant specifying the offset before and at which ledger transacti
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-resetnowaitcommitmentsfrom"></a>
 **Endpoint `PruningService.ResetNoWaitCommitmentsFrom`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1807,6 +1921,8 @@ Enable waiting for commitments from the given counter-participants
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setcron"></a>
 **Endpoint `PruningService.SetCron`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1839,6 +1955,8 @@ Modify individual pruning schedule parameters.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setmaxduration"></a>
 **Endpoint `PruningService.SetMaxDuration`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1870,6 +1988,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setnowaitcommitmentsfrom"></a>
 **Endpoint `PruningService.SetNoWaitCommitmentsFrom`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1904,6 +2024,8 @@ Disable waiting for commitments from the given counter-participants
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setparticipantschedule"></a>
 **Endpoint `PruningService.SetParticipantSchedule`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1935,6 +2057,8 @@ Enable automatic pruning with participant-specific schedule parameters.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setretention"></a>
 **Endpoint `PruningService.SetRetention`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -1966,6 +2090,8 @@ _No description._
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-pruningservice-setschedule"></a>
 **Endpoint `PruningService.SetSchedule`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2002,19 +2128,23 @@ Enable automatic pruning using the specified schedule parameters
 <a id="service-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice"></a>
 ### Service `ResourceManagementService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L8)
 - Endpoints tracked: `2`
 
 _No description._
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetResourceLimits`](#endpoint-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice-getresourcelimits) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetResourceLimitsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getresourcelimitsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetResourceLimitsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getresourcelimitsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L14) |
-| [`SetResourceLimits`](#endpoint-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice-setresourcelimits) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.SetResourceLimitsRequest`](#type-com-digitalasset-canton-admin-participant-v30-setresourcelimitsrequest) | [`com.digitalasset.canton.admin.participant.v30.SetResourceLimitsResponse`](#type-com-digitalasset-canton-admin-participant-v30-setresourcelimitsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L11) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetResourceLimits`](#endpoint-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice-getresourcelimits) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetResourceLimitsRequest`](#type-com-digitalasset-canton-admin-participant-v30-getresourcelimitsrequest) | [`com.digitalasset.canton.admin.participant.v30.GetResourceLimitsResponse`](#type-com-digitalasset-canton-admin-participant-v30-getresourcelimitsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L14) |
+| [`SetResourceLimits`](#endpoint-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice-setresourcelimits) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.SetResourceLimitsRequest`](#type-com-digitalasset-canton-admin-participant-v30-setresourcelimitsrequest) | [`com.digitalasset.canton.admin.participant.v30.SetResourceLimitsResponse`](#type-com-digitalasset-canton-admin-participant-v30-setresourcelimitsresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/resource_management_service.proto#L11) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice-getresourcelimits"></a>
 **Endpoint `ResourceManagementService.GetResourceLimits`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2046,6 +2176,8 @@ Get the current resource limits.
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-resourcemanagementservice-setresourcelimits"></a>
 **Endpoint `ResourceManagementService.SetResourceLimits`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2078,6 +2210,8 @@ Update resource limits.
 <a id="service-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice"></a>
 ### Service `SynchronizerConnectivityService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L18)
 - Endpoints tracked: `11`
 
@@ -2087,23 +2221,25 @@ Update resource limits.
  The synchronizer connectivity service allows to register to new synchronizers and control the
  participants synchronizer connections.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`ConnectSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-connectsynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ConnectSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-connectsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.ConnectSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-connectsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L20) |
-| [`DisconnectAllSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-disconnectallsynchronizers) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.DisconnectAllSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-disconnectallsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.DisconnectAllSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-disconnectallsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L35) |
-| [`DisconnectSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-disconnectsynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.DisconnectSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-disconnectsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.DisconnectSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-disconnectsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L33) |
-| [`GetSynchronizerId`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-getsynchronizerid) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetSynchronizerIdRequest`](#type-com-digitalasset-canton-admin-participant-v30-getsynchronizeridrequest) | [`com.digitalasset.canton.admin.participant.v30.GetSynchronizerIdResponse`](#type-com-digitalasset-canton-admin-participant-v30-getsynchronizeridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L47) |
-| [`ListConnectedSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-listconnectedsynchronizers) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListConnectedSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-listconnectedsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.ListConnectedSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-listconnectedsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L41) |
-| [`ListRegisteredSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-listregisteredsynchronizers) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListRegisteredSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-listregisteredsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.ListRegisteredSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-listregisteredsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L43) |
-| [`Logout`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-logout) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LogoutRequest`](#type-com-digitalasset-canton-admin-participant-v30-logoutrequest) | [`com.digitalasset.canton.admin.participant.v30.LogoutResponse`](#type-com-digitalasset-canton-admin-participant-v30-logoutresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L38) |
-| [`ModifySynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-modifysynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ModifySynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-modifysynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.ModifySynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-modifysynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L30) |
-| [`ReconnectSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-reconnectsynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L27) |
-| [`ReconnectSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-reconnectsynchronizers) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L25) |
-| [`RegisterSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-registersynchronizer) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RegisterSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-registersynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.RegisterSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-registersynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L22) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`ConnectSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-connectsynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ConnectSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-connectsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.ConnectSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-connectsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L20) |
+| [`DisconnectAllSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-disconnectallsynchronizers) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.DisconnectAllSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-disconnectallsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.DisconnectAllSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-disconnectallsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L35) |
+| [`DisconnectSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-disconnectsynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.DisconnectSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-disconnectsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.DisconnectSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-disconnectsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L33) |
+| [`GetSynchronizerId`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-getsynchronizerid) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.GetSynchronizerIdRequest`](#type-com-digitalasset-canton-admin-participant-v30-getsynchronizeridrequest) | [`com.digitalasset.canton.admin.participant.v30.GetSynchronizerIdResponse`](#type-com-digitalasset-canton-admin-participant-v30-getsynchronizeridresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L47) |
+| [`ListConnectedSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-listconnectedsynchronizers) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListConnectedSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-listconnectedsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.ListConnectedSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-listconnectedsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L41) |
+| [`ListRegisteredSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-listregisteredsynchronizers) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ListRegisteredSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-listregisteredsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.ListRegisteredSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-listregisteredsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L43) |
+| [`Logout`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-logout) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.LogoutRequest`](#type-com-digitalasset-canton-admin-participant-v30-logoutrequest) | [`com.digitalasset.canton.admin.participant.v30.LogoutResponse`](#type-com-digitalasset-canton-admin-participant-v30-logoutresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L38) |
+| [`ModifySynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-modifysynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ModifySynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-modifysynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.ModifySynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-modifysynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L30) |
+| [`ReconnectSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-reconnectsynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L27) |
+| [`ReconnectSynchronizers`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-reconnectsynchronizers) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizersRequest`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizersrequest) | [`com.digitalasset.canton.admin.participant.v30.ReconnectSynchronizersResponse`](#type-com-digitalasset-canton-admin-participant-v30-reconnectsynchronizersresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L25) |
+| [`RegisterSynchronizer`](#endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-registersynchronizer) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.RegisterSynchronizerRequest`](#type-com-digitalasset-canton-admin-participant-v30-registersynchronizerrequest) | [`com.digitalasset.canton.admin.participant.v30.RegisterSynchronizerResponse`](#type-com-digitalasset-canton-admin-participant-v30-registersynchronizerresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/synchronizer_connectivity.proto#L22) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-connectsynchronizer"></a>
 **Endpoint `SynchronizerConnectivityService.ConnectSynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2135,6 +2271,8 @@ Connect to a new synchronizer
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-disconnectallsynchronizers"></a>
 **Endpoint `SynchronizerConnectivityService.DisconnectAllSynchronizers`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2166,6 +2304,8 @@ Disconnect from all connected synchronizers
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-disconnectsynchronizer"></a>
 **Endpoint `SynchronizerConnectivityService.DisconnectSynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2197,6 +2337,8 @@ Disconnect from a connected synchronizer
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-getsynchronizerid"></a>
 **Endpoint `SynchronizerConnectivityService.GetSynchronizerId`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2229,6 +2371,8 @@ Get the physical synchronizer id of the given synchronizer alias
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-listconnectedsynchronizers"></a>
 **Endpoint `SynchronizerConnectivityService.ListConnectedSynchronizers`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2260,6 +2404,8 @@ list connected synchronizers
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-listregisteredsynchronizers"></a>
 **Endpoint `SynchronizerConnectivityService.ListRegisteredSynchronizers`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2291,6 +2437,8 @@ list registered synchronizers
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-logout"></a>
 **Endpoint `SynchronizerConnectivityService.Logout`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2322,6 +2470,8 @@ Revoke the authentication tokens for all the sequencers on a synchronizer and di
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-modifysynchronizer"></a>
 **Endpoint `SynchronizerConnectivityService.ModifySynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2353,6 +2503,8 @@ Reconfigure a synchronizer connection
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-reconnectsynchronizer"></a>
 **Endpoint `SynchronizerConnectivityService.ReconnectSynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2384,6 +2536,8 @@ Reconnect to a registered synchronizer
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-reconnectsynchronizers"></a>
 **Endpoint `SynchronizerConnectivityService.ReconnectSynchronizers`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2415,6 +2569,8 @@ Reconnect to registered synchronizers
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-synchronizerconnectivityservice-registersynchronizer"></a>
 **Endpoint `SynchronizerConnectivityService.RegisterSynchronizer`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
@@ -2446,18 +2602,22 @@ Register the configuration of a new synchronizer connection
 <a id="service-com-digitalasset-canton-admin-participant-v30-trafficcontrolservice"></a>
 ### Service `TrafficControlService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/traffic_control_service.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/traffic_control_service.proto#L11)
 - Endpoints tracked: `1`
 
 Service to retrieve information about the traffic state of the participant.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`TrafficControlState`](#endpoint-com-digitalasset-canton-admin-participant-v30-trafficcontrolservice-trafficcontrolstate) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.TrafficControlStateRequest`](#type-com-digitalasset-canton-admin-participant-v30-trafficcontrolstaterequest) | [`com.digitalasset.canton.admin.participant.v30.TrafficControlStateResponse`](#type-com-digitalasset-canton-admin-participant-v30-trafficcontrolstateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/traffic_control_service.proto#L12) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`TrafficControlState`](#endpoint-com-digitalasset-canton-admin-participant-v30-trafficcontrolservice-trafficcontrolstate) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.admin.participant.v30.TrafficControlStateRequest`](#type-com-digitalasset-canton-admin-participant-v30-trafficcontrolstaterequest) | [`com.digitalasset.canton.admin.participant.v30.TrafficControlStateResponse`](#type-com-digitalasset-canton-admin-participant-v30-trafficcontrolstateresponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/admin-api/src/main/protobuf/com/digitalasset/canton/admin/participant/v30/traffic_control_service.proto#L12) |
 
 <a id="endpoint-com-digitalasset-canton-admin-participant-v30-trafficcontrolservice-trafficcontrolstate"></a>
 **Endpoint `TrafficControlService.TrafficControlState`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`

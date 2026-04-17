@@ -13,10 +13,12 @@ The pieces that make up the Daml language.
 
 <CardGroup cols={2}>
 <Card title="Lifecycle">
-Stable.
+Unspecified.
 </Card>
 <Card title="Notices">
 Status: `active`
+Lifecycle state: `-`
+Replaces: `-`
 Introduced in: `3.4.10`
 Removed in: `-`
 Warnings: `0`
@@ -137,6 +139,10 @@ Instances:
 ### `data AnyException`
 
 A wrapper for all exception types.
+
+<Warning>
+Lifecycle state: `deprecated`
+</Warning>
 
 <Warning>
 Deprecated: Exceptions are deprecated, prefer `failWithStatus`, and avoid using catch.

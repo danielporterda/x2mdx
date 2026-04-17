@@ -12,6 +12,20 @@ from typing import Any
 from x2mdx.mintlify import MintlifyGroup
 from x2mdx.openapi.models import OpenApiEntityLifecycle, OpenApiLifecycleReport, OpenApiSpecLifecycle
 from x2mdx.output import Page, RawMarkdown
+from x2mdx.presentation import (
+    CollectionPageModel,
+    DetailCodeBlock,
+    DetailParagraph,
+    DetailTable,
+    LifecycleStatus,
+    ProtocolInteraction,
+    ProtocolSubject,
+    StatusRow,
+    VersionDeltaRow,
+    status_legend_items,
+    status_row_context,
+    version_delta_row_cells,
+)
 from x2mdx.templating import markdown_page, render_template
 
 MAX_CHANGED_ENTITIES = 300
@@ -136,6 +150,14 @@ def summarize_operation_transition(previous: dict[str, Any] | None, current: dic
     if (previous.get("operation_id") or "") != (current.get("operation_id") or ""):
         changes.append(
             f"operation id changed {md_code(previous.get('operation_id') or '-')} -> {md_code(current.get('operation_id') or '-')}"
+        )
+    if (previous.get("state") or "") != (current.get("state") or ""):
+        changes.append(
+            f"lifecycle state changed {md_code(previous.get('state') or '-')} -> {md_code(current.get('state') or '-')}"
+        )
+    if (previous.get("replaces") or "") != (current.get("replaces") or ""):
+        changes.append(
+            f"replacement target changed {md_code(previous.get('replaces') or '-')} -> {md_code(current.get('replaces') or '-')}"
         )
     if (previous.get("summary") or "") != (current.get("summary") or ""):
         changes.append(f"summary changed {md_code(previous.get('summary') or '-')} -> {md_code(current.get('summary') or '-')}")
@@ -290,6 +312,85 @@ def table_of_contents_rows(spec: OpenApiSpecLifecycle) -> list[list[str]]:
     return rows
 
 
+def _version_index(spec: OpenApiSpecLifecycle) -> dict[str, int]:
+    return {version: index for index, version in enumerate(spec.versions_present)}
+
+
+def _earliest_version(spec: OpenApiSpecLifecycle, values: list[str]) -> str | None:
+    if not values:
+        return None
+    index = _version_index(spec)
+    return min(values, key=lambda value: index.get(value, len(index)))
+
+
+def _latest_version(spec: OpenApiSpecLifecycle, values: list[str]) -> str | None:
+    if not values:
+        return None
+    index = _version_index(spec)
+    return max(values, key=lambda value: index.get(value, -1))
+
+
+def _path_status_summary(operations: list[dict[str, Any]]) -> str:
+    kind = path_kind_value(operations)
+    summary = path_summary_text(operations)
+    if kind != "-" and summary != "-":
+        return f"{kind}: {summary}"
+    if kind != "-":
+        return kind
+    return summary
+
+
+def _path_states(operations: list[dict[str, Any]]) -> tuple[str, ...]:
+    order = {"alpha": 0, "beta": 1, "stable": 2, "deprecated": 3}
+    seen: list[str] = []
+    for operation in operations:
+        state = str(operation.get("state") or "").strip().lower()
+        if state in order and state not in seen:
+            seen.append(state)
+    return tuple(sorted(seen, key=order.get))
+
+
+def table_of_contents_status_rows(spec: OpenApiSpecLifecycle) -> list[StatusRow]:
+    lifecycle_by_key = {
+        record.entity_key: record
+        for record in spec.entity_lifecycle
+        if record.entity_type == "operation"
+    }
+    rows: list[StatusRow] = []
+    for path, operations in group_operations_by_path(spec.latest_operation_details).items():
+        lifecycles = [
+            lifecycle
+            for operation in operations
+            if (lifecycle := lifecycle_by_key.get(str(operation.get("entity_key", "") or ""))) is not None
+        ]
+        if not lifecycles:
+            continue
+        introduced = _earliest_version(spec, [lifecycle.introduced_version for lifecycle in lifecycles])
+        changed_versions = sorted(
+            {
+                version
+                for lifecycle in lifecycles
+                for version in lifecycle.changed_in_versions
+            },
+            key=lambda version: _version_index(spec).get(version, len(spec.versions_present)),
+        )
+        removed_candidates = [lifecycle.removed_version for lifecycle in lifecycles if lifecycle.removed_version]
+        removed = _latest_version(spec, removed_candidates) if len(removed_candidates) == len(lifecycles) else None
+        rows.append(
+            StatusRow(
+                link=endpoint_path_anchor_link(path),
+                summary=_path_status_summary(operations),
+                lifecycle=LifecycleStatus.from_values(
+                    introduced=introduced,
+                    changed_versions=changed_versions,
+                    states=_path_states(operations),
+                    removed=removed,
+                ),
+            )
+        )
+    return rows
+
+
 def endpoint_header(operation: dict[str, Any]) -> str:
     return md_code(endpoint_name(operation))
 
@@ -431,6 +532,8 @@ def _endpoint_reference_operation(operation: dict[str, Any]) -> dict[str, Any]:
             item
             for item in [
                 f"Operation ID: {md_code(operation['operation_id'])}" if operation.get("operation_id") else "",
+                f"Lifecycle state: {md_code(operation['state'])}" if operation.get("state") else "",
+                f"Replaces: {md_code(operation['replaces'])}" if operation.get("replaces") else "",
                 f"Summary: {md_text(operation['summary'])}" if operation.get("summary") else "",
                 f"Description: {md_text(operation['description'])}" if operation.get("description") else "",
                 f"Tags: {md_code(', '.join(operation['tags']))}" if operation.get("tags") else "",
@@ -487,10 +590,195 @@ def render_endpoint_reference(operations: list[dict[str, Any]], max_endpoints: i
     )
 
 
-def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
+def _operation_interaction(operation: dict[str, Any]) -> ProtocolInteraction:
+    context = _endpoint_reference_operation(operation)
+    detail_blocks: list[DetailParagraph | DetailTable | DetailCodeBlock] = []
+    if context["parameter_rows"]:
+        detail_blocks.append(
+            DetailTable(
+                title="Parameters",
+                headers=("Name", "In", "Required", "Schema", "Description"),
+                rows=tuple(tuple(row) for row in context["parameter_rows"]),
+            )
+        )
+    request_body = context["request_body"]
+    if request_body:
+        detail_blocks.append(DetailParagraph(title="Request Body Required", text=str(request_body["required"])))
+        if request_body["content_rows"]:
+            detail_blocks.append(
+                DetailTable(
+                    title="Request Body",
+                    headers=("Content Type", "Schema", "Required Fields"),
+                    rows=tuple(tuple(row) for row in request_body["content_rows"]),
+                )
+            )
+        else:
+            detail_blocks.append(DetailParagraph(title="Request Body Content", text=str(request_body["content"])))
+        for example in request_body["examples"]:
+            detail_blocks.append(
+                DetailCodeBlock(
+                    title=f"Request Example: {example['content_type']}",
+                    language="json",
+                    body=example["body"],
+                )
+            )
+    if context["response_rows"]:
+        detail_blocks.append(
+            DetailTable(
+                title="Responses",
+                headers=("Code", "Description", "Content Types", "Schemas"),
+                rows=tuple(tuple(row) for row in context["response_rows"]),
+            )
+        )
+    return ProtocolInteraction(
+        label=str(context["method"]),
+        detail_items=tuple(context["bullet_items"]),
+        detail_blocks=tuple(detail_blocks),
+    )
+
+
+def _path_subject(
+    spec: OpenApiSpecLifecycle,
+    path: str,
+    operations: list[dict[str, Any]],
+    lifecycles: list[OpenApiEntityLifecycle],
+) -> ProtocolSubject:
+    changed_versions: list[str] = []
+    for lifecycle in lifecycles:
+        for version in lifecycle.changed_in_versions:
+            if version not in changed_versions:
+                changed_versions.append(version)
+    return ProtocolSubject(
+        anchor=endpoint_path_anchor_id(path),
+        title=path,
+        kind=path_kind_value(operations),
+        summary=path_summary_text(operations),
+        lifecycle=LifecycleStatus.from_values(
+            introduced=introduced_versions_value(lifecycles),
+            changed_versions=changed_versions,
+            removed=removed_versions_value(lifecycles),
+        ),
+        version_changes=tuple(
+            (
+                md_code(version),
+                path_change_summary_value(
+                    spec,
+                    [lifecycle for lifecycle in lifecycles if version in lifecycle.changed_in_versions],
+                ),
+            )
+            for version in changed_versions
+        ),
+        interactions=tuple(_operation_interaction(operation) for operation in operations),
+    )
+
+
+def render_endpoint_reference_subjects(subjects: list[ProtocolSubject], max_endpoints: int) -> str:
+    if not subjects:
+        return "No endpoint details available in the latest spec."
+    return render_template(
+        "openapi/endpoint_reference.md.j2",
+        path_groups=[
+            {
+                "anchor_id": subject.anchor,
+                "header": md_code(subject.title),
+                "methods": [interaction.label for interaction in subject.interactions],
+                "version_changes": [list(row) for row in subject.version_changes],
+                "operations": [
+                    {
+                        "anchor_id": endpoint_anchor_id(f"{interaction.label.strip('`')} {subject.title}"),
+                        "method": interaction.label,
+                        "bullet_items": list(interaction.detail_items),
+                        "parameter_rows": [
+                            list(row)
+                            for block in interaction.detail_blocks
+                            if isinstance(block, DetailTable) and block.title == "Parameters"
+                            for row in block.rows
+                        ],
+                        "request_body": next(
+                            (
+                                {
+                                    "required": required_block.text,
+                                    "content_rows": [list(row) for row in block.rows],
+                                    "content": next(
+                                        (
+                                            paragraph.text
+                                            for paragraph in interaction.detail_blocks
+                                            if isinstance(paragraph, DetailParagraph)
+                                            and paragraph.title == "Request Body Content"
+                                        ),
+                                        md_code("-"),
+                                    ),
+                                    "examples": [
+                                        {
+                                            "content_type": code_block.title.replace("Request Example: ", ""),
+                                            "body": code_block.body,
+                                        }
+                                        for code_block in interaction.detail_blocks
+                                        if isinstance(code_block, DetailCodeBlock)
+                                        and code_block.title
+                                        and code_block.title.startswith("Request Example: ")
+                                    ],
+                                }
+                                for required_block in interaction.detail_blocks
+                                if isinstance(required_block, DetailParagraph)
+                                and required_block.title == "Request Body Required"
+                                for block in interaction.detail_blocks
+                                if isinstance(block, DetailTable) and block.title == "Request Body"
+                            ),
+                            next(
+                                (
+                                    {
+                                        "required": required_block.text,
+                                        "content_rows": [],
+                                        "content": next(
+                                            (
+                                                paragraph.text
+                                                for paragraph in interaction.detail_blocks
+                                                if isinstance(paragraph, DetailParagraph)
+                                                and paragraph.title == "Request Body Content"
+                                            ),
+                                            md_code("-"),
+                                        ),
+                                        "examples": [
+                                            {
+                                                "content_type": code_block.title.replace("Request Example: ", ""),
+                                                "body": code_block.body,
+                                            }
+                                            for code_block in interaction.detail_blocks
+                                            if isinstance(code_block, DetailCodeBlock)
+                                            and code_block.title
+                                            and code_block.title.startswith("Request Example: ")
+                                        ],
+                                    }
+                                    for required_block in interaction.detail_blocks
+                                    if isinstance(required_block, DetailParagraph)
+                                    and required_block.title == "Request Body Required"
+                                ),
+                                None,
+                            ),
+                        ),
+                        "response_rows": [
+                            list(row)
+                            for block in interaction.detail_blocks
+                            if isinstance(block, DetailTable) and block.title == "Responses"
+                            for row in block.rows
+                        ],
+                    }
+                    for interaction in subject.interactions
+                ],
+            }
+            for subject in subjects[:max_endpoints]
+        ],
+        max_endpoints=max_endpoints,
+        total_paths=len(subjects),
+    )
+
+
+def build_spec_page_legacy(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     counts = lifecycle_counts(spec)
     interesting = interesting_entities(spec)
     toc_rows = table_of_contents_rows(spec)
+    toc_status_rows = table_of_contents_status_rows(spec)
     latest_operations = spec.latest_entities.get("operations", [])
     latest_components = spec.latest_entities.get("components", [])
     latest_paths = spec.latest_entities.get("paths", [])
@@ -498,9 +786,10 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
 
     body = render_template(
         "openapi/spec.md.j2",
-        table_of_contents_rows=toc_rows[:MAX_TABLE_OF_CONTENTS_ROWS],
+        table_of_contents_rows=[status_row_context(row) for row in toc_status_rows[:MAX_TABLE_OF_CONTENTS_ROWS]],
         table_of_contents_total=len(toc_rows),
         table_of_contents_limit=MAX_TABLE_OF_CONTENTS_ROWS,
+        table_of_contents_legend=status_legend_items(toc_status_rows),
         endpoint_reference=render_endpoint_reference(spec.latest_operation_details, MAX_ENDPOINTS),
         version_timeline_rows=[
             [
@@ -573,7 +862,120 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     )
 
 
-def build_overview_page(
+def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
+    counts = lifecycle_counts(spec)
+    interesting = interesting_entities(spec)
+    toc_rows = table_of_contents_rows(spec)
+    toc_status_rows = table_of_contents_status_rows(spec)
+    latest_operations = spec.latest_entities.get("operations", [])
+    latest_components = spec.latest_entities.get("components", [])
+    latest_paths = spec.latest_entities.get("paths", [])
+    latest_tags = spec.latest_entities.get("tags", [])
+    lifecycle_by_key = {
+        record.entity_key: record
+        for record in spec.entity_lifecycle
+        if record.entity_type == "operation"
+    }
+    subjects = [
+        _path_subject(
+            spec,
+            path,
+            operations,
+            [
+                lifecycle
+                for operation in operations
+                if (lifecycle := lifecycle_by_key.get(str(operation.get("entity_key", "") or ""))) is not None
+            ],
+        )
+        for path, operations in group_operations_by_path(spec.latest_operation_details).items()
+    ]
+    page_model = CollectionPageModel(
+        path=f"{spec_dir_name}/{slugify(spec.spec_id)}.mdx",
+        title=spec.display_name,
+        description="Generated lifecycle view for an OpenAPI specification",
+        toc_rows=tuple(tuple(row) for row in toc_rows),
+        version_rows=tuple(
+            VersionDeltaRow(
+                version=version,
+                added=md_code(spec.per_version_entity_deltas.get(version, {}).get("added_count", 0)),
+                changed=md_code(spec.per_version_entity_deltas.get(version, {}).get("changed_count", 0)),
+                removed=md_code(spec.per_version_entity_deltas.get(version, {}).get("removed_count", 0)),
+            )
+            for version in spec.versions_present
+        ),
+    )
+
+    body = render_template(
+        "openapi/spec.md.j2",
+        table_of_contents_rows=[status_row_context(row) for row in toc_status_rows[:MAX_TABLE_OF_CONTENTS_ROWS]],
+        table_of_contents_total=len(page_model.toc_rows),
+        table_of_contents_limit=MAX_TABLE_OF_CONTENTS_ROWS,
+        table_of_contents_legend=status_legend_items(toc_status_rows),
+        endpoint_reference=render_endpoint_reference_subjects(subjects, MAX_ENDPOINTS),
+        version_timeline_rows=[version_delta_row_cells(row) for row in page_model.version_rows],
+        interesting_rows=[
+            [
+                md_code(record.name),
+                md_code(record.entity_type),
+                lifecycle_value(record.introduced_version, "introduced"),
+                changed_versions_value(record.changed_in_versions),
+                lifecycle_value(record.removed_version, "removed"),
+            ]
+            for record in interesting[:MAX_CHANGED_ENTITIES]
+        ],
+        interesting_total=len(interesting),
+        interesting_limit=MAX_CHANGED_ENTITIES,
+        latest_operations_rows=[
+            [
+                md_code(str(record.get("name", ""))),
+                lifecycle_value(str(record.get("introduced_version", "")), "introduced"),
+                changed_versions_value(list(record.get("changed_in_versions", []))),
+                lifecycle_value(record.get("removed_version"), "removed"),
+            ]
+            for record in latest_operations[:MAX_LATEST_OPERATIONS]
+        ],
+        latest_operations_total=len(latest_operations),
+        latest_operations_limit=MAX_LATEST_OPERATIONS,
+        latest_components_rows=[
+            [
+                md_code(str(record.get("name", ""))),
+                lifecycle_value(str(record.get("introduced_version", "")), "introduced"),
+                changed_versions_value(list(record.get("changed_in_versions", []))),
+                lifecycle_value(record.get("removed_version"), "removed"),
+            ]
+            for record in latest_components[:MAX_LATEST_COMPONENTS]
+        ],
+        latest_components_total=len(latest_components),
+        latest_components_limit=MAX_LATEST_COMPONENTS,
+        spec_metadata_items=[
+            f"Canonical spec id: {md_code(spec.spec_id)}",
+            f"Latest source path: {md_code(spec.latest_source_path)}",
+            f"OpenAPI version (latest): {md_code(spec.latest_openapi_version or '-')}",
+            f"Introduced: {lifecycle_value(spec.introduced_version, 'introduced')}",
+            f"Changed in versions: {changed_versions_value(spec.changed_in_versions)}",
+            f"Removed: {lifecycle_value(spec.removed_version, 'removed')}",
+        ],
+        entity_summary_items=[
+            f"Total entities tracked: {md_code(counts['total'])}",
+            f"Entities introduced after spec introduction: {md_code(counts['introduced_later'])}",
+            f"Entities changed at least once: {md_code(counts['changed'])}",
+            f"Entities removed: {md_code(counts['removed'])}",
+            f"Latest operations: {md_code(len(latest_operations))}",
+            f"Latest paths: {md_code(len(latest_paths))}",
+            f"Latest components: {md_code(len(latest_components))}",
+            f"Latest tags: {md_code(len(latest_tags))}",
+        ],
+    )
+    body = body.replace("## Reference\n\n<a id=", "## Reference\n\n\n<a id=", 1)
+    return Page(
+        path=page_model.path,
+        title=page_model.title,
+        description=page_model.description,
+        blocks=[RawMarkdown(body)],
+    )
+
+
+def build_overview_page_legacy(
     report: OpenApiLifecycleReport,
     spec_pages: list[Page],
     overview_name: str,
@@ -619,6 +1021,26 @@ def build_overview_page(
     )
 
 
+def build_overview_page(
+    report: OpenApiLifecycleReport,
+    spec_pages: list[Page],
+    overview_name: str,
+    overview_title: str,
+) -> Page:
+    return build_overview_page_legacy(report, spec_pages, overview_name, overview_title)
+
+
+def build_pages_legacy(
+    report: OpenApiLifecycleReport,
+    overview_name: str = "overview.mdx",
+    spec_dir_name: str = "specs",
+    overview_title: str = "OpenAPI Lifecycle Overview",
+) -> list[Page]:
+    spec_pages = [build_spec_page_legacy(spec, spec_dir_name) for spec in sorted(report.specs, key=lambda item: item.spec_id)]
+    overview_page = build_overview_page_legacy(report, spec_pages, overview_name, overview_title)
+    return [overview_page, *spec_pages]
+
+
 def build_pages(
     report: OpenApiLifecycleReport,
     overview_name: str = "overview.mdx",
@@ -628,6 +1050,20 @@ def build_pages(
     spec_pages = [build_spec_page(spec, spec_dir_name) for spec in sorted(report.specs, key=lambda item: item.spec_id)]
     overview_page = build_overview_page(report, spec_pages, overview_name, overview_title)
     return [overview_page, *spec_pages]
+
+
+def build_api_page_legacy(report: OpenApiLifecycleReport, output_path: str) -> Page:
+    specs = sorted(report.specs, key=lambda item: item.spec_id)
+    if len(specs) != 1:
+        raise ValueError(f"Expected exactly one spec for single-page output, found {len(specs)}")
+
+    spec_page = build_spec_page_legacy(specs[0], "specs")
+    return Page(
+        path=output_path,
+        title=spec_page.title,
+        description="Generated API reference from versioned OpenAPI artifacts",
+        blocks=spec_page.blocks,
+    )
 
 
 def build_api_page(report: OpenApiLifecycleReport, output_path: str) -> Page:

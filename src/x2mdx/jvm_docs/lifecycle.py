@@ -19,6 +19,8 @@ from x2mdx.jvm_docs.models import (
     JvmDocSymbolLifecycle,
 )
 
+EXPLICIT_LIFECYCLE_STATES = {"alpha", "beta", "stable", "deprecated"}
+
 
 def version_key(version: str) -> tuple[tuple[int, int | str], ...]:
     version_text = version[1:] if version.startswith("v") else version
@@ -136,6 +138,47 @@ def parse_since_from_note(note: str) -> str | None:
     return None
 
 
+def normalize_lifecycle_state(value: Any) -> str | None:
+    text = str(value or "").strip().lower()
+    if text in EXPLICIT_LIFECYCLE_STATES:
+        return text
+    return None
+
+
+def normalized_replacement(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text or None
+
+
+def java_member_canonical_id(owner_symbol: str, signature_token: str, label: str) -> str:
+    normalized_signature = str(signature_token or label).strip()
+    if normalized_signature.startswith(f"{label}("):
+        return f"{owner_symbol}#{normalized_signature}"
+    if normalized_signature == label:
+        return f"{owner_symbol}#{label}"
+    return f"{owner_symbol}#{label}{normalized_signature}"
+
+
+def scala_member_canonical_id(member_fqn: str, tail: str) -> str:
+    owner, _, member_name = member_fqn.rpartition(".")
+    if owner:
+        return f"{owner}#{member_name}{tail}"
+    return f"{member_name}{tail}"
+
+
+def lifecycle_override(
+    artifact_source: JvmDocArtifactSource,
+    canonical_id: str,
+) -> tuple[str | None, str | None]:
+    symbols = artifact_source.lifecycle_manifest.get("symbols", {})
+    if not isinstance(symbols, dict):
+        return None, None
+    raw = symbols.get(canonical_id, {})
+    if not isinstance(raw, dict):
+        return None, None
+    return normalize_lifecycle_state(raw.get("state")), normalized_replacement(raw.get("replaces"))
+
+
 def parse_java_symbols(
     archive: zipfile.ZipFile,
     *,
@@ -183,6 +226,7 @@ def parse_java_symbols(
                 "language": "java",
                 "kind": "type",
                 "symbol": symbol,
+                "canonical_id": symbol,
                 "doc_path": doc_path,
                 "doc_url": javadocio_symbol_url(group, artifact, version, doc_path),
                 "deprecated_note": deprecated_refs.get(doc_path) or deprecated_refs.get(urllib.parse.unquote(doc_path)),
@@ -211,6 +255,7 @@ def parse_java_symbols(
                 "language": "java",
                 "kind": "member",
                 "symbol": f"{owner_symbol}#{label}",
+                "canonical_id": java_member_canonical_id(owner_symbol, signature_token, label),
                 "doc_path": doc_path,
                 "doc_url": javadocio_symbol_url(group, artifact, version, doc_path),
                 "deprecated_note": deprecated_note,
@@ -277,6 +322,7 @@ def parse_scala_symbols(
                             "language": "scala",
                             "kind": "type",
                             "symbol": name,
+                            "canonical_id": name,
                             "doc_path": doc_path,
                             "doc_url": javadocio_symbol_url(group, artifact, version, doc_path),
                             "deprecated_note": None,
@@ -304,6 +350,7 @@ def parse_scala_symbols(
                             "language": "scala",
                             "kind": "member",
                             "symbol": display,
+                            "canonical_id": scala_member_canonical_id(member_fqn, tail),
                             "doc_path": normalized_link,
                             "doc_url": javadocio_symbol_url(group, artifact, version, normalized_link),
                             "deprecated_note": None,
@@ -358,6 +405,7 @@ def consolidate_lifecycle(
                     "language": symbol["language"],
                     "kind": symbol["kind"],
                     "symbol": symbol["symbol"],
+                    "canonical_id": symbol["canonical_id"],
                     "versions_present": set(),
                     "doc_links": {},
                     "doc_paths": {},
@@ -376,6 +424,7 @@ def consolidate_lifecycle(
         introduced = present[0]
         last_seen_index = max(version_index[version] for version in present)
         removed = versions[last_seen_index + 1] if last_seen_index + 1 < len(versions) else None
+        lifecycle_state, replaces = lifecycle_override(artifact_source, record["canonical_id"])
 
         deprecated_version: str | None = None
         deprecation_note: str | None = None
@@ -398,12 +447,15 @@ def consolidate_lifecycle(
                 language=record["language"],
                 kind=record["kind"],
                 symbol=record["symbol"],
+                canonical_id=record["canonical_id"],
                 introduced_version=introduced,
                 deprecated_version=deprecated_version,
                 removed_version=removed,
                 versions_present=present,
                 doc_links=dict(record["doc_links"]),
                 latest_doc_path=str(record["doc_paths"][latest_present]),
+                lifecycle_state=lifecycle_state,
+                replaces=replaces,
                 deprecation_note=deprecation_note,
             )
         )
@@ -548,6 +600,8 @@ def build_jvm_doc_lifecycle_report_from_sources(
         "Input acquisition stays outside x2mdx; this report is built from supplied local Javadoc/Scaladoc jars.",
         "Java deprecation metadata is best-effort from deprecated-list.html when present.",
         "Scala deprecation is not inferred from Scaladoc indexes in this initial implementation.",
+        "Explicit alpha/beta/stable and replacement metadata comes only from the configured JVM lifecycle sidecar manifest.",
+        "Replacement relationships are not inferred from deprecation notes or upstream 'use X instead' text.",
         "Removed means the first configured version after the last observed presence.",
     ]
     return JvmDocLifecycleReport(

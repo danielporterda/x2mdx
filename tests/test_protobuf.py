@@ -33,6 +33,15 @@ def make_method(name: str, request_type: str, response_type: str) -> descriptor_
     return descriptor_pb2.MethodDescriptorProto(name=name, input_type=request_type, output_type=response_type)
 
 
+def add_custom_option(options: descriptor_pb2.MessageOptions, name: str, value: str) -> None:
+    option = options.uninterpreted_option.add()
+    for part in name.split("."):
+        name_part = option.name.add()
+        name_part.name_part = part
+        name_part.is_extension = False
+    option.string_value = value.encode("utf-8")
+
+
 class ProtobufTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -61,7 +70,9 @@ class ProtobufTests(unittest.TestCase):
             ]
         )
         service_v1 = descriptor_pb2.ServiceDescriptorProto(name="ExampleService")
+        add_custom_option(service_v1.options, "docs.lifecycle.state", "alpha")
         service_v1.method.extend([make_method("GetFoo", ".com.example.v1.FooRequest", ".com.example.v1.FooResponse")])
+        service_v1.method[0].options.deprecated = True
         v1.service.extend([service_v1])
 
         v2 = descriptor_pb2.FileDescriptorProto(name=base_import, package="com.example.v1", syntax="proto3")
@@ -74,12 +85,16 @@ class ProtobufTests(unittest.TestCase):
             ]
         )
         service_v2 = descriptor_pb2.ServiceDescriptorProto(name="ExampleService")
+        add_custom_option(service_v2.options, "docs.lifecycle.state", "alpha")
         service_v2.method.extend(
             [
                 make_method("GetFoo", ".com.example.v1.FooRequest", ".com.example.v1.FooResponseV2"),
                 make_method("GetBar", ".com.example.v1.BarRequest", ".com.example.v1.BarResponse"),
             ]
         )
+        service_v2.method[0].options.deprecated = True
+        add_custom_option(service_v2.method[1].options, "docs.lifecycle.state", "stable")
+        add_custom_option(service_v2.method[1].options, "docs.lifecycle.replaces", "com.example.v1.ExampleService/GetFoo")
         v2.service.extend([service_v2])
 
         image_v1 = self._write_descriptor_image("snapshots/1.0.0/image.bin.gz", v1)
@@ -145,6 +160,23 @@ class ProtobufTests(unittest.TestCase):
             lifecycle["com.example.v1.ExampleService/GetBar"]["introducedIn"],
             "1.1.0",
         )
+        latest_snapshot = report["latestSnapshot"]
+        self.assertEqual(
+            latest_snapshot["services"]["com.example.v1.ExampleService"]["metadata"]["state"],
+            "alpha",
+        )
+        self.assertEqual(
+            latest_snapshot["endpoints"]["com.example.v1.ExampleService/GetFoo"]["metadata"]["state"],
+            "deprecated",
+        )
+        self.assertEqual(
+            latest_snapshot["endpoints"]["com.example.v1.ExampleService/GetBar"]["metadata"]["state"],
+            "stable",
+        )
+        self.assertEqual(
+            latest_snapshot["endpoints"]["com.example.v1.ExampleService/GetBar"]["metadata"]["replaces"],
+            "com.example.v1.ExampleService/GetFoo",
+        )
 
     def test_cli_builds_overview_and_package_pages(self) -> None:
         manifest_path = self._write_manifest()
@@ -180,11 +212,19 @@ class ProtobufTests(unittest.TestCase):
         self.assertIn("Table of Contents", overview_text)
         self.assertIn("Release Summary", overview_text)
         self.assertIn("## Reference", overview_text)
+        self.assertIn(
+            "Lifecycle state and replacement metadata come only from explicit protobuf metadata, not endpoint history or description text.",
+            overview_text,
+        )
         self.assertIn("com.example.v1", overview_text)
         self.assertIn("(protobuf-history/packages/com-example-v1)", overview_text)
         self.assertIn("### Service `ExampleService`", package_text)
+        self.assertIn("Lifecycle state: `alpha`", package_text)
         self.assertIn("**Endpoint `ExampleService.GetFoo`**", package_text)
+        self.assertIn("Lifecycle state: `deprecated`", package_text)
         self.assertIn("rpc ExampleService.GetFoo", package_text)
+        self.assertIn("Lifecycle state: `stable`", package_text)
+        self.assertIn("Replaces: `com.example.v1.ExampleService/GetFoo`", package_text)
         self.assertIn("## Type Reference", package_text)
         self.assertIn("**Message `com.example.v1.FooResponseV2`**", package_text)
         self.assertFalse(stale_endpoint_file.exists())

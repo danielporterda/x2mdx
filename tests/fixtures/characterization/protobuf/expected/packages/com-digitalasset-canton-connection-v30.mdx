@@ -24,26 +24,30 @@ description: "Descriptor-backed protobuf API history for package com.digitalasse
 
 ## Services
 
-| Service | Endpoints | Source | Description |
-| --- | --- | --- | --- |
-| [`ApiInfoService`](#service-com-digitalasset-canton-connection-v30-apiinfoservice) | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/connection/v30/api_info.proto#L10) | Provides basic information about the API, like if it is an admin api or public sequencer api. This is useful to detec... |
+| Service | Lifecycle | Endpoints | Source | Description |
+| --- | --- | --- | --- | --- |
+| [`ApiInfoService`](#service-com-digitalasset-canton-connection-v30-apiinfoservice) | - | `1` | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/connection/v30/api_info.proto#L10) | Provides basic information about the API, like if it is an admin api or public sequencer api. This is useful to detec... |
 
 <a id="service-com-digitalasset-canton-connection-v30-apiinfoservice"></a>
 ### Service `ApiInfoService`
 
+- Lifecycle state: -
+- Replaces: -
 - Source: [community/base/src/main/protobuf/com/digitalasset/canton/connection/v30/api_info.proto](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/connection/v30/api_info.proto#L10)
 - Endpoints tracked: `1`
 
 Provides basic information about the API, like if it is an admin api or public sequencer api.
  This is useful to detect port misconfigurations and provide a user-friendly error message.
 
-| Endpoint | Introduced | Last Changed | Removed | Request | Response | Source |
-| --- | --- | --- | --- | --- | --- | --- |
-| [`GetApiInfo`](#endpoint-com-digitalasset-canton-connection-v30-apiinfoservice-getapiinfo) | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.connection.v30.GetApiInfoRequest`](#type-com-digitalasset-canton-connection-v30-getapiinforequest) | [`com.digitalasset.canton.connection.v30.GetApiInfoResponse`](#type-com-digitalasset-canton-connection-v30-getapiinforesponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/connection/v30/api_info.proto#L11) |
+| Endpoint | Lifecycle | Replaces | Introduced | Last Changed | Removed | Request | Response | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`GetApiInfo`](#endpoint-com-digitalasset-canton-connection-v30-apiinfoservice-getapiinfo) | - | - | `3.4.0` | `3.4.0` | `` | [`com.digitalasset.canton.connection.v30.GetApiInfoRequest`](#type-com-digitalasset-canton-connection-v30-getapiinforequest) | [`com.digitalasset.canton.connection.v30.GetApiInfoResponse`](#type-com-digitalasset-canton-connection-v30-getapiinforesponse) | [file](https://github.com/DACH-NY/canton/blob/v3.4.11/community/base/src/main/protobuf/com/digitalasset/canton/connection/v30/api_info.proto#L11) |
 
 <a id="endpoint-com-digitalasset-canton-connection-v30-apiinfoservice-getapiinfo"></a>
 **Endpoint `ApiInfoService.GetApiInfo`**
 
+- Lifecycle state: -
+- Replaces: -
 - Introduced in: `3.4.0`
 - Last changed in: `3.4.0`
 - Removed in: `-`
