@@ -227,6 +227,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Title to use for the generated overview page.",
     )
     build_lifecycle.add_argument(
+        "--link-prefix",
+        help="Optional root-relative URL prefix to use for overview/spec links.",
+    )
+    build_lifecycle.add_argument(
+        "--primary-spec-id",
+        help="Optional spec id to promote to the top-level overview page.",
+    )
+    build_lifecycle.add_argument(
         "--fixture-root",
         help="Directory to resolve manifest fixture paths from; defaults to the manifest directory",
     )
@@ -631,7 +639,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
             report = build_openapi_report_from_manifest_args(args)
             if args.output_file:
-                page = build_api_page(report, output_path=Path(args.output_file).name)
+                page = build_api_page(
+                    report,
+                    output_path=Path(args.output_file).name,
+                    primary_spec_id=args.primary_spec_id,
+                )
                 output_file = Path(args.output_file)
                 write_page(page, output_file)
                 if args.docs_json:
@@ -652,6 +664,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     overview_name=args.overview_name,
                     spec_dir_name=args.spec_dir_name,
                     overview_title=args.overview_title,
+                    link_prefix=args.link_prefix,
+                    primary_spec_id=args.primary_spec_id,
                 ),
                 Path(args.output_dir),
             )
