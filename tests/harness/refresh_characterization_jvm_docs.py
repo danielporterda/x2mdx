@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import re
+import shutil
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 from typing import Any
@@ -29,6 +31,9 @@ CACHE_DIR = INPUT_DIR / "cache"
 MANIFEST_PATH = INPUT_DIR / "manifest.json"
 EXPECTED_DIR = FIXTURE_DIR / "expected"
 OVERVIEW_FILE = EXPECTED_DIR / "index.mdx"
+EXPECTED_DOCS_LAYOUT_DIR = FIXTURE_DIR / "expected_docs_layout"
+DOCS_JSON_BEFORE = FIXTURE_DIR / "docs_json.before.json"
+DOCS_JSON_AFTER = FIXTURE_DIR / "docs_json.after.json"
 
 
 def slugify(value: str) -> str:
@@ -105,6 +110,7 @@ def build_manifest(*, force_download: bool) -> Path:
         MANIFEST_PATH,
         {
             "source": "Published DAML Java/Scala bindings Javadoc/Scaladoc jars",
+            "overview_title": source_config.get("overview_title") or "Ledger API Java Bindings",
             "artifacts": artifacts,
         },
     )
@@ -131,6 +137,51 @@ def refresh(*, force_download: bool) -> Path:
             "characterization fixture versions",
         ]
     )
+    reset_dir(EXPECTED_DOCS_LAYOUT_DIR)
+    run_x2mdx(
+        [
+            "jvm-docs",
+            "build-api-pages-from-manifest",
+            "--manifest",
+            str(manifest_path),
+            "--overview-file",
+            str(EXPECTED_DOCS_LAYOUT_DIR / "ledger-api-jvm-bindings.mdx"),
+            "--details-dir",
+            str(EXPECTED_DOCS_LAYOUT_DIR / "details"),
+            "--source-name",
+            "Published DAML Java/Scala bindings Javadoc/Scaladoc jars",
+            "--version-filter",
+            "characterization fixture versions",
+        ]
+    )
+    with tempfile.TemporaryDirectory() as temp_dir:
+        docs_root = Path(temp_dir) / "docs-main"
+        overview_file = docs_root / "reference" / "ledger-api-jvm-bindings.mdx"
+        details_dir = docs_root / "reference" / "details"
+        docs_json_path = docs_root / "docs.json"
+        docs_json_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(DOCS_JSON_BEFORE, docs_json_path)
+        run_x2mdx(
+            [
+                "jvm-docs",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--overview-file",
+                str(overview_file),
+                "--details-dir",
+                str(details_dir),
+                "--docs-json",
+                str(docs_json_path),
+                "--nav-dropdown",
+                "Reference",
+                "--source-name",
+                "Published DAML Java/Scala bindings Javadoc/Scaladoc jars",
+                "--version-filter",
+                "characterization fixture versions",
+            ]
+        )
+        write_json(DOCS_JSON_AFTER, load_json(docs_json_path))
     return EXPECTED_DIR
 
 

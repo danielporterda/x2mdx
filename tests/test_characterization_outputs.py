@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import json
 import re
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from x2mdx.cli import main as cli_main
 
+from tests.harness.characterization_cases import CHARACTERIZATION_CASES, CharacterizationCase
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "characterization"
+
 GENERATED_AT_PATTERNS = [
     re.compile(r"Generated at \(UTC\): `[^`]+`"),
     re.compile(r"Generated at: `[^`]+`"),
@@ -41,192 +43,35 @@ class CharacterizationOutputTests(unittest.TestCase):
     def assertTreeEqual(self, actual_root: Path, expected_root: Path) -> None:
         self.assertEqual(mdx_tree(actual_root), mdx_tree(expected_root))
 
-    def test_openapi_render_matches_characterization_output(self) -> None:
-        expected_file = FIXTURE_ROOT / "openapi" / "expected" / "json-api-reference.mdx"
-        actual_file = self.root / "openapi" / "json-api-reference.mdx"
-        manifest_path = REPO_ROOT / "tests" / "fixtures" / "openapi" / "ledger_api" / "manifest.json"
-
-        result = cli_main(
-            [
-                "openapi",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(manifest_path),
-                "--root",
-                "published",
-                "--include-spec-pattern",
-                r"^json-ledger-api/openapi\.yaml$",
-                "--output-file",
-                str(actual_file),
-                "--source-name",
-                "docs.digitalasset.com JSON Ledger API OpenAPI fixtures",
-                "--version-filter",
-                "published docs major versions",
-                "--version",
-                "3.4",
-                "--version",
-                "3.5",
-            ]
+    def assertFileEqual(self, actual_file: Path, expected_file: Path) -> None:
+        self.assertEqual(
+            normalize_dynamic_text(actual_file.read_text(encoding="utf-8")),
+            normalize_dynamic_text(expected_file.read_text(encoding="utf-8")),
         )
 
-        self.assertEqual(result, 0)
-        self.assertEqual(actual_file.read_text(encoding="utf-8"), expected_file.read_text(encoding="utf-8"))
-
-    def test_jvm_docs_render_matches_characterization_output(self) -> None:
-        fixture_dir = FIXTURE_ROOT / "jvm_docs"
-        actual_root = self.root / "jvm_docs"
-        result = cli_main(
-            [
-                "jvm-docs",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(fixture_dir / "input" / "manifest.json"),
-                "--overview-file",
-                str(actual_root / "index.mdx"),
-                "--details-dir",
-                str(actual_root),
-                "--overview-title",
-                "Ledger API JVM Bindings",
-                "--source-name",
-                "Published DAML Java/Scala bindings Javadoc/Scaladoc jars",
-                "--version-filter",
-                "characterization fixture versions",
-            ]
+    def assertJsonEqual(self, actual_file: Path, expected_file: Path) -> None:
+        self.assertEqual(
+            json.loads(actual_file.read_text(encoding="utf-8")),
+            json.loads(expected_file.read_text(encoding="utf-8")),
         )
 
-        self.assertEqual(result, 0)
-        self.assertTreeEqual(actual_root, fixture_dir / "expected")
+    def prepare_docs_json(self, case: CharacterizationCase) -> None:
+        if case.docs_json_before is None or case.actual_docs_json is None:
+            return
+        actual_docs_json = self.root / case.actual_docs_json
+        actual_docs_json.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(case.docs_json_before, actual_docs_json)
 
-    def test_daml_json_render_matches_characterization_output(self) -> None:
-        fixture_dir = FIXTURE_ROOT / "daml_json"
-        actual_root = self.root / "daml_json"
-        result = cli_main(
-            [
-                "daml-json",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(fixture_dir / "input" / "manifest.json"),
-                "--output-dir",
-                str(actual_root),
-                "--publish-version",
-                "3.4.11",
-                "--overview-title",
-                "Daml Standard Library",
-                "--source-name",
-                "Published Daml Standard Library docs JSON from local SDK artifacts",
-                "--version-filter",
-                "characterization fixture versions",
-                "--link-prefix",
-                "/appdev/reference/daml-standard-library",
-            ]
-        )
+    def test_characterization_outputs_match_golden_fixtures(self) -> None:
+        for case in CHARACTERIZATION_CASES:
+            with self.subTest(case=case.name):
+                self.prepare_docs_json(case)
+                result = cli_main(case.argv_factory(self.root))
+                self.assertEqual(result, 0)
 
-        self.assertEqual(result, 0)
-        self.assertTreeEqual(actual_root, fixture_dir / "expected")
-
-    def test_protobuf_render_matches_characterization_output(self) -> None:
-        fixture_dir = FIXTURE_ROOT / "protobuf"
-        actual_root = self.root / "expected"
-        result = cli_main(
-            [
-                "protobuf",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(fixture_dir / "input" / "manifest.json"),
-                "--output-dir",
-                str(actual_root),
-                "--source-name",
-                "Canton protobuf descriptor snapshots from release tags",
-                "--version-filter",
-                "characterization fixture versions",
-            ]
-        )
-
-        self.assertEqual(result, 0)
-        self.assertTreeEqual(actual_root, fixture_dir / "expected")
-
-    def test_typedoc_render_matches_characterization_output(self) -> None:
-        fixture_dir = FIXTURE_ROOT / "typedoc"
-        actual_file = self.root / "typedoc" / "typescript.mdx"
-        expected_file = fixture_dir / "expected" / "typescript.mdx"
-
-        result = cli_main(
-            [
-                "typedoc",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(fixture_dir / "input" / "manifest.json"),
-                "--output-file",
-                str(actual_file),
-                "--publish-version",
-                "3.4.11",
-                "--source-name",
-                "Published @daml/types npm tarballs rendered to local TypeDoc JSON",
-                "--version-filter",
-                "characterization fixture versions",
-                "--page-title",
-                "TypeScript",
-                "--page-description",
-                "TypeScript and JavaScript language bindings for Canton.",
-            ]
-        )
-
-        self.assertEqual(result, 0)
-        self.assertEqual(actual_file.read_text(encoding="utf-8"), expected_file.read_text(encoding="utf-8"))
-
-    def test_asyncapi_render_matches_characterization_output(self) -> None:
-        fixture_dir = FIXTURE_ROOT / "asyncapi"
-        actual_file = self.root / "asyncapi" / "ledger-api-websocket-reference.mdx"
-        expected_file = fixture_dir / "expected" / "ledger-api-websocket-reference.mdx"
-
-        result = cli_main(
-            [
-                "asyncapi",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(fixture_dir / "input" / "manifest.json"),
-                "--output-file",
-                str(actual_file),
-                "--publish-version",
-                "3.4.12",
-                "--source-name",
-                "splice-wallet-kernel Ledger API AsyncAPI snapshots",
-                "--version-filter",
-                "characterization fixture versions",
-                "--page-title",
-                "JSON Ledger API WebSocket Reference",
-                "--page-description",
-                "Versioned AsyncAPI reference for JSON Ledger API WebSocket endpoints.",
-            ]
-        )
-
-        self.assertEqual(result, 0)
-        self.assertEqual(actual_file.read_text(encoding="utf-8"), expected_file.read_text(encoding="utf-8"))
-
-    def test_openrpc_render_matches_characterization_output(self) -> None:
-        fixture_dir = FIXTURE_ROOT / "openrpc"
-        actual_root = self.root / "openrpc"
-
-        result = cli_main(
-            [
-                "openrpc",
-                "build-api-pages-from-manifest",
-                "--manifest",
-                str(fixture_dir / "input" / "manifest.json"),
-                "--output-dir",
-                str(actual_root),
-                "--publish-version",
-                "0.21.0",
-                "--source-name",
-                "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
-                "--version-filter",
-                "characterization fixture versions",
-                "--overview-title",
-                "Wallet Gateway JSON-RPC",
-                "--link-prefix",
-                "/reference/wallet-gateway-json-rpc",
-            ]
-        )
-
-        self.assertEqual(result, 0)
-        self.assertTreeEqual(actual_root, fixture_dir / "expected")
+                if case.expected_file is not None and case.actual_file is not None:
+                    self.assertFileEqual(self.root / case.actual_file, case.expected_file)
+                if case.expected_tree is not None and case.actual_tree is not None:
+                    self.assertTreeEqual(self.root / case.actual_tree, case.expected_tree)
+                if case.docs_json_after is not None and case.actual_docs_json is not None:
+                    self.assertJsonEqual(self.root / case.actual_docs_json, case.docs_json_after)

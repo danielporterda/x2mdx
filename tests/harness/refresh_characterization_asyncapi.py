@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Any
 
 
@@ -21,6 +23,8 @@ CACHE_DIR = INPUT_DIR / "cache"
 MANIFEST_PATH = INPUT_DIR / "manifest.json"
 EXPECTED_DIR = FIXTURE_DIR / "expected"
 EXPECTED_FILE = EXPECTED_DIR / "ledger-api-websocket-reference.mdx"
+DOCS_JSON_BEFORE = FIXTURE_DIR / "docs_json.before.json"
+DOCS_JSON_AFTER = FIXTURE_DIR / "docs_json.after.json"
 DEFAULT_REPO_DIR = REPO_ROOT / ".cache" / "characterization" / "asyncapi" / "repos" / "splice-wallet-kernel"
 
 
@@ -128,11 +132,44 @@ def refresh(*, skip_fetch: bool) -> Path:
             "--version-filter",
             "characterization fixture versions",
             "--page-title",
-            "JSON Ledger API WebSocket Reference",
+            "JSON API AsyncAPI Reference",
             "--page-description",
-            "Versioned AsyncAPI reference for JSON Ledger API WebSocket endpoints.",
+            "JSON Ledger API WebSocket AsyncAPI reference and version history.",
         ]
     )
+    with tempfile.TemporaryDirectory() as temp_dir:
+        docs_root = Path(temp_dir) / "docs-main"
+        output_file = docs_root / "reference" / "json-api-asyncapi-reference.mdx"
+        docs_json_path = docs_root / "docs.json"
+        docs_json_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(DOCS_JSON_BEFORE, docs_json_path)
+        run_x2mdx(
+            [
+                "asyncapi",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--output-file",
+                str(output_file),
+                "--publish-version",
+                publish_version,
+                "--source-name",
+                "splice-wallet-kernel Ledger API AsyncAPI snapshots",
+                "--version-filter",
+                "characterization fixture versions",
+                "--page-title",
+                "JSON API AsyncAPI Reference",
+                "--page-description",
+                "JSON Ledger API WebSocket AsyncAPI reference and version history.",
+                "--docs-json",
+                str(docs_json_path),
+                "--nav-dropdown",
+                "Reference",
+                "--nav-group",
+                "Ledger API Endpoints",
+            ]
+        )
+        write_json(DOCS_JSON_AFTER, load_json(docs_json_path))
     return EXPECTED_FILE
 
 

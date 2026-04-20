@@ -1,5 +1,6 @@
 {
   "source": "Published DAML Java/Scala bindings Javadoc/Scaladoc jars",
+  "overview_title": "Ledger API Java Bindings",
   "artifacts": [
     {
       "group": "com.daml",

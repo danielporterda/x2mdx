@@ -20,6 +20,7 @@ INPUT_DIR = FIXTURE_DIR / "input"
 CACHE_DIR = INPUT_DIR / "cache"
 MANIFEST_PATH = INPUT_DIR / "manifest.json"
 EXPECTED_DIR = FIXTURE_DIR / "expected"
+EXPECTED_ALT_LAYOUT_DIR = FIXTURE_DIR / "expected_alt_layout"
 DEFAULT_REPO_DIR = REPO_ROOT / ".cache" / "characterization" / "openrpc" / "repos" / "splice-wallet-kernel"
 
 
@@ -101,7 +102,7 @@ def build_manifest(*, skip_fetch: bool) -> Path:
                 {
                     "version": version,
                     "source_path": source_path,
-                    "fixture_path": relative_to_manifest(fixture_path, MANIFEST_PATH),
+                    "fixture_path": fixture_path.resolve().relative_to(REPO_ROOT.resolve()).as_posix(),
                 }
             )
 
@@ -118,6 +119,7 @@ def build_manifest(*, skip_fetch: bool) -> Path:
         MANIFEST_PATH,
         {
             "source": source_config.get("source") or "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
+            "overview_title": source_config.get("overview_title") or "Wallet Gateway JSON-RPC",
             "publish_version": source_config.get("publish_version") or selected_versions[-1],
             "specs": specs_payload,
         },
@@ -140,14 +142,39 @@ def refresh(*, skip_fetch: bool) -> Path:
             str(manifest_path),
             "--output-dir",
             str(EXPECTED_DIR),
+            "--fixture-root",
+            str(REPO_ROOT),
             "--publish-version",
             publish_version,
             "--source-name",
             "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
             "--version-filter",
             "characterization fixture versions",
-            "--overview-title",
-            "Wallet Gateway JSON-RPC",
+            "--link-prefix",
+            "/reference/wallet-gateway-json-rpc",
+        ]
+    )
+    reset_dir(EXPECTED_ALT_LAYOUT_DIR)
+    run_x2mdx(
+        [
+            "openrpc",
+            "build-api-pages-from-manifest",
+            "--manifest",
+            str(manifest_path),
+            "--output-dir",
+            str(EXPECTED_ALT_LAYOUT_DIR),
+            "--fixture-root",
+            str(REPO_ROOT),
+            "--publish-version",
+            publish_version,
+            "--source-name",
+            "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
+            "--version-filter",
+            "characterization fixture versions",
+            "--overview-name",
+            "wallet-gateway-overview.mdx",
+            "--spec-dir-name",
+            "rpc-specs",
             "--link-prefix",
             "/reference/wallet-gateway-json-rpc",
         ]

@@ -1,5 +1,6 @@
 {
   "source": "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
+  "overview_title": "Wallet Kernel",
   "publish_version": "0.21.0",
   "specs": [
     {
@@ -10,12 +11,12 @@
         {
           "version": "0.20.0",
           "source_path": "api-specs/openrpc-dapp-api.json",
-          "fixture_path": "cache/specs/0.20.0/openrpc-dapp-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.20.0/openrpc-dapp-api.json"
         },
         {
           "version": "0.21.0",
           "source_path": "api-specs/openrpc-dapp-api.json",
-          "fixture_path": "cache/specs/0.21.0/openrpc-dapp-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.21.0/openrpc-dapp-api.json"
         }
       ]
     },
@@ -27,12 +28,12 @@
         {
           "version": "0.20.0",
           "source_path": "api-specs/openrpc-dapp-remote-api.json",
-          "fixture_path": "cache/specs/0.20.0/openrpc-dapp-remote-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.20.0/openrpc-dapp-remote-api.json"
         },
         {
           "version": "0.21.0",
           "source_path": "api-specs/openrpc-dapp-remote-api.json",
-          "fixture_path": "cache/specs/0.21.0/openrpc-dapp-remote-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.21.0/openrpc-dapp-remote-api.json"
         }
       ]
     },
@@ -44,12 +45,12 @@
         {
           "version": "0.20.0",
           "source_path": "api-specs/openrpc-signing-api.json",
-          "fixture_path": "cache/specs/0.20.0/openrpc-signing-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.20.0/openrpc-signing-api.json"
         },
         {
           "version": "0.21.0",
           "source_path": "api-specs/openrpc-signing-api.json",
-          "fixture_path": "cache/specs/0.21.0/openrpc-signing-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.21.0/openrpc-signing-api.json"
         }
       ]
     },
@@ -61,12 +62,12 @@
         {
           "version": "0.20.0",
           "source_path": "api-specs/openrpc-user-api.json",
-          "fixture_path": "cache/specs/0.20.0/openrpc-user-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.20.0/openrpc-user-api.json"
         },
         {
           "version": "0.21.0",
           "source_path": "api-specs/openrpc-user-api.json",
-          "fixture_path": "cache/specs/0.21.0/openrpc-user-api.json"
+          "fixture_path": "tests/fixtures/characterization/openrpc/input/cache/specs/0.21.0/openrpc-user-api.json"
         }
       ]
     }

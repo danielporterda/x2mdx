@@ -1,5 +1,6 @@
 {
   "source": "splice-wallet-kernel Wallet Gateway OpenRPC release-tag snapshots",
+  "overview_title": "Wallet Kernel",
   "repo": {
     "remote": "https://github.com/hyperledger-labs/splice-wallet-kernel.git",
     "tag_prefix": "@canton-network/wallet-gateway-remote@"
