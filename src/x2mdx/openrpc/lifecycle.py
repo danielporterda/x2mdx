@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import hashlib
 import json
 import re
@@ -633,11 +632,9 @@ def build_openrpc_report_from_sources(
         )
 
     return OpenRpcReport(
-        generated_at_utc=dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         source_name=source_name,
         version_filter=version_filter,
         versions=scoped_versions,
         publish_version=selected_publish_version,
         specs=specs,
     )
-

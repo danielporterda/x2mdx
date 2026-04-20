@@ -28,7 +28,6 @@ class AsyncApiChannelLifecycle:
 
 @dataclass(frozen=True)
 class AsyncApiReport:
-    generated_at_utc: str
     source_name: str
     version_filter: str
     versions: list[str]
@@ -39,4 +38,3 @@ class AsyncApiReport:
     latest_source_path: str
     per_version_deltas: dict[str, dict[str, int]]
     channels: list[AsyncApiChannelLifecycle]
-

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import hashlib
 import json
 import re
@@ -780,7 +779,6 @@ def build_openapi_lifecycle_report_from_snapshots(
         )
 
     return OpenApiLifecycleReport(
-        generated_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
         source_name=source_name,
         tag_filter=version_filter,
         tags=tags,

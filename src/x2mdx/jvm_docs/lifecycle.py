@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import html
 import json
 import re
@@ -551,7 +550,6 @@ def build_jvm_doc_lifecycle_report_from_sources(
         "Removed means the first configured version after the last observed presence.",
     ]
     return JvmDocLifecycleReport(
-        generated_at_utc=dt.datetime.now(dt.UTC).isoformat(),
         source_name=source_name,
         version_filter=version_filter,
         summary={

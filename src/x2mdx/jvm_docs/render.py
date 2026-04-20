@@ -585,7 +585,6 @@ def build_pages(
         description="Generated lifecycle timeline and reference pages for local Javadoc/Scaladoc artifacts",
         template_name="jvm_docs/overview.md.j2",
         source_items=[
-            f"Generated at (UTC): `{md_code(report.generated_at_utc)}`",
             f"Source name: `{md_code(report.source_name)}`",
             f"Version filter: `{md_code(report.version_filter)}`",
             f"Artifacts: `{report.summary['artifact_count']}`",

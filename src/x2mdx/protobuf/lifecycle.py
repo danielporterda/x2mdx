@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import gzip
 import hashlib
 import json
@@ -887,7 +886,6 @@ def build_protobuf_history_report_from_sources(
     build_release_diffs(releases)
     latest_release = releases[-1]
     return {
-        "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
         "sourceName": source_name,
         "versionFilter": version_filter,
         "repo": {

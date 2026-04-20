@@ -605,7 +605,6 @@ def build_overview_page(
         description="Generated OpenAPI lifecycle reference",
         template_name="openapi/overview.md.j2",
         source_items=[
-            f"Generated at (UTC): {md_code(report.generated_at_utc)}",
             f"Source: {md_code(report.source_name)}",
             f"Tag filter: {md_code(report.tag_filter)}",
         ],

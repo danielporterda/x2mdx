@@ -82,7 +82,6 @@ def build_overview_page(
             f"Versions compared: {', '.join(f'`{version}`' for version in report.versions)}",
             f"Source: `{report.source_name}`",
             f"Version filter: `{report.version_filter}`",
-            f"Generated at: `{report.generated_at_utc}`",
         ],
         spec_summary_legend=render_status_legend(include_deprecated=False),
         spec_rows=[

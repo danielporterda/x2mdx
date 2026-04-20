@@ -57,7 +57,6 @@ class OpenApiSpecLifecycle:
 
 @dataclass(frozen=True)
 class OpenApiLifecycleReport:
-    generated_at_utc: str
     source_name: str
     tag_filter: str
     tags: list[str]

@@ -48,10 +48,8 @@ class OpenRpcSpecLifecycle:
 
 @dataclass(frozen=True)
 class OpenRpcReport:
-    generated_at_utc: str
     source_name: str
     version_filter: str
     versions: list[str]
     publish_version: str
     specs: list[OpenRpcSpecLifecycle]
-

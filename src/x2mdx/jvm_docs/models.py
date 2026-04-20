@@ -52,10 +52,8 @@ class JvmDocArtifactLifecycle:
 
 @dataclass(frozen=True)
 class JvmDocLifecycleReport:
-    generated_at_utc: str
     source_name: str
     version_filter: str
     summary: dict[str, int]
     notes: list[str]
     artifacts: list[JvmDocArtifactLifecycle]
-

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import hashlib
 import json
 import re
@@ -569,7 +568,6 @@ def build_asyncapi_report_from_sources(
         info = {}
 
     return AsyncApiReport(
-        generated_at_utc=dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         source_name=source_name,
         version_filter=version_filter,
         versions=[snapshot.version for snapshot in scoped_sources],
@@ -581,4 +579,3 @@ def build_asyncapi_report_from_sources(
         per_version_deltas=per_version_deltas,
         channels=merged_channels,
     )
-

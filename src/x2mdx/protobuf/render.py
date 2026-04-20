@@ -475,7 +475,6 @@ def render_overview_page(
             f"Version filter: `{report['versionFilter']}`",
             f"Latest release: `{report['latestRelease']}`",
             f"Source repo: `{report['repo'].get('remote') or '-'}`",
-            f"Generated at: `{report['generatedAt']}`",
         ],
         snapshot_items=[
             f"Packages: `{latest['stats']['packages']}`",

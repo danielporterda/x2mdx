@@ -72,7 +72,6 @@ def report_from_json_data(data: dict[str, Any]) -> OpenApiLifecycleReport:
     ]
 
     return OpenApiLifecycleReport(
-        generated_at_utc=data["generated_at_utc"],
         source_name=data["source_name"],
         tag_filter=data["tag_filter"],
         tags=list(data.get("tags", [])),

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 import shutil
 import tempfile
 import unittest
@@ -12,22 +11,9 @@ from x2mdx.cli import main as cli_main
 from tests.harness.characterization_cases import CHARACTERIZATION_CASES, CharacterizationCase
 
 
-GENERATED_AT_PATTERNS = [
-    re.compile(r"Generated at \(UTC\): `[^`]+`"),
-    re.compile(r"Generated at: `[^`]+`"),
-]
-
-
-def normalize_dynamic_text(text: str) -> str:
-    normalized = text
-    for pattern in GENERATED_AT_PATTERNS:
-        normalized = pattern.sub(lambda match: match.group(0).split("`", 1)[0] + "`<normalized>`", normalized)
-    return normalized
-
-
 def mdx_tree(root: Path) -> dict[str, str]:
     return {
-        path.relative_to(root).as_posix(): normalize_dynamic_text(path.read_text(encoding="utf-8"))
+        path.relative_to(root).as_posix(): path.read_text(encoding="utf-8")
         for path in sorted(root.rglob("*.mdx"))
     }
 
@@ -45,8 +31,8 @@ class CharacterizationOutputTests(unittest.TestCase):
 
     def assertFileEqual(self, actual_file: Path, expected_file: Path) -> None:
         self.assertEqual(
-            normalize_dynamic_text(actual_file.read_text(encoding="utf-8")),
-            normalize_dynamic_text(expected_file.read_text(encoding="utf-8")),
+            actual_file.read_text(encoding="utf-8"),
+            expected_file.read_text(encoding="utf-8"),
         )
 
     def assertJsonEqual(self, actual_file: Path, expected_file: Path) -> None:
