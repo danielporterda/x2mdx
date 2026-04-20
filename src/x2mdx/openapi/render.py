@@ -28,6 +28,23 @@ def slugify(value: str) -> str:
     return output
 
 
+def spec_page_name(spec: OpenApiSpecLifecycle) -> str:
+    return f"{slugify(spec.spec_id)}.mdx"
+
+
+def spec_page_link(spec: OpenApiSpecLifecycle, *, spec_dir_name: str) -> str:
+    return f"{spec_dir_name}/{Path(spec_page_name(spec)).with_suffix('').as_posix()}"
+
+
+def normalize_link_prefix(link_prefix: str) -> str:
+    trimmed = link_prefix.strip()
+    if not trimmed:
+        raise ValueError("link_prefix must not be empty")
+    if trimmed == "/":
+        return ""
+    return "/" + trimmed.strip("/")
+
+
 def md_text(text: Any) -> str:
     output = html.escape(str(text), quote=False)
     output = output.replace("{", "\\{").replace("}", "\\}")
@@ -566,10 +583,67 @@ def build_spec_page(spec: OpenApiSpecLifecycle, spec_dir_name: str) -> Page:
     )
     body = body.replace("## Reference\n\n<a id=", "## Reference\n\n\n<a id=", 1)
     return Page(
-        path=f"{spec_dir_name}/{slugify(spec.spec_id)}.mdx",
+        path=f"{spec_dir_name}/{spec_page_name(spec)}",
         title=spec.display_name,
         description="Generated lifecycle view for an OpenAPI specification",
         blocks=[RawMarkdown(body)],
+    )
+
+
+def render_additional_specs_section(
+    specs: list[OpenApiSpecLifecycle],
+    *,
+    spec_dir_name: str,
+    link_prefix: str | None = None,
+) -> str:
+    if not specs:
+        return ""
+
+    normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
+    rows = []
+    for spec in sorted(specs, key=lambda item: item.spec_id):
+        target = spec_page_link(spec, spec_dir_name=spec_dir_name)
+        href = f"{normalized_link_prefix}/{target}" if normalized_link_prefix is not None else f"./{target}"
+        rows.append(
+            [
+                f"[Open]({href})",
+                md_code(spec.spec_id),
+                lifecycle_value(spec.introduced_version, "introduced"),
+                md_code(spec.latest_version),
+                lifecycle_value(spec.removed_version, "removed"),
+                changed_versions_value(spec.changed_in_versions),
+                md_code(spec.entity_count),
+            ]
+        )
+
+    return render_template("openapi/additional_specs.md.j2", rows=rows)
+
+
+def build_primary_spec_page(
+    report: OpenApiLifecycleReport,
+    primary_spec: OpenApiSpecLifecycle,
+    *,
+    overview_name: str,
+    overview_title: str,
+    spec_dir_name: str,
+    link_prefix: str | None = None,
+) -> Page:
+    spec_page = build_spec_page(primary_spec, spec_dir_name)
+    secondary_specs = [spec for spec in report.specs if spec.spec_id != primary_spec.spec_id]
+    blocks = list(spec_page.blocks)
+    additional_specs = render_additional_specs_section(
+        secondary_specs,
+        spec_dir_name=spec_dir_name,
+        link_prefix=link_prefix,
+    )
+    if additional_specs:
+        blocks.append(RawMarkdown(additional_specs))
+
+    return Page(
+        path=overview_name,
+        title=overview_title,
+        description=spec_page.description,
+        blocks=blocks,
     )
 
 
@@ -578,7 +652,11 @@ def build_overview_page(
     spec_pages: list[Page],
     overview_name: str,
     overview_title: str,
+    *,
+    spec_dir_name: str,
+    link_prefix: str | None = None,
 ) -> Page:
+    normalized_link_prefix = normalize_link_prefix(link_prefix) if link_prefix else None
     spec_page_map = {
         spec.spec_id: page
         for spec, page in zip(sorted(report.specs, key=lambda item: item.spec_id), spec_pages)
@@ -586,7 +664,8 @@ def build_overview_page(
     rows = []
     for spec in sorted(report.specs, key=lambda item: item.spec_id):
         page = spec_page_map[spec.spec_id]
-        spec_dir_link = f"./{page.path[:-4]}"
+        target = spec_page_link(spec, spec_dir_name=spec_dir_name)
+        spec_dir_link = f"{normalized_link_prefix}/{target}" if normalized_link_prefix is not None else f"./{page.path[:-4]}"
         rows.append(
             [
                 f"[Open]({spec_dir_link})",
@@ -624,14 +703,56 @@ def build_pages(
     overview_name: str = "overview.mdx",
     spec_dir_name: str = "specs",
     overview_title: str = "OpenAPI Lifecycle Overview",
+    link_prefix: str | None = None,
+    primary_spec_id: str | None = None,
 ) -> list[Page]:
-    spec_pages = [build_spec_page(spec, spec_dir_name) for spec in sorted(report.specs, key=lambda item: item.spec_id)]
-    overview_page = build_overview_page(report, spec_pages, overview_name, overview_title)
+    specs = sorted(report.specs, key=lambda item: item.spec_id)
+    if primary_spec_id:
+        primary_spec = next((spec for spec in specs if spec.spec_id == primary_spec_id), None)
+        if primary_spec is None:
+            raise ValueError(f"primary_spec_id {primary_spec_id!r} did not match any rendered spec")
+        secondary_pages = [build_spec_page(spec, spec_dir_name) for spec in specs if spec.spec_id != primary_spec_id]
+        primary_page = build_primary_spec_page(
+            report,
+            primary_spec,
+            overview_name=overview_name,
+            overview_title=overview_title,
+            spec_dir_name=spec_dir_name,
+            link_prefix=link_prefix,
+        )
+        return [primary_page, *secondary_pages]
+
+    spec_pages = [build_spec_page(spec, spec_dir_name) for spec in specs]
+    overview_page = build_overview_page(
+        report,
+        spec_pages,
+        overview_name,
+        overview_title,
+        spec_dir_name=spec_dir_name,
+        link_prefix=link_prefix,
+    )
     return [overview_page, *spec_pages]
 
 
-def build_api_page(report: OpenApiLifecycleReport, output_path: str) -> Page:
+def build_api_page(
+    report: OpenApiLifecycleReport,
+    output_path: str,
+    *,
+    primary_spec_id: str | None = None,
+) -> Page:
     specs = sorted(report.specs, key=lambda item: item.spec_id)
+    if primary_spec_id:
+        primary_spec = next((spec for spec in specs if spec.spec_id == primary_spec_id), None)
+        if primary_spec is None:
+            raise ValueError(f"primary_spec_id {primary_spec_id!r} did not match any rendered spec")
+        spec_page = build_spec_page(primary_spec, "specs")
+        return Page(
+            path=output_path,
+            title=spec_page.title,
+            description="Generated API reference from versioned OpenAPI artifacts",
+            blocks=spec_page.blocks,
+        )
+
     if len(specs) != 1:
         raise ValueError(f"Expected exactly one spec for single-page output, found {len(specs)}")
 

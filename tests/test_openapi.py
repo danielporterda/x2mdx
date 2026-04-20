@@ -57,7 +57,8 @@ class OpenApiLifecycleTests(unittest.TestCase):
             "versions": [],
         }
         for version, source_path, contents in versions:
-            relative_path = Path(version) / "openapi.yaml"
+            filename = Path(source_path).name or "openapi.yaml"
+            relative_path = Path(version) / filename
             write_text(fixture_root / relative_path, contents)
             manifest["versions"].append(
                 {
@@ -278,6 +279,147 @@ class OpenApiLifecycleTests(unittest.TestCase):
         self.assertIn("- Method: `GET`", spec_page)
         self.assertNotIn("### `GET /ping`", spec_page)
         self.assertNotIn("| Endpoint | Operation ID | Summary | Tags |", spec_page)
+
+    def test_render_pages_link_prefix_emits_root_relative_multi_spec_links(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/scan.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Scan API
+                      version: 0.1.0
+                    paths:
+                      /scan:
+                        get:
+                          operationId: getScan
+                          summary: Scan endpoint
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+                self._snapshot(
+                    "v0.1.0",
+                    "published/scan-stream-server.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Scan Streaming API
+                      version: 0.1.0
+                    paths:
+                      /stream:
+                        get:
+                          operationId: getStream
+                          summary: Stream endpoint
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+            ],
+            OpenApiLifecycleConfig(
+                roots=["published"],
+                include_spec_patterns=[r".*\.yaml$"],
+                canonical_path_map={},
+                priority_prefixes=["published/"],
+            ),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        pages = build_pages(
+            report,
+            overview_name="index.mdx",
+            overview_title="Splice Scan APIs",
+            link_prefix="/reference/splice-scan-openapi",
+        )
+        out_dir = self.root / "out-link-prefix"
+        write_pages(pages, out_dir)
+
+        overview = (out_dir / "index.mdx").read_text(encoding="utf-8")
+        self.assertIn("[Open](/reference/splice-scan-openapi/specs/scan-yaml)", overview)
+        self.assertIn("[Open](/reference/splice-scan-openapi/specs/scan-stream-server-yaml)", overview)
+        self.assertNotIn("[Open](./specs/scan-yaml)", overview)
+
+    def test_render_pages_primary_spec_promotes_spec_to_overview_page(self) -> None:
+        report = build_openapi_lifecycle_report_from_snapshots(
+            [
+                self._snapshot(
+                    "v0.1.0",
+                    "published/scan.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Scan API
+                      version: 0.1.0
+                    paths:
+                      /livez:
+                        get:
+                          operationId: getLivez
+                          summary: Liveness
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+                self._snapshot(
+                    "v0.1.0",
+                    "published/scan-stream-server.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Scan Streaming API
+                      version: 0.1.0
+                    paths:
+                      /stream:
+                        get:
+                          operationId: getStream
+                          summary: Stream endpoint
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+            ],
+            OpenApiLifecycleConfig(
+                roots=["published"],
+                include_spec_patterns=[r".*\.yaml$"],
+                canonical_path_map={},
+                priority_prefixes=["published/"],
+            ),
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+        )
+
+        pages = build_pages(
+            report,
+            overview_name="index.mdx",
+            overview_title="Splice Scan APIs",
+            link_prefix="/reference/splice-scan-openapi",
+            primary_spec_id="scan.yaml",
+        )
+
+        out_dir = self.root / "out-primary-spec"
+        write_pages(pages, out_dir)
+
+        primary_page = out_dir / "index.mdx"
+        streaming_page = out_dir / "specs" / "scan-stream-server-yaml.mdx"
+        duplicate_primary_page = out_dir / "specs" / "scan-yaml.mdx"
+
+        self.assertTrue(primary_page.exists())
+        self.assertTrue(streaming_page.exists())
+        self.assertFalse(duplicate_primary_page.exists())
+
+        rendered = primary_page.read_text(encoding="utf-8")
+        self.assertIn('title: "Splice Scan APIs"', rendered)
+        self.assertIn("## Table of Contents", rendered)
+        self.assertIn("## Version Change Summary", rendered)
+        self.assertIn("## Reference", rendered)
+        self.assertIn("## Additional Specs", rendered)
+        self.assertIn("[Open](/reference/splice-scan-openapi/specs/scan-stream-server-yaml)", rendered)
 
     def test_render_pages_group_operations_by_path(self) -> None:
         report = build_openapi_lifecycle_report_from_snapshots(
@@ -644,6 +786,89 @@ class OpenApiLifecycleTests(unittest.TestCase):
         for version in versions:
             reference_group = next(group for group in version["groups"] if group["group"] == "Reference")
             self.assertEqual(reference_group["pages"], ["appdev/reference/json-api-reference"])
+
+    def test_cli_build_api_pages_from_manifest_supports_primary_spec_mode(self) -> None:
+        manifest_path = self._write_manifest(
+            name="cli-primary-spec",
+            versions=[
+                (
+                    "v0.1.0",
+                    "published/scan.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Scan API
+                      version: 0.1.0
+                    paths:
+                      /livez:
+                        get:
+                          operationId: getLivez
+                          summary: Liveness
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+                (
+                    "v0.1.0",
+                    "published/scan-stream-server.yaml",
+                    """
+                    openapi: 3.0.3
+                    info:
+                      title: Scan Streaming API
+                      version: 0.1.0
+                    paths:
+                      /stream:
+                        get:
+                          operationId: getStream
+                          summary: Stream endpoint
+                          responses:
+                            "200":
+                              description: ok
+                    """,
+                ),
+            ],
+        )
+
+        out_dir = self.root / "rendered-primary-spec"
+        self.assertEqual(
+            cli_main(
+                [
+                    "openapi",
+                    "build-api-pages-from-manifest",
+                    "--manifest",
+                    str(manifest_path),
+                    "--root",
+                    "published",
+                    "--include-spec-pattern",
+                    r"^scan\.yaml$",
+                    "--include-spec-pattern",
+                    r"^scan-stream-server\.yaml$",
+                    "--output-dir",
+                    str(out_dir),
+                    "--overview-name",
+                    "index.mdx",
+                    "--overview-title",
+                    "Splice Scan APIs",
+                    "--spec-dir-name",
+                    "specs",
+                    "--link-prefix",
+                    "/reference/splice-scan-openapi",
+                    "--primary-spec-id",
+                    "scan.yaml",
+                ]
+            ),
+            0,
+        )
+
+        primary_page = out_dir / "index.mdx"
+        streaming_page = out_dir / "specs" / "scan-stream-server-yaml.mdx"
+        duplicate_primary_page = out_dir / "specs" / "scan-yaml.mdx"
+
+        self.assertTrue(primary_page.exists())
+        self.assertTrue(streaming_page.exists())
+        self.assertFalse(duplicate_primary_page.exists())
+        self.assertIn("## Table of Contents", primary_page.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
