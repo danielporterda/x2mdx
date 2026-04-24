@@ -27,7 +27,6 @@ class CharacterizationPreviewTests(unittest.TestCase):
                 group_names,
                 [
                     "Overview",
-                    "OpenAPI",
                     "JVM Docs",
                     "DAML JSON",
                     "Protobuf",
@@ -37,9 +36,6 @@ class CharacterizationPreviewTests(unittest.TestCase):
                 ],
             )
 
-            self.assertTrue((output_root / "reference" / "openapi-single-file" / "json-api-reference.mdx").exists())
-            self.assertTrue((output_root / "reference" / "openapi-multipage" / "json-api-overview.mdx").exists())
-            self.assertTrue((output_root / "reference" / "openapi-multipage" / "json-api-specs").exists())
             self.assertTrue((output_root / "reference" / "jvm-docs-layout" / "ledger-api-jvm-bindings.mdx").exists())
             self.assertTrue((output_root / "appdev" / "reference" / "daml-standard-library" / "index.mdx").exists())
             self.assertTrue((output_root / "reference" / "protobuf-history" / "index.mdx").exists())
@@ -59,7 +55,7 @@ class CharacterizationPreviewTests(unittest.TestCase):
 
             overview = (output_root / "index.mdx").read_text(encoding="utf-8")
             self.assertIn("x2mdx Characterization Preview", overview)
-            self.assertIn("Single-file docs navigation", overview)
+            self.assertIn("Overview and details layout", overview)
             self.assertIn("Docs Nav Snapshot", overview)
 
             daml_index = (
