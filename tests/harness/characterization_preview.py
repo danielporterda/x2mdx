@@ -23,7 +23,6 @@ TOKEN_LABELS = {
     "json": "JSON",
     "jvm": "JVM",
     "mdx": "MDX",
-    "openapi": "OpenAPI",
     "openrpc": "OpenRPC",
     "protobuf": "Protobuf",
     "rpc": "RPC",
@@ -178,7 +177,7 @@ def _overview_body(staged_cases: list[StagedPreviewCase]) -> str:
             "",
             "## Notes",
             "",
-            "- The three docs-nav cases still freeze their `docs.json` before/after snapshots in the characterization tests; this preview only adds a root Mintlify `docs.json` so the frozen MDX can be browsed together.",
+            "- The docs-nav cases still freeze their `docs.json` before/after snapshots in the characterization tests; this preview only adds a root Mintlify `docs.json` so the frozen MDX can be browsed together.",
             "- The alternate OpenRPC layout is staged under `/reference/wallet-gateway-json-rpc-alt` and gets preview-only link rewrites so its absolute links do not collide with the standard Wallet Gateway preview tree.",
             "- The Daml Standard Library tree stays under `/appdev/reference/daml-standard-library` so its absolute `link-prefix` links remain valid inside the preview.",
         ]

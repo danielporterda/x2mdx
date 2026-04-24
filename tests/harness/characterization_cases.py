@@ -7,7 +7,6 @@ from typing import Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "characterization"
-OPENAPI_MANIFEST = REPO_ROOT / "tests" / "fixtures" / "openapi" / "ledger_api" / "manifest.json"
 
 
 @dataclass(frozen=True)
@@ -33,64 +32,6 @@ class CharacterizationCase:
     docs_json_before: Path | None = None
     docs_json_after: Path | None = None
     actual_docs_json: str | None = None
-
-
-def openapi_single_file_args(root: Path) -> list[str]:
-    output_file = root / "docs-main" / "appdev" / "reference" / "json-api-reference.mdx"
-    docs_json = root / "docs-main" / "docs.json"
-    return [
-        "openapi",
-        "build-api-pages-from-manifest",
-        "--manifest",
-        str(OPENAPI_MANIFEST),
-        "--root",
-        "published",
-        "--include-spec-pattern",
-        r"^json-ledger-api/openapi\.yaml$",
-        "--output-file",
-        str(output_file),
-        "--docs-json",
-        str(docs_json),
-        "--nav-dropdown",
-        "Reference",
-        "--source-name",
-        "docs.digitalasset.com JSON Ledger API OpenAPI fixtures",
-        "--version-filter",
-        "published docs major versions",
-        "--version",
-        "3.4",
-        "--version",
-        "3.5",
-    ]
-
-
-def openapi_multipage_args(root: Path) -> list[str]:
-    return [
-        "openapi",
-        "build-api-pages-from-manifest",
-        "--manifest",
-        str(OPENAPI_MANIFEST),
-        "--root",
-        "published",
-        "--include-spec-pattern",
-        r"^json-ledger-api/openapi\.yaml$",
-        "--output-dir",
-        str(root / "openapi"),
-        "--overview-name",
-        "json-api-overview.mdx",
-        "--overview-title",
-        "JSON API OpenAPI Lifecycle",
-        "--spec-dir-name",
-        "json-api-specs",
-        "--source-name",
-        "docs.digitalasset.com JSON Ledger API OpenAPI fixtures",
-        "--version-filter",
-        "published docs major versions",
-        "--version",
-        "3.4",
-        "--version",
-        "3.5",
-    ]
 
 
 def jvm_docs_args(root: Path) -> list[str]:
@@ -250,35 +191,6 @@ def openrpc_alt_layout_args(root: Path) -> list[str]:
 
 
 CHARACTERIZATION_CASES = [
-    CharacterizationCase(
-        name="openapi single-file docs navigation",
-        argv_factory=openapi_single_file_args,
-        preview=CharacterizationPreview(
-            format_group="OpenAPI",
-            case_label="Single-file docs navigation",
-            description="Single generated OpenAPI page plus the frozen Reference dropdown insertion behavior.",
-            target_root="reference/openapi-single-file",
-            entry_file="json-api-reference.mdx",
-        ),
-        expected_file=FIXTURE_ROOT / "openapi" / "expected" / "json-api-reference.mdx",
-        actual_file="docs-main/appdev/reference/json-api-reference.mdx",
-        docs_json_before=FIXTURE_ROOT / "openapi" / "docs_json.before.json",
-        docs_json_after=FIXTURE_ROOT / "openapi" / "docs_json.after.json",
-        actual_docs_json="docs-main/docs.json",
-    ),
-    CharacterizationCase(
-        name="openapi multipage custom layout",
-        argv_factory=openapi_multipage_args,
-        preview=CharacterizationPreview(
-            format_group="OpenAPI",
-            case_label="Multipage custom layout",
-            description="Overview-plus-spec-tree OpenAPI output using custom overview and spec directory names.",
-            target_root="reference/openapi-multipage",
-            entry_file="json-api-overview.mdx",
-        ),
-        expected_tree=FIXTURE_ROOT / "openapi" / "expected_multipage",
-        actual_tree="openapi",
-    ),
     CharacterizationCase(
         name="jvm docs docs layout with navigation",
         argv_factory=jvm_docs_args,

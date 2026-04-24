@@ -12,7 +12,6 @@ if str(REPO_ROOT) not in sys.path:
 from tests.harness.refresh_characterization_daml_json import refresh as refresh_daml_json
 from tests.harness.refresh_characterization_jvm_docs import refresh as refresh_jvm_docs
 from tests.harness.refresh_characterization_asyncapi import refresh as refresh_asyncapi
-from tests.harness.refresh_characterization_openapi import refresh as refresh_openapi
 from tests.harness.refresh_characterization_openrpc import refresh as refresh_openrpc
 from tests.harness.refresh_characterization_protobuf import refresh as refresh_protobuf
 from tests.harness.refresh_characterization_typedoc import refresh as refresh_typedoc
@@ -23,7 +22,7 @@ def main() -> int:
     parser.add_argument(
         "--format",
         action="append",
-        choices=["openapi", "jvm-docs", "daml-json", "protobuf", "typedoc", "asyncapi", "openrpc"],
+        choices=["jvm-docs", "daml-json", "protobuf", "typedoc", "asyncapi", "openrpc"],
         help="Format to refresh. Repeat to refresh multiple formats. Defaults to all.",
     )
     parser.add_argument("--force-download", action="store_true", help="Force jar re-downloads for JVM docs.")
@@ -32,9 +31,7 @@ def main() -> int:
     parser.add_argument("--force-refresh", action="store_true", help="Force descriptor-image refresh for protobuf.")
     args = parser.parse_args()
 
-    selected = set(args.format or ["openapi", "jvm-docs", "daml-json", "protobuf", "typedoc", "asyncapi", "openrpc"])
-    if "openapi" in selected:
-        refresh_openapi()
+    selected = set(args.format or ["jvm-docs", "daml-json", "protobuf", "typedoc", "asyncapi", "openrpc"])
     if "jvm-docs" in selected:
         refresh_jvm_docs(force_download=args.force_download)
     if "daml-json" in selected:
