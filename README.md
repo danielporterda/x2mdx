@@ -35,6 +35,14 @@ x2mdx asyncapi build-api-pages-from-manifest --manifest fixtures/asyncapi.json -
 x2mdx openrpc build-api-pages-from-manifest --manifest fixtures/openrpc.json --output-dir ./out/openrpc
 ```
 
+Run the tool through the pinned shell so `python`, `pytest`, and `x2mdx` all come from the same environment:
+
+```bash
+direnv allow
+direnv exec . x2mdx list-formats
+direnv exec . pytest
+```
+
 ## JVM Docs
 
 `jvm-docs build-api-pages-from-manifest` consumes a local manifest of Javadoc/Scaladoc jars and renders:
@@ -115,13 +123,20 @@ The intended split is:
 
 ## direnv / Nix
 
-This repo now includes [.envrc](/Users/danielporter/control/.envrc) and [shell.nix](/Users/danielporter/control/shell.nix) so `direnv` can give you a Mintlify-compatible Node runtime.
+This repo includes [`flake.nix`](./flake.nix), [`flake.lock`](./flake.lock), [`.envrc`](./.envrc), and [`shell.nix`](./shell.nix) so the development shell is pinned and reproducible.
 
 Activate it with:
 
 ```bash
 direnv allow
-node -v
+direnv exec . x2mdx list-formats
+direnv exec . pytest
 ```
 
-The shell pins Node 22, which works with Mintlify and avoids the local Node 25 incompatibility.
+The shell pins:
+
+- Node 22 for Mintlify compatibility
+- Python 3.12 plus the runtime and test dependencies used by `x2mdx`
+- the `x2mdx` CLI itself, built from the checked-out source tree
+
+GitHub Actions uses the same flake via `.github/workflows/ci.yml`, so local `direnv` and CI exercise the same bootstrap path.

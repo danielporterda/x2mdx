@@ -10,6 +10,7 @@ from google.protobuf import descriptor_pb2
 
 from x2mdx.cli import main as cli_main
 from x2mdx.protobuf.lifecycle import build_protobuf_history_report_from_sources
+from x2mdx.protobuf.render import build_operation_page
 from x2mdx.protobuf.snapshots import load_protobuf_sources
 
 
@@ -175,16 +176,94 @@ class ProtobufTests(unittest.TestCase):
             / "packages"
             / "com-example-v1.mdx"
         ).read_text(encoding="utf-8")
+        operation_text = (
+            output_dir
+            / "operations"
+            / "com-example-v1"
+            / "exampleservice"
+            / "getfoo.mdx"
+        ).read_text(encoding="utf-8")
 
-        self.assertIn("Canton Protobuf History", overview_text)
-        self.assertIn("Table of Contents", overview_text)
-        self.assertIn("Release Summary", overview_text)
-        self.assertIn("## Reference", overview_text)
+        self.assertIn("Canton Protobuf Reference", overview_text)
+        self.assertIn("## Release Summary", overview_text)
         self.assertIn("com.example.v1", overview_text)
-        self.assertIn("(protobuf-history/packages/com-example-v1)", overview_text)
-        self.assertIn("### Service `ExampleService`", package_text)
-        self.assertIn("**Endpoint `ExampleService.GetFoo`**", package_text)
-        self.assertIn("rpc ExampleService.GetFoo", package_text)
-        self.assertIn("## Type Reference", package_text)
-        self.assertIn("**Message `com.example.v1.FooResponseV2`**", package_text)
+        self.assertIn('href="packages/com-example-v1"', overview_text)
+        self.assertIn("## ExampleService", package_text)
+        self.assertIn("ExampleService.GetFoo", package_text)
+        self.assertIn("## Protocol Details", operation_text)
+        self.assertIn("<dt>Service</dt>", operation_text)
+        self.assertIn("<dd>ExampleService</dd>", operation_text)
+        self.assertIn("x2mdx-ref-right-rail", operation_text)
+        self.assertIn("x2mdx-ref-rail-panel", operation_text)
+        self.assertIn("```bash grpcurl", operation_text)
+        self.assertIn("x2mdx-ref-breadcrumbs", operation_text)
+        self.assertIn('<h1 class="x2mdx-ref-title">GetFoo</h1>', operation_text)
+        self.assertNotIn("x2mdx-ref-summary", operation_text)
+        self.assertIn("x2mdx-ref-operation-bar", operation_text)
+        self.assertIn("/com.example.v1.ExampleService/GetFoo", operation_text)
+        self.assertNotIn("## Overview", operation_text)
+        self.assertIn("grpcurl", operation_text)
+        self.assertIn("```json OK", operation_text)
+        self.assertIn("x2mdx-ref-response-label", operation_text)
+        self.assertIn("<HOST:PORT>", operation_text)
+        self.assertIn("## Related Schemas", operation_text)
+        self.assertIn("<AccordionGroup>", operation_text)
+        self.assertIn("com.example.v1.FooResponseV2", operation_text)
+        self.assertEqual(operation_text.count('class="x2mdx-ref-schema"'), 2)
         self.assertFalse(stale_endpoint_file.exists())
+
+    def test_operation_adapter_collects_request_and_response_schemas(self) -> None:
+        ctx = {
+            "messages": {
+                "com.example.v1.FooRequest": {
+                    "id": "com.example.v1.FooRequest",
+                    "description": "",
+                    "fieldIds": ["request:id"],
+                    "enumIds": [],
+                    "nestedMessageIds": [],
+                },
+                "com.example.v1.FooResponse": {
+                    "id": "com.example.v1.FooResponse",
+                    "description": "",
+                    "fieldIds": ["response:name"],
+                    "enumIds": [],
+                    "nestedMessageIds": [],
+                },
+            },
+            "fields": {
+                "request:id": {"name": "id", "type": "string", "label": "optional", "description": ""},
+                "response:name": {"name": "name", "type": "string", "label": "optional", "description": ""},
+            },
+            "enums": {},
+            "enumValues": {},
+        }
+        endpoint = {
+            "service": "ExampleService",
+            "name": "GetFoo",
+            "requestType": "com.example.v1.FooRequest",
+            "responseType": "com.example.v1.FooResponse",
+            "clientStreaming": False,
+            "serverStreaming": False,
+            "description": "Fetch a foo.",
+            "file": "com/example/service.proto",
+            "sourceUrl": None,
+        }
+        lifecycle = {
+            "introducedIn": "1.0.0",
+            "removedIn": None,
+            "history": [{"version": "1.0.0", "changeTypes": ["added"], "kind": "added"}],
+        }
+
+        page = build_operation_page("com.example.v1", endpoint, lifecycle, output_dir=self.root / "out", ctx=ctx)
+
+        self.assertEqual(page.path, "operations/com-example-v1/exampleservice/getfoo.mdx")
+        self.assertEqual(page.title, "GetFoo")
+        self.assertEqual(page.operation_method, "RPC")
+        self.assertEqual(page.operation_target, "/com.example.v1.ExampleService/GetFoo")
+        self.assertEqual([schema.name for schema in page.related_schemas], ["com.example.v1.FooRequest", "com.example.v1.FooResponse"])
+        self.assertEqual(page.examples[0].title, "grpcurl")
+        self.assertEqual(page.examples[1].title, "OK")
+        self.assertEqual(page.examples[1].kind, "response")
+        self.assertIn("com.example.v1.ExampleService/GetFoo", page.examples[0].body)
+        self.assertIn('"id": "string"', page.examples[0].body)
+        self.assertIn('"name": "string"', page.examples[1].body)

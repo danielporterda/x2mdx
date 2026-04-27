@@ -11,6 +11,7 @@ from pathlib import Path
 from x2mdx.cli import main as cli_main
 from x2mdx.openrpc.lifecycle import build_openrpc_report_from_sources, parse_openrpc
 from x2mdx.openrpc.models import OpenRpcSourceSnapshot
+from x2mdx.openrpc.render import build_method_page
 
 
 def write_text(path: Path, contents: str) -> None:
@@ -365,13 +366,27 @@ class OpenRpcTests(unittest.TestCase):
         self.assertEqual(exit_code, 0, stdout.getvalue())
         overview = (output_dir / "index.mdx").read_text(encoding="utf-8")
         dapp_page = (output_dir / "specs" / "dapp-api.mdx").read_text(encoding="utf-8")
-        remote_page = (output_dir / "specs" / "remote-dapp-api.mdx").read_text(encoding="utf-8")
+        status_page = (output_dir / "operations" / "dapp-api" / "status.mdx").read_text(encoding="utf-8")
+        remote_page = (output_dir / "operations" / "remote-dapp-api" / "status.mdx").read_text(encoding="utf-8")
 
         self.assertIn("Wallet Gateway OpenRPC", overview)
-        self.assertIn("Table of Contents", overview)
-        self.assertIn("## Version Change Timeline", dapp_page)
+        self.assertIn('class="x2mdx-ref-card"', overview)
+        self.assertIn("## Specs", overview)
         self.assertIn("## Methods", dapp_page)
-        self.assertIn("Result Example", dapp_page)
+        self.assertIn("Method pages are the primary reference surface", dapp_page)
+        self.assertIn("## Protocol Details", status_page)
+        self.assertIn("## Inputs", status_page)
+        self.assertIn("## Outputs", status_page)
+        self.assertIn("x2mdx-ref-breadcrumbs", status_page)
+        self.assertIn('<h1 class="x2mdx-ref-title">status</h1>', status_page)
+        self.assertNotIn("x2mdx-ref-summary", status_page)
+        self.assertIn("x2mdx-ref-operation-bar", status_page)
+        self.assertIn("JSON-RPC", status_page)
+        self.assertNotIn("## Overview", status_page)
+        self.assertIn("curl", status_page)
+        self.assertIn("<JSON_RPC_URL>", status_page)
+        self.assertIn("## Related Schemas", status_page)
+        self.assertEqual(status_page.count('class="x2mdx-ref-schema"'), 1)
         self.assertIn("required fields", remote_page)
 
     def test_cli_uses_root_relative_link_prefix_for_overview_and_spec_links(self) -> None:
@@ -396,6 +411,55 @@ class OpenRpcTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         overview = (output_dir / "index.mdx").read_text(encoding="utf-8")
         spec_page = (output_dir / "specs" / "dapp-api.mdx").read_text(encoding="utf-8")
+        operation_page = (output_dir / "operations" / "dapp-api" / "status.mdx").read_text(encoding="utf-8")
 
-        self.assertIn("[`Dapp API`](/reference/wallet-gateway-json-rpc/specs/dapp-api)", overview)
-        self.assertIn("[Back to overview](/reference/wallet-gateway-json-rpc)", spec_page)
+        self.assertIn('href="/reference/wallet-gateway-json-rpc/specs/dapp-api"', overview)
+        self.assertIn('href="/reference/wallet-gateway-json-rpc/index"', spec_page)
+        self.assertIn('href="/reference/wallet-gateway-json-rpc/specs/dapp-api"', operation_page)
+        self.assertIn("x2mdx-ref-right-rail", operation_page)
+        self.assertIn("x2mdx-ref-rail-panel", operation_page)
+        self.assertIn("```bash cURL", operation_page)
+        self.assertNotIn("## Examples", operation_page)
+
+    def test_method_adapter_builds_operation_page_context(self) -> None:
+        method = self._snapshot(
+            version="1.1.0",
+            spec_id="dapp-api",
+            display_name="Dapp API",
+            source_path="api-specs/openrpc-dapp-api.json",
+            contents="""
+                {
+                  "openrpc": "1.2.6",
+                  "info": {"title": "Dapp API", "version": "1.1.0"},
+                  "methods": [
+                    {
+                      "name": "status",
+                      "description": "Return wallet provider status.",
+                      "params": [],
+                      "result": {
+                        "name": "result",
+                        "schema": {"type": "object", "required": ["connected"], "properties": {"connected": {"type": "boolean"}}}
+                      }
+                    }
+                  ]
+                }
+            """,
+        )
+        report = build_openrpc_report_from_sources(
+            [method],
+            source_name="unit test snapshots",
+            version_filter="unit test versions",
+            publish_version="1.1.0",
+        )
+        spec = report.specs[0]
+        page = build_method_page(spec, spec.methods[0], output_dir=self.root / "out", spec_dir_name="specs")
+
+        self.assertEqual(page.path, "operations/dapp-api/status.mdx")
+        self.assertEqual(page.badges[0].label, "JSON-RPC")
+        self.assertEqual(page.operation_method, "POST")
+        self.assertEqual(page.operation_target, "JSON-RPC status")
+        self.assertEqual(page.related_schemas[0].name, "result")
+        self.assertEqual(page.outputs[0].schema.name, "result")
+        self.assertEqual(page.examples[0].title, "cURL")
+        self.assertIn('"method": "status"', page.examples[0].body)
+        self.assertEqual(page.examples[1].title, "Result")

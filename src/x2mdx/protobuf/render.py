@@ -1,15 +1,33 @@
-"""Render descriptor-backed protobuf history reports into grouped MDX pages."""
+"""Render descriptor-backed protobuf reports into Mintlify-like collection and operation pages."""
 
 from __future__ import annotations
 
-import os
+import json
 import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from x2mdx.output import Page
-from x2mdx.templating import markdown_page, render_status_cell, render_status_legend
+from x2mdx.reference_pages import (
+    ReferenceBadge,
+    ReferenceBreadcrumb,
+    ReferenceCard,
+    ReferenceChange,
+    ReferenceCollectionPage,
+    ReferenceExample,
+    ReferenceField,
+    ReferenceMetaItem,
+    ReferenceOperationPage,
+    ReferencePanel,
+    ReferenceSchema,
+    ReferenceSection,
+    compact_text,
+    relative_page_ref,
+    render_collection_page,
+    render_operation_page,
+    safe_markdown_text,
+)
+
 
 PACKAGE_GROUP_ORDER = [
     "Ledger API",
@@ -21,124 +39,14 @@ PACKAGE_GROUP_ORDER = [
     "Schema Packages",
 ]
 
-
-def escape_text(text: str) -> str:
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
-def escape_md(text: str) -> str:
-    return text.replace("|", r"\|")
-
-
-def escape_md_cell(text: str) -> str:
-    return escape_text(escape_md(text)).replace("\n", "<br/>")
-
-
-def md_link(label: str, url: str | None) -> str:
-    return f"[{label}]({url})" if url else label
-
-
-def render_description(text: str) -> str:
-    return escape_text(text.strip()) if text.strip() else "_No description._"
-
-
-def compact_text(text: str, *, limit: int = 120) -> str:
-    normalized = " ".join(text.split())
-    if len(normalized) <= limit:
-        return normalized
-    return normalized[: limit - 3].rstrip() + "..."
-
-
-def compact_package_summary(package: dict[str, Any]) -> str:
-    parts = [
-        f"{package['serviceCount']} services",
-        f"{package['endpointCount']} endpoints",
-        f"{package['messageCount']} messages",
-    ]
-    if package["enumCount"]:
-        parts.append(f"{package['enumCount']} enums")
-    return escape_md_cell(", ".join(parts))
-
-
-def change_versions_for_package(
-    package_name: str,
-    endpoint_lifecycle: list[dict[str, Any]],
-    *,
-    version_order: dict[str, int],
-) -> list[str]:
-    versions = {
-        str(event["version"])
-        for entry in endpoint_lifecycle
-        if entry["package"] == package_name
-        for event in entry.get("history", [])
-        if event.get("kind") == "modified"
-    }
-    return sorted(versions, key=lambda version: version_order.get(version, len(version_order)))
-
-
-def introduced_version_for_package(
-    package_name: str,
-    endpoint_lifecycle: list[dict[str, Any]],
-    *,
-    version_order: dict[str, int],
-) -> str | None:
-    versions = [str(entry["introducedIn"]) for entry in endpoint_lifecycle if entry["package"] == package_name and entry.get("introducedIn")]
-    if not versions:
-        return None
-    return sorted(versions, key=lambda version: version_order.get(version, len(version_order)))[0]
+GRPC_TARGET_PLACEHOLDER = "<HOST:PORT>"
+REQUEST_SAMPLE_MAX_DEPTH = 4
+REQUEST_SAMPLE_MAX_FIELDS = 8
 
 
 def slugify_segment(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9]+", "-", value).strip("-").lower()
     return slug or "item"
-
-
-def relative_page_link(from_path: Path, to_path: Path) -> str:
-    relative = os.path.relpath(to_path.with_suffix(""), start=from_path.parent)
-    return Path(relative).as_posix()
-
-
-def relative_anchor_link(from_path: Path, to_path: Path, anchor: str) -> str:
-    if from_path == to_path:
-        return f"#{anchor}"
-    return f"{relative_page_link(from_path, to_path)}#{anchor}"
-
-
-def service_anchor(service_id: str) -> str:
-    return f"service-{slugify_segment(service_id)}"
-
-
-def endpoint_anchor(endpoint_id: str) -> str:
-    return f"endpoint-{slugify_segment(endpoint_id)}"
-
-
-def type_anchor(type_name: str) -> str:
-    return f"type-{slugify_segment(type_name)}"
-
-
-def build_package_page_path(output_dir: Path, package_name: str) -> Path:
-    return output_dir / "packages" / f"{slugify_segment(package_name)}.mdx"
-
-
-def build_package_page_map(report: dict[str, Any], *, output_dir: Path) -> dict[str, Path]:
-    package_names = {package["package"] for package in report["latestSnapshot"]["packages"]}
-    package_names.update(entry["package"] for entry in report["endpointLifecycle"])
-    return {
-        package_name: build_package_page_path(output_dir, package_name)
-        for package_name in sorted(package_names)
-    }
-
-
-def build_type_page_map(report: dict[str, Any], *, package_page_map: dict[str, Path]) -> dict[str, Path]:
-    latest = report["latestSnapshot"]
-    version_order = {str(release["version"]): index for index, release in enumerate(report["releases"])}
-    type_page_map: dict[str, Path] = {}
-    for collection_name in ("messages", "enums"):
-        for entity in latest[collection_name].values():
-            page_path = package_page_map.get(entity["package"])
-            if page_path is not None:
-                type_page_map[entity["id"]] = page_path
-    return type_page_map
 
 
 def package_group(package_name: str, *, has_services: bool) -> str:
@@ -170,140 +78,42 @@ def package_group_sort_key(package_name: str, *, has_services: bool) -> tuple[in
     return (PACKAGE_GROUP_ORDER.index(label), package_name)
 
 
-def render_type_link(type_name: str, *, from_path: Path, type_page_map: dict[str, Path]) -> str:
-    label = f"`{escape_md(type_name)}`"
-    page_path = type_page_map.get(type_name)
-    if page_path is None:
-        return label
-    return f"[{label}]({relative_anchor_link(from_path, page_path, type_anchor(type_name))})"
+def lifecycle_badges(*, introduced: str, changed: str | None = None, removed: str | None = None) -> list[ReferenceBadge]:
+    badges = [ReferenceBadge("gRPC", tone="protocol"), ReferenceBadge(f"Since {introduced}", tone="added")]
+    if changed and changed != introduced:
+        badges.append(ReferenceBadge(f"Changed {changed}", tone="changed"))
+    if removed:
+        badges.append(ReferenceBadge(f"Removed {removed}", tone="removed"))
+    return badges
 
 
-def render_field_type(field: dict[str, Any], *, current_page: Path, type_page_map: dict[str, Path]) -> str:
-    type_name = field.get("typeName")
-    if type_name and not field.get("map"):
-        return render_type_link(type_name, from_path=current_page, type_page_map=type_page_map)
-    return f"`{escape_md(field['type'])}`"
+def page_ref(from_path: Path, to_path: Path) -> str:
+    return relative_page_ref(from_path, to_path)
 
 
-def render_message_block(
-    message: dict[str, Any],
-    ctx: dict[str, dict[str, Any]],
-    *,
-    current_page: Path,
-    type_page_map: dict[str, Path],
-    seen: set[str],
-) -> list[str]:
-    if message["id"] in seen:
-        return []
-    seen.add(message["id"])
-
-    lines = [
-        f'<a id="{type_anchor(message["id"])}"></a>',
-        f"**Message `{message['id']}`**",
-        "",
-        f"- Source: {md_link(message['file'], message['sourceUrl'])}",
-        f"- Fields: {len(message['fieldIds'])}",
-        "",
-        render_description(message["description"]),
-    ]
-
-    if message["fieldIds"]:
-        lines.extend(
-            [
-                "",
-                "| Field | Type | Label | Description |",
-                "| --- | --- | --- | --- |",
-            ]
-        )
-        for field_id in message["fieldIds"]:
-            field = ctx["fields"][field_id]
-            lines.append(
-                "| "
-                + " | ".join(
-                    [
-                        escape_md_cell(field["name"]),
-                        render_field_type(field, current_page=current_page, type_page_map=type_page_map),
-                        escape_md_cell(field["label"]),
-                        escape_md_cell(field["description"] or ""),
-                    ]
-                )
-                + " |"
-            )
-
-    for enum_id in message.get("enumIds", []):
-        nested_lines = render_enum_block(
-            ctx["enums"][enum_id],
-            ctx,
-            current_page=current_page,
-            type_page_map=type_page_map,
-            seen=seen,
-        )
-        if nested_lines:
-            lines.extend(["", *nested_lines])
-    for nested_id in message.get("nestedMessageIds", []):
-        nested_lines = render_message_block(
-            ctx["messages"][nested_id],
-            ctx,
-            current_page=current_page,
-            type_page_map=type_page_map,
-            seen=seen,
-        )
-        if nested_lines:
-            lines.extend(["", *nested_lines])
-    return lines
+def package_page_path(output_dir: Path, package_name: str) -> Path:
+    return output_dir / "packages" / f"{slugify_segment(package_name)}.mdx"
 
 
-def render_enum_block(
-    enum_doc: dict[str, Any],
-    ctx: dict[str, dict[str, Any]],
-    *,
-    current_page: Path,
-    type_page_map: dict[str, Path],
-    seen: set[str],
-) -> list[str]:
-    del current_page, type_page_map
-    if enum_doc["id"] in seen:
-        return []
-    seen.add(enum_doc["id"])
-
-    lines = [
-        f'<a id="{type_anchor(enum_doc["id"])}"></a>',
-        f"**Enum `{enum_doc['id']}`**",
-        "",
-        f"- Source: {md_link(enum_doc['file'], enum_doc['sourceUrl'])}",
-        "",
-        render_description(enum_doc["description"]),
-        "",
-        "| Name | Number |",
-        "| --- | --- |",
-    ]
-    for value_id in enum_doc["valueIds"]:
-        value = ctx["enumValues"][value_id]
-        lines.append(f"| {escape_md_cell(value['name'])} | `{value['number']}` |")
-    return lines
-
-
-def render_endpoint_signature(endpoint: dict[str, Any]) -> str:
-    request_prefix = "stream " if endpoint["clientStreaming"] else ""
-    response_prefix = "stream " if endpoint["serverStreaming"] else ""
+def operation_page_path(output_dir: Path, package_name: str, service_name: str, endpoint_name: str) -> Path:
     return (
-        f"{endpoint['service']}.{endpoint['name']}("
-        f"{request_prefix}{endpoint['requestType']}) returns "
-        f"({response_prefix}{endpoint['responseType']})"
+        output_dir
+        / "operations"
+        / slugify_segment(package_name)
+        / slugify_segment(service_name)
+        / f"{slugify_segment(endpoint_name)}.mdx"
     )
 
 
-def render_history_table(lifecycle_entry: dict[str, Any]) -> str:
-    lines = [
-        "| Version | Kind | Details |",
-        "| --- | --- | --- |",
+def compact_package_summary(package: dict[str, Any]) -> str:
+    parts = [
+        f"{package['serviceCount']} services",
+        f"{package['endpointCount']} endpoints",
+        f"{package['messageCount']} messages",
     ]
-    for event in lifecycle_entry.get("history", []):
-        details = ", ".join(event.get("changeTypes", []))
-        lines.append(
-            f"| `{escape_md_cell(event['version'])}` | `{escape_md_cell(event['kind'])}` | {escape_md_cell(details)} |"
-        )
-    return "\n".join(lines)
+    if package["enumCount"]:
+        parts.append(f"{package['enumCount']} enums")
+    return ", ".join(parts)
 
 
 def endpoint_snapshot_map(report: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -376,283 +186,517 @@ def build_package_docs(report: dict[str, Any]) -> list[dict[str, Any]]:
     )
 
 
-def package_status(
-    package_name: str,
-    lifecycle_entries: list[dict[str, Any]],
-) -> str:
-    package_entries = [entry for entry in lifecycle_entries if entry["package"] == package_name]
-    if not package_entries:
-        return "-"
+def field_type_label(field: dict[str, Any]) -> str:
+    if field.get("map"):
+        base = "map"
+    elif field.get("typeName"):
+        base = str(field["typeName"])
+    else:
+        base = str(field.get("type") or "-")
+    if field.get("label") == "repeated":
+        return f"repeated {base}"
+    return base
 
-    introduced_versions = sorted({str(entry["introducedIn"]) for entry in package_entries if entry.get("introducedIn")})
-    changed_versions = sorted(
-        {
-            str(version)
-            for entry in package_entries
-            for version in [entry.get("lastChangedIn"), entry.get("removedIn")]
-            if version and str(version) not in introduced_versions
-        }
+
+def short_type_name(type_name: str) -> str:
+    return type_name.rsplit(".", 1)[-1] if "." in type_name else type_name
+
+
+def display_field_type(field: dict[str, Any]) -> str:
+    type_label = field_type_label(field)
+    if type_label.startswith("repeated "):
+        return f"repeated {short_type_name(type_label.removeprefix('repeated '))}"
+    return short_type_name(type_label)
+
+
+def message_schema(
+    message: dict[str, Any],
+    ctx: dict[str, dict[str, Any]],
+    *,
+    seen: set[str],
+) -> list[ReferenceSchema]:
+    if message["id"] in seen:
+        return []
+    seen.add(message["id"])
+
+    schemas = [
+        ReferenceSchema(
+            name=message["id"],
+            summary=f"{len(message['fieldIds'])} fields",
+            description=str(message.get("description") or ""),
+            anchor=f"schema-{slugify_segment(message['id'])}",
+            fields=[
+                ReferenceField(
+                    name=field["name"],
+                    type_label=display_field_type(field),
+                    required=field.get("label") == "required",
+                    description=str(field.get("description") or ""),
+                )
+                for field_id in message["fieldIds"]
+                for field in [ctx["fields"][field_id]]
+            ],
+        )
+    ]
+
+    for enum_id in message.get("enumIds", []):
+        schemas.extend(enum_schema(ctx["enums"][enum_id], ctx, seen=seen))
+    for nested_id in message.get("nestedMessageIds", []):
+        schemas.extend(message_schema(ctx["messages"][nested_id], ctx, seen=seen))
+    for field_id in message["fieldIds"]:
+        field = ctx["fields"][field_id]
+        type_name = field.get("typeName")
+        if type_name and type_name in ctx["messages"]:
+            schemas.extend(message_schema(ctx["messages"][type_name], ctx, seen=seen))
+        elif type_name and type_name in ctx["enums"]:
+            schemas.extend(enum_schema(ctx["enums"][type_name], ctx, seen=seen))
+    return schemas
+
+
+def enum_schema(enum_doc: dict[str, Any], ctx: dict[str, dict[str, Any]], *, seen: set[str]) -> list[ReferenceSchema]:
+    if enum_doc["id"] in seen:
+        return []
+    seen.add(enum_doc["id"])
+    return [
+        ReferenceSchema(
+            name=enum_doc["id"],
+            summary=f"{len(enum_doc['valueIds'])} values",
+            description=str(enum_doc.get("description") or ""),
+            anchor=f"schema-{slugify_segment(enum_doc['id'])}",
+            enum_values=[
+                str(ctx_value["name"])
+                for value_id in enum_doc["valueIds"]
+                for ctx_value in [ctx["enumValues"][value_id]]
+            ],
+        )
+    ]
+
+
+def related_schemas_for_types(
+    type_names: list[str],
+    ctx: dict[str, dict[str, Any]],
+) -> list[ReferenceSchema]:
+    seen: set[str] = set()
+    schemas: list[ReferenceSchema] = []
+    for type_name in type_names:
+        if type_name in ctx["messages"]:
+            schemas.extend(message_schema(ctx["messages"][type_name], ctx, seen=seen))
+        elif type_name in ctx["enums"]:
+            schemas.extend(enum_schema(ctx["enums"][type_name], ctx, seen=seen))
+    return schemas
+
+
+def endpoint_signature(endpoint: dict[str, Any]) -> str:
+    request_prefix = "stream " if endpoint["clientStreaming"] else ""
+    response_prefix = "stream " if endpoint["serverStreaming"] else ""
+    return (
+        f"rpc {endpoint['service']}.{endpoint['name']}("
+        f"{request_prefix}{endpoint['requestType']}) returns "
+        f"({response_prefix}{endpoint['responseType']});"
     )
-    removed_versions = sorted({str(entry["removedIn"]) for entry in package_entries if entry.get("removedIn")})
-    all_removed = bool(package_entries) and all(not entry.get("current", True) for entry in package_entries)
-    removed_version = removed_versions[-1] if all_removed and removed_versions else None
-    return render_status_cell(
-        introduced=introduced_versions[0] if introduced_versions else None,
-        changed=changed_versions,
-        removed=removed_version,
-    )
 
 
-def render_overview_page(
+def scalar_json_sample(type_name: str | None) -> Any:
+    normalized = str(type_name or "").lower()
+    if normalized in {"double", "float"}:
+        return 0.0
+    if normalized in {"int64", "sint64", "sfixed64", "uint64", "fixed64"}:
+        return "0"
+    if normalized in {"int32", "sint32", "sfixed32", "uint32", "fixed32"}:
+        return 0
+    if normalized == "bool":
+        return True
+    if normalized == "bytes":
+        return "BASE64_ENCODED_BYTES"
+    if normalized:
+        return "string"
+    return {}
+
+
+def enum_json_sample(enum_name: str, ctx: dict[str, dict[str, Any]]) -> str:
+    enum_doc = ctx["enums"].get(enum_name)
+    if not enum_doc:
+        return "ENUM_VALUE"
+    for value_id in enum_doc.get("valueIds", []):
+        enum_value = ctx["enumValues"].get(value_id)
+        if enum_value:
+            return str(enum_value["name"])
+    return "ENUM_VALUE"
+
+
+def type_json_sample(
+    type_name: str | None,
+    ctx: dict[str, dict[str, Any]],
+    *,
+    depth: int,
+    seen_messages: set[str],
+) -> Any:
+    if type_name and type_name in ctx["messages"]:
+        return message_json_sample(type_name, ctx, depth=depth, seen_messages=seen_messages)
+    if type_name and type_name in ctx["enums"]:
+        return enum_json_sample(type_name, ctx)
+    return scalar_json_sample(type_name)
+
+
+def field_json_sample(
+    field: dict[str, Any],
+    ctx: dict[str, dict[str, Any]],
+    *,
+    depth: int,
+    seen_messages: set[str],
+) -> Any:
+    if field.get("map"):
+        value_sample = type_json_sample(field.get("valueType"), ctx, depth=depth - 1, seen_messages=seen_messages)
+        sample: Any = {"key": value_sample}
+    elif field.get("typeName"):
+        sample = type_json_sample(field.get("typeName"), ctx, depth=depth - 1, seen_messages=seen_messages)
+    else:
+        sample = scalar_json_sample(field.get("type"))
+    if field.get("label") == "repeated":
+        return [sample]
+    return sample
+
+
+def message_json_sample(
+    message_name: str,
+    ctx: dict[str, dict[str, Any]],
+    *,
+    depth: int = REQUEST_SAMPLE_MAX_DEPTH,
+    seen_messages: set[str] | None = None,
+) -> Any:
+    if depth <= 0:
+        return {}
+    message = ctx["messages"].get(message_name)
+    if not message:
+        return {}
+    if seen_messages is None:
+        seen_messages = set()
+    if message_name in seen_messages:
+        return {}
+
+    next_seen = seen_messages | {message_name}
+    sample: dict[str, Any] = {}
+    rendered_oneofs: set[str] = set()
+
+    for field_id in message.get("fieldIds", [])[:REQUEST_SAMPLE_MAX_FIELDS]:
+        field = ctx["fields"][field_id]
+        oneof_name = field.get("oneof")
+        if oneof_name:
+            if oneof_name in rendered_oneofs:
+                continue
+            rendered_oneofs.add(oneof_name)
+        sample[str(field.get("jsonName") or field["name"])] = field_json_sample(
+            field,
+            ctx,
+            depth=depth,
+            seen_messages=next_seen,
+        )
+    return sample
+
+
+def grpc_method_name(package_name: str, endpoint: dict[str, Any]) -> str:
+    endpoint_id = endpoint.get("id")
+    if endpoint_id:
+        return str(endpoint_id)
+    return f"{package_name}.{endpoint['service']}/{endpoint['name']}"
+
+
+def grpcurl_example(package_name: str, endpoint: dict[str, Any], request_body: Any) -> str:
+    body = json.dumps(request_body, indent=2, ensure_ascii=False)
+    lines = [
+        "# Add -plaintext if the server is not using TLS.",
+        "grpcurl \\",
+        "  -d @ \\",
+        f"  {GRPC_TARGET_PLACEHOLDER} \\",
+        f"  {grpc_method_name(package_name, endpoint)} <<'EOF'",
+        body,
+        "EOF",
+    ]
+    if endpoint.get("clientStreaming") or endpoint.get("serverStreaming"):
+        lines.insert(1, "# This RPC uses streaming semantics. Send additional JSON messages on stdin as needed.")
+    return "\n".join(lines)
+
+
+def build_overview_page(
     report: dict[str, Any],
     *,
     output_dir: Path,
-    overview_path: Path,
-    package_page_map: dict[str, Path],
     package_docs: list[dict[str, Any]],
-) -> Page:
-    latest = report["latestSnapshot"]
+) -> ReferenceCollectionPage:
+    package_page_map = {package["package"]: package_page_path(output_dir, package["package"]) for package in package_docs}
+    package_groups: dict[str, list[ReferenceCard]] = defaultdict(list)
+    for package in package_docs:
+        group_label = package_group(package["package"], has_services=bool(package["serviceCount"] or package["endpointCount"]))
+        package_groups[group_label].append(
+            ReferenceCard(
+                title=package["package"],
+                href=page_ref(output_dir / "index.mdx", package_page_map[package["package"]]),
+                summary=compact_package_summary(package),
+                badges=[ReferenceBadge("gRPC", tone="protocol")],
+                meta_items=[
+                    ReferenceMetaItem("Services", str(package["serviceCount"])),
+                    ReferenceMetaItem("Endpoints", str(package["endpointCount"])),
+                    ReferenceMetaItem("Messages", str(package["messageCount"])),
+                    ReferenceMetaItem("Enums", str(package["enumCount"])),
+                ],
+            )
+        )
 
-    release_rows: list[list[str]] = []
+    release_cards = []
     for release in report["releases"]:
         counts = release["changes"]["counts"]
-        release_rows.append(
-            [
-                f"`{release['version']}`",
-                f"`{counts['endpoints']['added']}/{counts['endpoints']['modified']}/{counts['endpoints']['removed']}`",
-                f"`{counts['messages']['added']}/{counts['messages']['modified']}/{counts['messages']['removed']}`",
-                f"`{counts['enums']['added']}/{counts['enums']['modified']}/{counts['enums']['removed']}`",
-                f"`{counts['files']['added']}/{counts['files']['modified']}/{counts['files']['removed']}`",
-            ]
+        release_cards.append(
+            ReferenceCard(
+                title=str(release["version"]),
+                summary="Endpoint / message / enum deltas for this release.",
+                badges=[ReferenceBadge("Release", tone="neutral")],
+                meta_items=[
+                    ReferenceMetaItem("Endpoints", f"{counts['endpoints']['added']} / {counts['endpoints']['modified']} / {counts['endpoints']['removed']}"),
+                    ReferenceMetaItem("Messages", f"{counts['messages']['added']} / {counts['messages']['modified']} / {counts['messages']['removed']}"),
+                    ReferenceMetaItem("Enums", f"{counts['enums']['added']} / {counts['enums']['modified']} / {counts['enums']['removed']}"),
+                ],
+            )
         )
 
-    package_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for package in package_docs:
-        label = package_group(
-            package["package"],
-            has_services=bool(package["serviceCount"] or package["endpointCount"]),
+    sections = [
+        ReferenceSection(
+            heading="Release Summary",
+            body_markdown="Counts are shown as added / changed / removed within each release slice.",
+            cards=release_cards,
         )
-        package_groups[label].append(package)
-
-    grouped_packages: list[dict[str, Any]] = []
-    toc_rows: list[list[str]] = []
+    ]
     for label in PACKAGE_GROUP_ORDER:
-        packages = package_groups.get(label, [])
-        if not packages:
-            continue
-        rows: list[list[str]] = []
-        for package in packages:
-            package_path = package_page_map[package["package"]]
-            link = package_path.relative_to(output_dir.parent).with_suffix("").as_posix()
-            rows.append(
-                [
-                    f"[`{escape_md(package['package'])}`]({link})",
-                    f"`{package['serviceCount']}`",
-                    f"`{package['endpointCount']}`",
-                    f"`{package['messageCount']}`",
-                    f"`{package['enumCount']}`",
-                ]
+        if label in package_groups:
+            sections.append(
+                ReferenceSection(
+                    heading=label,
+                    cards=package_groups[label],
+                )
             )
-            toc_rows.append(
-                [
-                    f"[`{escape_md(package['package'])}`]({link})",
-                    package_status(
-                        package["package"],
-                        report["endpointLifecycle"],
-                    ),
-                    compact_package_summary(package),
-                ]
-            )
-        grouped_packages.append({"label": label, "rows": rows})
-
-    return markdown_page(
-        path=overview_path.relative_to(output_dir.parent).as_posix(),
-        title="Canton Protobuf History",
+    latest = report["latestSnapshot"]
+    return ReferenceCollectionPage(
+        path="index.mdx",
+        title="Canton Protobuf Reference",
         description="Descriptor-backed protobuf API history grouped by package.",
-        template_name="protobuf/overview.md.j2",
-        source_items=[
-            f"Source name: `{report['sourceName']}`",
-            f"Version filter: `{report['versionFilter']}`",
-            f"Latest release: `{report['latestRelease']}`",
-            f"Source repo: `{report['repo'].get('remote') or '-'}`",
+        eyebrow="Protobuf Reference",
+        summary="Operation-first gRPC pages with package-level browsing and recursive related schema sections.",
+        badges=[ReferenceBadge("Protobuf", tone="protocol"), ReferenceBadge(str(report["latestRelease"]), tone="neutral")],
+        meta_items=[
+            ReferenceMetaItem("Source", str(report["sourceName"])),
+            ReferenceMetaItem("Version filter", str(report["versionFilter"])),
+            ReferenceMetaItem("Latest release", str(report["latestRelease"])),
+            ReferenceMetaItem("Packages", str(latest["stats"]["packages"])),
+            ReferenceMetaItem("Endpoints", str(latest["stats"]["endpoints"])),
+            ReferenceMetaItem("Messages", str(latest["stats"]["messages"])),
         ],
-        snapshot_items=[
-            f"Packages: `{latest['stats']['packages']}`",
-            f"Services: `{latest['stats']['services']}`",
-            f"Endpoints: `{latest['stats']['endpoints']}`",
-            f"Messages: `{latest['stats']['messages']}`",
-            f"Enums: `{latest['stats']['enums']}`",
-        ],
-        package_toc_legend=render_status_legend(include_deprecated=False),
-        package_toc_rows=toc_rows,
-        package_groups=grouped_packages,
-        release_rows=release_rows,
+        sections=sections,
     )
 
 
-def render_package_page(
+def build_package_page(
     package_doc: dict[str, Any],
     report: dict[str, Any],
     *,
-    package_path: Path,
-    overview_path: Path,
+    output_dir: Path,
     ctx: dict[str, dict[str, Any]],
     endpoint_docs: dict[str, dict[str, Any]],
-    type_page_map: dict[str, Path],
-) -> Page:
+) -> ReferenceCollectionPage:
     lifecycle_map = {entry["id"]: entry for entry in report["endpointLifecycle"]}
-    package_entries = sorted(
-        [entry for entry in report["endpointLifecycle"] if entry["package"] == package_doc["package"]],
-        key=lambda entry: (entry["service"], entry["name"]),
-    )
-    service_buckets: dict[str, dict[str, Any]] = {}
+    page_path = package_page_path(output_dir, package_doc["package"])
+    overview_path = output_dir / "index.mdx"
+
+    service_sections: list[ReferenceSection] = []
     for service_id in package_doc["serviceIds"]:
-        service_doc = ctx["services"][service_id]
-        service_buckets[service_id] = {
-            "id": service_id,
-            "name": service_doc["name"],
-            "file": service_doc["file"],
-            "sourceUrl": service_doc.get("sourceUrl"),
-            "description": service_doc.get("description", ""),
-            "endpointIds": [],
-        }
-    for entry in package_entries:
-        bucket = service_buckets.setdefault(
-            entry["serviceFullName"],
-            {
-                "id": entry["serviceFullName"],
-                "name": entry["service"],
-                "file": endpoint_docs.get(entry["id"], {}).get("file", "-"),
-                "sourceUrl": endpoint_docs.get(entry["id"], {}).get("sourceUrl"),
-                "description": "",
-                "endpointIds": [],
-            },
-        )
-        bucket["endpointIds"].append(entry["id"])
-
-    package_files = [ctx["files"][file_id] for file_id in package_doc["fileIds"] if file_id in ctx["files"]]
-    package_messages = [ctx["messages"][message_id] for message_id in package_doc["messageIds"] if message_id in ctx["messages"]]
-    package_enums = [ctx["enums"][enum_id] for enum_id in package_doc["enumIds"] if enum_id in ctx["enums"]]
-
-    service_contexts: list[dict[str, Any]] = []
-    service_rows: list[list[str]] = []
-    for service in sorted(service_buckets.values(), key=lambda item: item["name"]):
-        service_rows.append(
-            [
-                f"[`{escape_md(service['name'])}`](#{service_anchor(service['id'])})",
-                f"`{len(service['endpointIds'])}`",
-                md_link("file", service.get("sourceUrl")),
-                escape_md_cell(compact_text(service.get("description", ""))),
-            ]
-        )
-        service_contexts.append(
-            {
-                "anchor": service_anchor(service["id"]),
-                "heading": f"Service `{service['name']}`",
-                "summary_items": [
-                    f"Source: {md_link(service['file'], service.get('sourceUrl'))}",
-                    f"Endpoints tracked: `{len(service['endpointIds'])}`",
-                ],
-                "description": render_description(service.get("description", "")),
-                "endpoint_rows": [
-                    [
-                        f"[`{escape_md(endpoint_docs[endpoint_id]['name'])}`](#{endpoint_anchor(endpoint_id)})",
-                        f"`{lifecycle_map[endpoint_id]['introducedIn']}`",
-                        f"`{lifecycle_map[endpoint_id]['lastChangedIn']}`",
-                        f"`{lifecycle_map[endpoint_id]['removedIn'] or ''}`",
-                        render_type_link(endpoint_docs[endpoint_id]["requestType"], from_path=package_path, type_page_map=type_page_map),
-                        render_type_link(endpoint_docs[endpoint_id]["responseType"], from_path=package_path, type_page_map=type_page_map),
-                        md_link("file", endpoint_docs[endpoint_id].get("sourceUrl")),
-                    ]
-                    for endpoint_id in sorted(service["endpointIds"])
-                ],
-                "endpoint_details": [
-                    {
-                        "anchor": endpoint_anchor(endpoint_id),
-                        "title": f"{endpoint_docs[endpoint_id]['service']}.{endpoint_docs[endpoint_id]['name']}",
-                        "summary_items": [
-                            f"Introduced in: `{lifecycle_map[endpoint_id]['introducedIn']}`",
-                            f"Last changed in: `{lifecycle_map[endpoint_id]['lastChangedIn']}`",
-                            f"Removed in: `{lifecycle_map[endpoint_id]['removedIn'] or '-'}`",
-                            f"Status: `{'current' if lifecycle_map[endpoint_id]['current'] else 'removed'}`",
-                            f"Source: {md_link(endpoint_docs[endpoint_id]['file'], endpoint_docs[endpoint_id].get('sourceUrl'))}",
-                        ],
-                        "signature": f"rpc {render_endpoint_signature(endpoint_docs[endpoint_id])};",
-                        "description": render_description(endpoint_docs[endpoint_id]["description"]),
-                        "history_table": render_history_table(lifecycle_map[endpoint_id]),
-                        "request_type": render_type_link(
-                            endpoint_docs[endpoint_id]["requestType"],
-                            from_path=package_path,
-                            type_page_map=type_page_map,
-                        ),
-                        "response_type": render_type_link(
-                            endpoint_docs[endpoint_id]["responseType"],
-                            from_path=package_path,
-                            type_page_map=type_page_map,
-                        ),
-                    }
-                    for endpoint_id in sorted(service["endpointIds"])
-                ],
-            }
-        )
-
-    type_reference_blocks: list[str] = []
-    if package_messages or package_enums:
-        seen: set[str] = set()
-        for message in package_messages:
-            block_lines = render_message_block(
-                message,
-                ctx,
-                current_page=package_path,
-                type_page_map=type_page_map,
-                seen=seen,
+        service = ctx["services"][service_id]
+        service_cards: list[ReferenceCard] = []
+        for endpoint_id in sorted(service["endpointIds"]):
+            endpoint = endpoint_docs[endpoint_id]
+            lifecycle = lifecycle_map[endpoint_id]
+            operation_path = operation_page_path(output_dir, package_doc["package"], endpoint["service"], endpoint["name"])
+            service_cards.append(
+                ReferenceCard(
+                    title=f"{endpoint['service']}.{endpoint['name']}",
+                    href=page_ref(page_path, operation_path),
+                    summary=compact_text(endpoint.get("description") or endpoint_signature(endpoint), limit=180),
+                    badges=lifecycle_badges(
+                        introduced=str(lifecycle["introducedIn"]),
+                        changed=str(lifecycle.get("lastChangedIn") or ""),
+                        removed=str(lifecycle.get("removedIn") or "") or None,
+                    ),
+                    meta_items=[
+                        ReferenceMetaItem("Request", endpoint["requestType"]),
+                        ReferenceMetaItem("Response", endpoint["responseType"]),
+                        ReferenceMetaItem("Client stream", "Yes" if endpoint["clientStreaming"] else "No"),
+                        ReferenceMetaItem("Server stream", "Yes" if endpoint["serverStreaming"] else "No"),
+                    ],
+                )
             )
-            if block_lines:
-                type_reference_blocks.append("\n".join(block_lines))
-        for enum_doc in package_enums:
-            block_lines = render_enum_block(
-                enum_doc,
-                ctx,
-                current_page=package_path,
-                type_page_map=type_page_map,
-                seen=seen,
+        service_sections.append(
+            ReferenceSection(
+                heading=service["name"],
+                body_markdown=safe_markdown_text(service.get("description") or "") or None,
+                meta_items=[
+                    ReferenceMetaItem("Source file", service["file"], href=service.get("sourceUrl")),
+                    ReferenceMetaItem("Operations", str(len(service_cards))),
+                ],
+                cards=service_cards,
             )
-            if block_lines:
-                type_reference_blocks.append("\n".join(block_lines))
+        )
 
-    return markdown_page(
-        path=package_path.relative_to(overview_path.parent.parent).as_posix(),
+    file_cards = [
+        ReferenceCard(
+                title=file_doc["repoPath"],
+                summary="Current source file in the latest published descriptor snapshot.",
+                meta_items=[
+                    ReferenceMetaItem("Services", str(len(file_doc["serviceIds"]))),
+                    ReferenceMetaItem("Messages", str(len(file_doc["messageIds"]))),
+                    ReferenceMetaItem("Enums", str(len(file_doc["enumIds"]))),
+                    ReferenceMetaItem("Source", file_doc["repoPath"], href=file_doc.get("sourceUrl")),
+                ],
+            )
+        for file_id in package_doc["fileIds"]
+        for file_doc in [ctx["files"][file_id]]
+        if file_id in ctx["files"]
+    ]
+
+    related_types = related_schemas_for_types(
+        [*package_doc["messageIds"], *package_doc["enumIds"]],
+        ctx,
+    )
+
+    sections = []
+    if file_cards:
+        sections.append(ReferenceSection(heading="Source Files", cards=file_cards))
+    sections.extend(service_sections)
+    if related_types:
+        sections.append(
+            ReferenceSection(
+                heading="Type Inventory",
+                body_markdown="These are the package-level message and enum shapes in the publish-version snapshot.",
+                schemas=related_types,
+            )
+        )
+
+    return ReferenceCollectionPage(
+        path=page_path.relative_to(output_dir).as_posix(),
         title=package_doc["package"],
-        description=f"Descriptor-backed protobuf API history for package {package_doc['package']}.",
-        template_name="protobuf/package.md.j2",
-        package_title=f"Package `{package_doc['package']}`",
-        overview_link=relative_page_link(package_path, overview_path),
-        snapshot_items=[
-            f"Current files: `{package_doc['fileCount']}`",
-            f"Current services: `{package_doc['serviceCount']}`",
-            f"Current endpoints: `{package_doc['endpointCount']}`",
-            f"Current messages: `{package_doc['messageCount']}`",
-            f"Current enums: `{package_doc['enumCount']}`",
-            f"Lifecycle endpoints tracked: `{len(package_entries)}`",
+        description=f"Package-level overview for {package_doc['package']}.",
+        eyebrow="Protobuf Package",
+        summary=compact_package_summary(package_doc),
+        back_link=page_ref(page_path, overview_path),
+        back_label="Back to overview",
+        badges=[ReferenceBadge("gRPC", tone="protocol")],
+        meta_items=[
+            ReferenceMetaItem("Files", str(package_doc["fileCount"])),
+            ReferenceMetaItem("Services", str(package_doc["serviceCount"])),
+            ReferenceMetaItem("Endpoints", str(package_doc["endpointCount"])),
+            ReferenceMetaItem("Messages", str(package_doc["messageCount"])),
+            ReferenceMetaItem("Enums", str(package_doc["enumCount"])),
         ],
-        source_file_rows=[
-            [
-                escape_md_cell(file_doc["repoPath"]),
-                f"`{len(file_doc['serviceIds'])}`",
-                f"`{len(file_doc['messageIds'])}`",
-                f"`{len(file_doc['enumIds'])}`",
-                md_link("file", file_doc.get("sourceUrl")),
-            ]
-            for file_doc in package_files
-        ],
-        service_rows=service_rows,
-        services=service_contexts,
-        type_reference_blocks=type_reference_blocks,
+        sections=sections,
     )
 
 
-def build_pages(report: dict[str, Any], *, output_dir: Path) -> tuple[Path, list[Page]]:
-    root = output_dir.parent
+def build_operation_page(
+    package_name: str,
+    endpoint: dict[str, Any],
+    lifecycle: dict[str, Any],
+    *,
+    output_dir: Path,
+    ctx: dict[str, dict[str, Any]],
+) -> ReferenceOperationPage:
+    page_path = operation_page_path(output_dir, package_name, endpoint["service"], endpoint["name"])
+    package_path = package_page_path(output_dir, package_name)
+    related_schemas = related_schemas_for_types([endpoint["requestType"], endpoint["responseType"]], ctx)
+    schema_map = {schema.name: schema for schema in related_schemas}
+
+    request_schema = schema_map.get(endpoint["requestType"])
+    response_schema = schema_map.get(endpoint["responseType"])
+    request_body = message_json_sample(endpoint["requestType"], ctx)
+    response_body = message_json_sample(endpoint["responseType"], ctx)
+
+    description = str(endpoint.get("description") or "")
+
+    return ReferenceOperationPage(
+        path=page_path.relative_to(output_dir).as_posix(),
+        title=endpoint["name"],
+        description=None,
+        eyebrow=package_name,
+        summary=None,
+        back_link=page_ref(page_path, package_path),
+        back_label="Back to package",
+        breadcrumbs=[
+            ReferenceBreadcrumb(package_group(package_name, has_services=True)),
+            ReferenceBreadcrumb("Protobuf", page_ref(page_path, output_dir / "index.mdx")),
+            ReferenceBreadcrumb(package_name, page_ref(page_path, package_path)),
+            ReferenceBreadcrumb(endpoint["name"]),
+        ],
+        badges=lifecycle_badges(
+            introduced=str(lifecycle["introducedIn"]),
+            changed=str(lifecycle.get("lastChangedIn") or ""),
+            removed=str(lifecycle.get("removedIn") or "") or None,
+        ),
+        meta_items=[
+            ReferenceMetaItem("Package", package_name),
+            ReferenceMetaItem("Service", endpoint["service"]),
+            ReferenceMetaItem("Introduced", str(lifecycle["introducedIn"])),
+            ReferenceMetaItem("Removed", str(lifecycle.get("removedIn") or "-")),
+            ReferenceMetaItem("Source", endpoint["file"], href=endpoint.get("sourceUrl")),
+        ],
+        operation_method="RPC",
+        operation_target=f"/{package_name}.{endpoint['service']}/{endpoint['name']}",
+        overview_markdown=None,
+        protocol_items=[
+            ReferenceMetaItem("Protocol", "gRPC"),
+            ReferenceMetaItem("Service", endpoint["service"]),
+            ReferenceMetaItem("RPC", endpoint["name"]),
+            ReferenceMetaItem("Client stream", "Yes" if endpoint["clientStreaming"] else "No"),
+            ReferenceMetaItem("Server stream", "Yes" if endpoint["serverStreaming"] else "No"),
+        ],
+        inputs=[
+            ReferencePanel(
+                title=short_type_name(endpoint["requestType"]),
+                meta_items=[
+                    ReferenceMetaItem("Message", endpoint["requestType"]),
+                    ReferenceMetaItem("Client stream", "Yes" if endpoint["clientStreaming"] else "No"),
+                ],
+                schema=request_schema,
+            )
+        ],
+        outputs=[
+            ReferencePanel(
+                title=short_type_name(endpoint["responseType"]),
+                meta_items=[
+                    ReferenceMetaItem("Message", endpoint["responseType"]),
+                    ReferenceMetaItem("Server stream", "Yes" if endpoint["serverStreaming"] else "No"),
+                ],
+                schema=response_schema,
+            )
+        ],
+        examples=[
+            ReferenceExample(
+                title="grpcurl",
+                body=grpcurl_example(package_name, endpoint, request_body),
+                language="bash",
+            ),
+            ReferenceExample(
+                title="OK",
+                body=json.dumps(response_body, indent=2, ensure_ascii=False),
+                kind="response",
+                media_type="application/json",
+            ),
+        ],
+        lifecycle_changes=[
+            ReferenceChange(
+                version=str(event["version"]),
+                details=", ".join(str(change) for change in event.get("changeTypes", [])) or str(event["kind"]),
+            )
+            for event in lifecycle.get("history", [])
+        ],
+        related_schemas=related_schemas,
+    )
+
+
+def build_pages(report: dict[str, Any], *, output_dir: Path) -> tuple[Path, list[Any]]:
     latest = report["latestSnapshot"]
     ctx = {
         "files": latest["files"],
@@ -663,33 +707,33 @@ def build_pages(report: dict[str, Any], *, output_dir: Path) -> tuple[Path, list
         "enums": latest["enums"],
         "enumValues": latest["enumValues"],
     }
-    overview_path = output_dir / "index.mdx"
     package_docs = build_package_docs(report)
-    package_page_map = build_package_page_map(report, output_dir=output_dir)
-    type_page_map = build_type_page_map(report, package_page_map=package_page_map)
     endpoint_docs = endpoint_snapshot_map(report)
+    lifecycle_map = {entry["id"]: entry for entry in report["endpointLifecycle"]}
 
-    pages = [
-        render_overview_page(
-            report,
-            output_dir=output_dir,
-            overview_path=overview_path,
-            package_page_map=package_page_map,
-            package_docs=package_docs,
-        )
-    ]
+    pages = [render_collection_page(build_overview_page(report, output_dir=output_dir, package_docs=package_docs))]
     for package_doc in package_docs:
-        package_path = package_page_map[package_doc["package"]]
         pages.append(
-            render_package_page(
-                package_doc,
-                report,
-                package_path=package_path,
-                overview_path=overview_path,
-                ctx=ctx,
-                endpoint_docs=endpoint_docs,
-                type_page_map=type_page_map,
+            render_collection_page(
+                build_package_page(
+                    package_doc,
+                    report,
+                    output_dir=output_dir,
+                    ctx=ctx,
+                    endpoint_docs=endpoint_docs,
+                )
             )
         )
-
-    return root, pages
+        for endpoint_id in package_doc["endpointIds"]:
+            pages.append(
+                render_operation_page(
+                    build_operation_page(
+                        package_doc["package"],
+                        endpoint_docs[endpoint_id],
+                        lifecycle_map[endpoint_id],
+                        output_dir=output_dir,
+                        ctx=ctx,
+                    )
+                )
+            )
+    return output_dir, pages

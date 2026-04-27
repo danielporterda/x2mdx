@@ -77,7 +77,7 @@ class CharacterizationPreviewTests(unittest.TestCase):
             openrpc_alt_spec = (
                 output_root / "reference" / "wallet-gateway-json-rpc-alt" / "rpc-specs" / "user-api.mdx"
             ).read_text(encoding="utf-8")
-            self.assertIn("[Back to overview](/reference/wallet-gateway-json-rpc-alt)", openrpc_alt_spec)
+            self.assertIn('href="/reference/wallet-gateway-json-rpc-alt/wallet-gateway-overview"', openrpc_alt_spec)
 
 
 if __name__ == "__main__":

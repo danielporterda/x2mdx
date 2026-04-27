@@ -10,6 +10,7 @@ from pathlib import Path
 
 from x2mdx.asyncapi.lifecycle import build_asyncapi_report_from_sources, parse_asyncapi
 from x2mdx.asyncapi.models import AsyncApiSourceSnapshot
+from x2mdx.asyncapi.render import build_action_operation
 from x2mdx.cli import main as cli_main
 
 
@@ -321,7 +322,7 @@ class AsyncApiTests(unittest.TestCase):
         self.assertEqual(report.per_version_deltas["1.1.0"]["changed_count"], 1)
         self.assertEqual(report.per_version_deltas["1.1.0"]["removed_count"], 1)
 
-    def test_cli_builds_asyncapi_page_and_updates_docs_json(self) -> None:
+    def test_cli_builds_single_file_asyncapi_page_and_updates_docs_json(self) -> None:
         manifest_path = self._write_manifest()
         output_file = self.root / "docs" / "reference" / "asyncapi.mdx"
         docs_json = self.root / "docs" / "docs.json"
@@ -367,11 +368,125 @@ class AsyncApiTests(unittest.TestCase):
         text = output_file.read_text(encoding="utf-8")
         docs = json.loads(docs_json.read_text(encoding="utf-8"))
 
-        self.assertIn("Table of Contents", text)
-        self.assertIn("Version Change Summary", text)
+        self.assertIn("### Publish stream", text)
+        self.assertIn("#### Protocol Details", text)
         self.assertIn("publish required fields added: `offset`", text)
-        self.assertIn("**Message Example**", text)
+        self.assertIn("wscat", text)
+        self.assertIn("message", text)
         self.assertEqual(
             docs["navigation"]["dropdowns"][0]["groups"],
             [{"group": "JSON Ledger API", "pages": ["reference/asyncapi"]}],
         )
+
+    def test_cli_builds_multipage_asyncapi_pages_and_updates_docs_json(self) -> None:
+        manifest_path = self._write_manifest()
+        output_dir = self.root / "docs" / "reference" / "asyncapi"
+        docs_json = self.root / "docs" / "docs.json"
+        docs_json.parent.mkdir(parents=True, exist_ok=True)
+        docs_json.write_text(
+            json.dumps(
+                {
+                    "navigation": {
+                        "dropdowns": [
+                            {
+                                "dropdown": "Reference",
+                                "pages": [],
+                            }
+                        ]
+                    }
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        exit_code = cli_main(
+            [
+                "asyncapi",
+                "build-api-pages-from-manifest",
+                "--manifest",
+                str(manifest_path),
+                "--output-dir",
+                str(output_dir),
+                "--overview-name",
+                "index.mdx",
+                "--docs-json",
+                str(docs_json),
+                "--nav-dropdown",
+                "Reference",
+                "--nav-group",
+                "JSON Ledger API",
+            ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        overview = (output_dir / "index.mdx").read_text(encoding="utf-8")
+        channel = (output_dir / "channels" / "stream.mdx").read_text(encoding="utf-8")
+        action = (output_dir / "operations" / "stream" / "subscribe.mdx").read_text(encoding="utf-8")
+        docs = json.loads(docs_json.read_text(encoding="utf-8"))
+
+        self.assertIn("## Channels", overview)
+        self.assertIn("## Actions", channel)
+        self.assertIn("## Outputs", action)
+        self.assertIn("wscat", action)
+        self.assertIn("x2mdx-ref-right-rail", action)
+        self.assertIn("x2mdx-ref-rail-panel", action)
+        self.assertIn("```bash wscat", action)
+        self.assertIn("x2mdx-ref-operation-bar", action)
+        self.assertIn("<code>/stream</code>", action)
+        self.assertNotIn("## Overview", action)
+        self.assertIn("x2mdx-ref-breadcrumbs", action)
+        self.assertIn('<h1 class="x2mdx-ref-title">Subscribe stream</h1>', action)
+        self.assertNotIn("x2mdx-ref-summary", action)
+        self.assertNotIn("## Examples", action)
+        self.assertIn("## Related Schemas", action)
+        self.assertEqual(action.count('class="x2mdx-ref-schema"'), 1)
+        self.assertEqual(
+            docs["navigation"]["dropdowns"][0]["groups"],
+            [{"group": "JSON Ledger API", "pages": ["reference/asyncapi/index"]}],
+        )
+
+    def test_action_adapter_builds_operation_page_context(self) -> None:
+        channel = build_asyncapi_report_from_sources(
+            [
+                self._snapshot(
+                    "1.1.0",
+                    "published/1.1.0/asyncapi.yaml",
+                    """
+                    asyncapi: 2.6.0
+                    info:
+                      title: Sample WebSocket API
+                      version: 1.1.0
+                    channels:
+                      /updates:
+                        subscribe:
+                          operationId: onUpdates
+                          bindings:
+                            ws:
+                              method: GET
+                          message:
+                            contentType: application/json
+                            payload:
+                              type: object
+                              required: [id]
+                              properties:
+                                id:
+                                  type: string
+                    """,
+                )
+            ],
+            source_name="unit test fixtures",
+            version_filter="unit test versions",
+            publish_version="1.1.0",
+        ).channels[0]
+
+        operation = build_action_operation(channel, channel.latest["actions"][0], output_dir=None)
+
+        self.assertEqual(operation.anchor, "operation-updates-subscribe")
+        self.assertEqual(operation.operation_method, "SUBSCRIBE")
+        self.assertEqual(operation.operation_target, "/updates")
+        self.assertEqual(operation.related_schemas[0].name, "-")
+        self.assertEqual(operation.outputs[0].schema.name, "-")
+        self.assertEqual(operation.examples[0].title, "wscat")
+        self.assertIn("npx wscat -c <WEBSOCKET_URL>", operation.examples[0].body)

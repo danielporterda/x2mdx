@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import re
 from functools import lru_cache
 from typing import Any
@@ -42,6 +43,23 @@ def anchor(anchor_id: str) -> str:
 
 def admonition(kind: str, body: str) -> str:
     return f"<{kind}>\n{body}\n</{kind}>"
+
+
+def escape_html(value: Any) -> str:
+    return html.escape("" if value is None else str(value), quote=True)
+
+
+def escape_mdx_html_text(value: Any) -> str:
+    escaped = escape_html(value)
+    return escaped.replace("{", "&#123;").replace("}", "&#125;")
+
+
+def escape_js_template_literal(value: Any) -> str:
+    return ("" if value is None else str(value)).replace("`", "\\`").replace("${", "\\${")
+
+
+def inline_text(value: Any) -> str:
+    return re.sub(r"\s+", " ", "" if value is None else str(value)).strip()
 
 
 def accordion_list(title: str, items: list[str]) -> str:
@@ -160,6 +178,10 @@ def template_environment() -> Environment:
         code_block=code_block,
         anchor=anchor,
         admonition=admonition,
+        escape_html=escape_html,
+        escape_mdx_html_text=escape_mdx_html_text,
+        escape_js_template_literal=escape_js_template_literal,
+        inline_text=inline_text,
         accordion_list=accordion_list,
         render_card_group=render_card_group,
         pretty_json=pretty_json,

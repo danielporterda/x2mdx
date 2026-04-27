@@ -346,9 +346,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to a JSON/YAML manifest that lists local AsyncAPI snapshots",
     )
     build_asyncapi.add_argument(
+        "--output-dir",
+        help="Directory where generated MDX pages should be written",
+    )
+    build_asyncapi.add_argument(
         "--output-file",
-        required=True,
         help="Exact MDX file path to write for the generated AsyncAPI page",
+    )
+    build_asyncapi.add_argument(
+        "--overview-name",
+        default="index.mdx",
+        help="Filename for the overview page inside the output directory.",
     )
     build_asyncapi.add_argument(
         "--fixture-root",
@@ -561,24 +569,42 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "asyncapi":
         if args.asyncapi_command == "build-api-pages-from-manifest":
-            from x2mdx.asyncapi.render import build_page
+            from x2mdx.asyncapi.render import build_page, build_pages
             from x2mdx.mintlify import MintlifyNavTarget, update_docs_json_navigation
-            from x2mdx.render import write_page
+            from x2mdx.render import write_page, write_pages
 
             if (args.nav_dropdown or args.nav_version or args.nav_group) and not args.docs_json:
                 parser.error("--nav-dropdown/--nav-version/--nav-group require --docs-json")
             if args.docs_json and not args.nav_dropdown:
                 parser.error("--docs-json requires --nav-dropdown")
+            if not args.output_dir and not args.output_file:
+                parser.error("build-api-pages-from-manifest requires --output-dir or --output-file")
+            if args.output_dir and args.output_file:
+                parser.error("build-api-pages-from-manifest accepts only one of --output-dir or --output-file")
 
             report = build_asyncapi_report_from_manifest_args(args)
-            output_file = Path(args.output_file)
-            page = build_page(
-                report,
-                output_path=output_file.name,
-                page_title=args.page_title,
-                page_description=args.page_description,
-            )
-            write_page(page, output_file)
+            if args.output_file:
+                output_file = Path(args.output_file)
+                page = build_page(
+                    report,
+                    output_path=output_file.name,
+                    page_title=args.page_title,
+                    page_description=args.page_description,
+                )
+                write_page(page, output_file)
+            else:
+                output_dir = Path(args.output_dir)
+                if output_dir.exists():
+                    shutil.rmtree(output_dir)
+                output_root, pages = build_pages(
+                    report,
+                    output_dir=output_dir,
+                    overview_name=args.overview_name,
+                    page_title=args.page_title,
+                    page_description=args.page_description,
+                )
+                write_pages(pages, output_root)
+                output_file = output_dir / args.overview_name
             if args.docs_json:
                 update_docs_json_navigation(
                     Path(args.docs_json),
