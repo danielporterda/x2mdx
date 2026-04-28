@@ -102,6 +102,11 @@ def build_manifest(*, force_download: bool) -> Path:
                 "artifact": artifact_entry["artifact"],
                 "language": artifact_entry["language"],
                 "include_prefixes": artifact_entry.get("include_prefixes", []),
+                **(
+                    {"status_manifest": artifact_entry["status_manifest"]}
+                    if isinstance(artifact_entry.get("status_manifest"), str)
+                    else {}
+                ),
                 "versions": version_entries,
             }
         )

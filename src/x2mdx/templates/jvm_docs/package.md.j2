@@ -1,28 +1,6 @@
 {% import "shared/macros.md.j2" as shared %}
+{{ heading(2, package_heading) }}
+
 {{ shared.status_toc(
-    type_reference_rows,
-    legend=type_toc_legend
+    object_rows
 ) }}
-
-{{ heading(2, "Reference") }}
-
-{% for entry in package_entries %}
-
-{{ anchor(entry.anchor) }}
-
-{{ heading(3, entry.heading) }}
-
-{{ bullet_list(entry.lifecycle_items) }}
-{% if entry.upstream != "-" %}
-{{ paragraph("Upstream docs: " ~ entry.upstream) }}
-{% endif %}
-{% if entry.signature %}
-{{ shared.detail_code_block("Signature", "text", entry.signature) }}
-{% endif %}
-{% if entry.summary %}
-{{ shared.detail_label("Summary") }}
-
-{{ paragraph(entry.summary) }}
-{% endif %}
-{{ shared.detail_table("Members", ["Docs", "Member", "Introduced", "Deprecated", "Removed"], entry.member_rows, empty_message="No members found for this type in the configured artifacts.") }}
-{% endfor %}

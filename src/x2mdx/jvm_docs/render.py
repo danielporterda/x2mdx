@@ -9,17 +9,17 @@ import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from x2mdx.jvm_docs.models import JvmDocArtifactLifecycle, JvmDocLifecycleReport, JvmDocSymbolLifecycle
 from x2mdx.output import Page
 from x2mdx.templating import markdown_page
 
-STATUS_MARKERS = {
+CHANGE_MARKER = "🔵"
+TIMELINE_MARKERS = {
     "active": "🟢",
-    "deprecated": "🟠",
     "removed": "🔴",
 }
-CHANGE_MARKER = "🔵"
 
 
 def slugify(value: str) -> str:
@@ -35,7 +35,17 @@ def md_code(text: str) -> str:
 
 def md_text(text: str) -> str:
     out = html.escape(str(text), quote=False)
+    out = out.replace("\\", "\\\\")
+    out = out.replace("{", "\\{").replace("}", "\\}").replace("$", "\\$")
     return out.replace("|", "\\|").replace("\n", " ").strip()
+
+
+def markdown_link_target(target: str) -> str:
+    return quote(str(target), safe="/#:?&=%;,+-._~")
+
+
+def markdown_link(label: str, target: str) -> str:
+    return f"[{label}](<{markdown_link_target(target)}>)"
 
 
 def page_path(root: Path, target: Path) -> str:
@@ -57,6 +67,13 @@ def latest_doc_link(symbol: JvmDocSymbolLifecycle) -> str:
         return ""
     latest_version = symbol.versions_present[-1]
     return symbol.doc_links.get(latest_version, "")
+
+
+def latest_doc_markdown_link(symbol: JvmDocSymbolLifecycle, *, label: str = "Open") -> str:
+    target = latest_doc_link(symbol)
+    if not target:
+        return "-"
+    return markdown_link(label, target)
 
 
 def changed_symbols(artifact: JvmDocArtifactLifecycle) -> list[JvmDocSymbolLifecycle]:
@@ -85,15 +102,6 @@ def format_lifecycle_value(value: str | None) -> str:
     return f"`{md_code(value)}`"
 
 
-def compact_version_label(value: str | None) -> str:
-    if not value:
-        return "-"
-    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", value)
-    if match:
-        return f"v{match.group(1)}.{match.group(2)}"
-    return f"v{value}"
-
-
 def type_label(type_text: str, package_name: str) -> str:
     prefix = f"{package_name}."
     if package_name != "(root package)" and type_text.startswith(prefix):
@@ -113,29 +121,16 @@ def summary_preview(text: str, *, max_length: int = 72) -> str:
     return md_text(f"{clipped}...")
 
 
-def status_cell(kind: str, version: str) -> str:
-    parts = [STATUS_MARKERS[kind], f"`{md_code(compact_version_label(version))}`"]
-    if kind != "active":
-        parts.append(kind.capitalize())
-    return " ".join(parts)
-
-
-def status_legend() -> str:
-    return "  ".join(
-        [
-            f'{STATUS_MARKERS["active"]} Active Since',
-            f'{STATUS_MARKERS["deprecated"]} Deprecated',
-            f'{STATUS_MARKERS["removed"]} Removed',
-        ]
-    )
+def status_cell(status: str) -> str:
+    return f"`{md_code(status)}`"
 
 
 def package_toc_legend() -> str:
     return "  ".join(
         [
-            f'{STATUS_MARKERS["active"]} Active Since',
+            f'{TIMELINE_MARKERS["active"]} Active Since',
             f"{CHANGE_MARKER} Changed",
-            f'{STATUS_MARKERS["removed"]} Removed',
+            f'{TIMELINE_MARKERS["removed"]} Removed',
         ]
     )
 
@@ -150,19 +145,20 @@ def status_timeline_cell(
     changed_versions: list[str] | None = None,
     removed_version: str | None = None,
 ) -> str:
-    parts = [timeline_marker(STATUS_MARKERS["active"], introduced_version)]
+    parts = [timeline_marker(TIMELINE_MARKERS["active"], introduced_version)]
     for version in changed_versions or []:
         parts.append(timeline_marker(CHANGE_MARKER, version))
     if removed_version:
-        parts.append(timeline_marker(STATUS_MARKERS["removed"], removed_version))
+        parts.append(timeline_marker(TIMELINE_MARKERS["removed"], removed_version))
     return " ".join(parts)
 
 
 def package_removed_version(symbols: list[JvmDocSymbolLifecycle], version_index: dict[str, int]) -> str | None:
-    if not symbols or any(symbol.removed_version is None for symbol in symbols):
+    type_symbols = [symbol for symbol in symbols if symbol.kind == "type"]
+    if not type_symbols or any(symbol.removed_version is None for symbol in type_symbols):
         return None
     return max(
-        (symbol.removed_version for symbol in symbols if symbol.removed_version),
+        (symbol.removed_version for symbol in type_symbols if symbol.removed_version),
         key=lambda version: version_index[version],
     )
 
@@ -217,6 +213,21 @@ def package_summary_text(
     return md_text(summary)
 
 
+def combined_summary(summary: str | None, removed_version: str | None) -> str:
+    parts: list[str] = []
+    if summary:
+        parts.append(summary)
+    if removed_version:
+        parts.append(f"Removed in {removed_version}.")
+    return " ".join(parts).strip()
+
+
+def object_page_description(symbol: JvmDocSymbolLifecycle, object_name: str) -> str:
+    if symbol.latest_summary:
+        return symbol.latest_summary
+    return f"Generated object reference page for {object_name} from local Javadoc/Scaladoc snapshots."
+
+
 def java_member_owner(symbol: JvmDocSymbolLifecycle) -> str:
     if "#" not in symbol.symbol:
         return ""
@@ -259,25 +270,25 @@ def package_name_for_symbol(symbol: JvmDocSymbolLifecycle) -> str:
     return "(root package)"
 
 
-def type_anchor(symbol: JvmDocSymbolLifecycle) -> str:
-    return f"type-{slugify(symbol.symbol)}"
+def build_object_slug(label: str, *, used_slugs: set[str]) -> str:
+    base = slugify(label) or "object"
+    if base not in used_slugs:
+        used_slugs.add(base)
+        return base
+
+    digest = hashlib.sha1(label.encode("utf-8")).hexdigest()[:8]
+    candidate = f"{base}-{digest}"
+    used_slugs.add(candidate)
+    return candidate
 
 
 def build_type_entries(
     artifact: JvmDocArtifactLifecycle,
 ) -> list[dict[str, Any]]:
-    version_index = {version: index for index, version in enumerate(artifact.versions)}
     type_symbols = sorted((symbol for symbol in artifact.symbols if symbol.kind == "type"), key=lambda symbol: symbol.symbol)
     member_symbols = [symbol for symbol in artifact.symbols if symbol.kind == "member"]
     type_by_symbol = {symbol.symbol: symbol for symbol in type_symbols}
     members_by_type: dict[str, list[JvmDocSymbolLifecycle]] = defaultdict(list)
-    type_flags: dict[str, dict[str, bool]] = {
-        symbol.symbol_key: {
-            "deprecated": symbol.deprecated_version is not None,
-            "removed": symbol.removed_version is not None,
-        }
-        for symbol in type_symbols
-    }
 
     for member in member_symbols:
         if artifact.language == "java":
@@ -286,10 +297,6 @@ def build_type_entries(
             if type_symbol is None:
                 continue
             members_by_type[type_symbol.symbol_key].append(member)
-            if member.deprecated_version is not None:
-                type_flags[type_symbol.symbol_key]["deprecated"] = True
-            if member.removed_version is not None:
-                type_flags[type_symbol.symbol_key]["removed"] = True
             continue
 
         owner, _ = scala_member_owner_and_label(member)
@@ -303,39 +310,15 @@ def build_type_entries(
         if best_match is None:
             continue
         members_by_type[best_match.symbol_key].append(member)
-        if member.deprecated_version is not None:
-            type_flags[best_match.symbol_key]["deprecated"] = True
-        if member.removed_version is not None:
-            type_flags[best_match.symbol_key]["removed"] = True
 
-    type_entries: list[dict[str, Any]] = []
-
+    entries: list[dict[str, Any]] = []
     for type_symbol in type_symbols:
-        upstream = latest_doc_link(type_symbol)
+        package_name = package_name_for_symbol(type_symbol)
+        object_name = type_label(type_symbol.symbol, package_name)
+        summary_text = combined_summary(type_symbol.latest_summary, type_symbol.removed_version)
         type_members = sorted(members_by_type.get(type_symbol.symbol_key, []), key=lambda symbol: symbol.symbol)
-        flags = type_flags[type_symbol.symbol_key]
-        deprecated_versions = [
-            version
-            for version in [type_symbol.deprecated_version, *(member.deprecated_version for member in type_members)]
-            if version
-        ]
-        removed_versions = [
-            version
-            for version in [type_symbol.removed_version, *(member.removed_version for member in type_members)]
-            if version
-        ]
-        deprecated_version = min(deprecated_versions, key=lambda version: version_index[version]) if deprecated_versions else None
-        removed_version = min(removed_versions, key=lambda version: version_index[version]) if removed_versions else None
-        status_kind = "active"
-        status_version = type_symbol.introduced_version
-        if removed_version is not None:
-            status_kind = "removed"
-            status_version = removed_version
-        elif deprecated_version is not None:
-            status_kind = "deprecated"
-            status_version = deprecated_version
-
         member_rows: list[list[str]] = []
+
         for member in type_members:
             if artifact.language == "java":
                 member_label = java_member_label(member)
@@ -344,7 +327,7 @@ def build_type_entries(
             upstream_link = latest_doc_link(member)
             member_rows.append(
                 [
-                    f"[Open]({upstream_link})" if upstream_link else "-",
+                    markdown_link("Open", upstream_link) if upstream_link else "-",
                     f"`{md_code(member_label)}`",
                     format_lifecycle_value(member.introduced_version),
                     format_lifecycle_value(member.deprecated_version),
@@ -352,29 +335,23 @@ def build_type_entries(
                 ]
             )
 
-        type_entries.append(
+        entries.append(
             {
-                "anchor": type_anchor(type_symbol),
-                "upstream": f"[Open]({upstream})" if upstream else "-",
-                "type": f"`{md_code(type_symbol.symbol)}`",
-                "type_text": type_symbol.symbol,
-                "summary": md_text(type_symbol.latest_summary or ""),
-                "summary_preview": summary_preview(type_symbol.latest_summary or ""),
-                "introduced": format_lifecycle_value(type_symbol.introduced_version),
-                "deprecated": format_lifecycle_value(type_symbol.deprecated_version),
-                "removed": format_lifecycle_value(type_symbol.removed_version),
-                "status_kind": status_kind,
-                "status_version": status_version,
-                "status_cell": status_cell(status_kind, status_version),
-                "package": package_name_for_symbol(type_symbol),
-                "symbol": type_symbol,
+                "object_name": object_name,
+                "package": package_name,
+                "status": type_symbol.status or "stable",
+                "status_cell": status_cell(type_symbol.status or "stable"),
+                "summary_preview": summary_preview(summary_text) or "-",
+                "description": object_page_description(type_symbol, object_name),
+                "removed_notice": f"Removed in `{md_code(type_symbol.removed_version)}`." if type_symbol.removed_version else "",
+                "upstream": latest_doc_markdown_link(type_symbol),
+                "signature": type_symbol.latest_signature or "",
                 "member_rows": member_rows,
-                "has_deprecated": "true" if flags["deprecated"] else "false",
-                "has_removed": "true" if flags["removed"] else "false",
+                "symbol": type_symbol,
             }
         )
 
-    return type_entries
+    return entries
 
 
 def build_package_rows_and_pages(
@@ -394,18 +371,23 @@ def build_package_rows_and_pages(
         package_symbol_groups[package_name_for_symbol(symbol)].append(symbol)
 
     version_index = {version: index for index, version in enumerate(artifact.versions)}
-
-    rows: list[dict[str, str]] = []
+    artifact_rows: list[dict[str, str]] = []
     pages: list[Page] = []
 
     for package_name in sorted(package_groups):
-        package_entries = sorted(package_groups[package_name], key=lambda item: str(item["type_text"]))
-        package_symbols = package_symbol_groups[package_name]
-        package_page_path = package_pages_dir / f"{slugify(package_name)}.mdx"
+        package_dir = package_pages_dir / slugify(package_name)
+        package_page_path = package_dir / "index.mdx"
+        used_slugs: set[str] = set()
 
-        introduced_count = sum(1 for entry in package_entries if entry["introduced"] != format_lifecycle_value(artifact.versions[0]))
-        deprecated_count = sum(1 for entry in package_entries if entry["has_deprecated"] == "true")
-        removed_count = sum(1 for entry in package_entries if entry["has_removed"] == "true")
+        package_entries = sorted(package_groups[package_name], key=lambda item: str(item["object_name"]))
+        for entry in package_entries:
+            entry["page_path"] = package_dir / f"{build_object_slug(str(entry['object_name']), used_slugs=used_slugs)}.mdx"
+
+        package_symbols = package_symbol_groups[package_name]
+        type_symbols = [symbol for symbol in package_symbols if symbol.kind == "type"]
+        introduced_count = sum(1 for symbol in type_symbols if symbol.introduced_version != artifact.versions[0])
+        deprecated_count = sum(1 for symbol in type_symbols if symbol.deprecated_version is not None)
+        removed_count = sum(1 for symbol in type_symbols if symbol.removed_version is not None)
         introduced_version = package_introduced_version(package_symbols, version_index)
         removed_version = package_removed_version(package_symbols, version_index)
         changed_versions = package_changed_versions(
@@ -418,37 +400,39 @@ def build_package_rows_and_pages(
         pages.append(
             markdown_page(
                 path=page_path(root, package_page_path),
-                title=package_name,
-                description="Generated package reference page from local Javadoc/Scaladoc snapshots",
+                title="Overview",
+                description=f"Object index for package {package_name}.",
                 template_name="jvm_docs/package.md.j2",
-                type_reference_rows=[
+                package_heading=f"Package `{md_code(package_name)}`",
+                object_rows=[
                     [
-                        f"[`{md_text(type_label(str(entry['type_text']), package_name))}`](#{entry['anchor']})",
+                        f"[`{md_code(str(entry['object_name']))}`]({relative_page_link(package_page_path, Path(entry['page_path']))})",
                         str(entry["status_cell"]),
-                        str(entry["summary_preview"] or "-"),
+                        str(entry["summary_preview"]),
                     ]
-                    for entry in package_entries
-                ],
-                type_toc_legend=status_legend(),
-                package_entries=[
-                    {
-                        "anchor": str(entry["anchor"]),
-                        "heading": f"`{md_code(type_label(str(entry['type_text']), package_name))}`",
-                        "lifecycle_items": [
-                            f"Introduced: {entry['introduced']}",
-                            f"Deprecated: {entry['deprecated']}",
-                            f"Removed: {entry['removed']}",
-                        ],
-                        "upstream": str(entry["upstream"]),
-                        "signature": entry["symbol"].latest_signature or "",
-                        "summary": md_text(entry["symbol"].latest_summary) if entry["symbol"].latest_summary else "",
-                        "member_rows": entry["member_rows"],
-                    }
                     for entry in package_entries
                 ],
             )
         )
-        rows.append(
+
+        for entry in package_entries:
+            symbol = entry["symbol"]
+            page_path_obj = Path(entry["page_path"])
+            pages.append(
+                markdown_page(
+                    path=page_path(root, page_path_obj),
+                    title=str(entry["object_name"]),
+                    description=str(entry["description"]),
+                    template_name="jvm_docs/object.md.j2",
+                    object_heading=f"{entry['object_name']} - {entry['status']}",
+                    docs_link=str(entry["upstream"]),
+                    removed_notice=str(entry["removed_notice"]),
+                    signature=symbol.latest_signature or "",
+                    member_rows=entry["member_rows"],
+                )
+            )
+
+        artifact_rows.append(
             {
                 "name": f"[`{md_code(package_name)}`]({relative_page_link(artifact_page_path, package_page_path)})",
                 "status": status_timeline_cell(
@@ -466,7 +450,7 @@ def build_package_rows_and_pages(
             }
         )
 
-    return rows, pages
+    return artifact_rows, pages
 
 
 def build_artifact_page(
@@ -488,7 +472,7 @@ def build_artifact_page(
 
     changed_rows = [
         [
-            f"[Open]({latest_doc_link(symbol)})" if latest_doc_link(symbol) else "-",
+            latest_doc_markdown_link(symbol),
             f"`{md_code(symbol.symbol)}`",
             f"`{md_code(symbol.kind)}`",
             format_lifecycle_value(symbol.introduced_version),
@@ -503,7 +487,7 @@ def build_artifact_page(
     artifact_page = markdown_page(
         path=page_path(root, artifact_page_path),
         title=f"{artifact.artifact} lifecycle",
-        description="Generated lifecycle timeline and type index from local Javadoc/Scaladoc snapshots",
+        description="Generated lifecycle timeline and package index from local Javadoc/Scaladoc snapshots",
         template_name="jvm_docs/artifact.md.j2",
         overview_link=relative_page_link(artifact_page_path, overview_output),
         version_summary_items=[

@@ -6,6 +6,7 @@
       "group": "com.daml",
       "artifact": "bindings-java",
       "language": "java",
+      "status_manifest": "status/bindings-java.yaml",
       "include_prefixes": [
         "com.daml"
       ],
@@ -18,6 +19,7 @@
       "group": "com.daml",
       "artifact": "bindings-scala_2.13",
       "language": "scala",
+      "status_manifest": "status/bindings-scala.yaml",
       "include_prefixes": [
         "com.daml"
       ],

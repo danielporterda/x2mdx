@@ -391,6 +391,16 @@ def consolidate_lifecycle(
                 deprecated_version = min(inferred_versions, key=lambda version: version_index[version])
 
         latest_present = present[-1]
+        status: str | None = None
+        if record["kind"] == "type":
+            status = artifact_source.type_statuses.get(record["symbol"])
+            if status is None and deprecated_version is not None:
+                status = "deprecated"
+            if status is None:
+                raise ValueError(
+                    "Missing status for JVM doc type "
+                    f"{record['symbol']} in {artifact_source.group}:{artifact_source.artifact}"
+                )
         lifecycle.append(
             JvmDocSymbolLifecycle(
                 symbol_key=symbol_key,
@@ -403,6 +413,7 @@ def consolidate_lifecycle(
                 versions_present=present,
                 doc_links=dict(record["doc_links"]),
                 latest_doc_path=str(record["doc_paths"][latest_present]),
+                status=status,
                 deprecation_note=deprecation_note,
             )
         )
@@ -461,24 +472,30 @@ def enrich_type_metadata(
     artifact_source: JvmDocArtifactSource,
     symbols: list[JvmDocSymbolLifecycle],
 ) -> list[JvmDocSymbolLifecycle]:
-    latest_jar_path = Path(artifact_source.versions[-1].jar_path)
-    if not latest_jar_path.exists():
-        return symbols
-
+    version_to_jar_path = {source.version: Path(source.jar_path) for source in artifact_source.versions}
     metadata: dict[str, tuple[str, str]] = {}
-    with zipfile.ZipFile(latest_jar_path) as archive:
-        names = set(archive.namelist())
-        for symbol in symbols:
-            if symbol.kind != "type":
-                continue
-            doc_file = symbol.latest_doc_path.split("#", 1)[0]
-            if doc_file not in names:
-                continue
-            raw_html = archive.read(doc_file).decode("utf-8", errors="replace")
-            if artifact_source.language == "java":
-                metadata[symbol.symbol_key] = parse_java_type_page(raw_html)
-            else:
-                metadata[symbol.symbol_key] = parse_scala_type_page(raw_html)
+    symbols_by_version: dict[str, list[JvmDocSymbolLifecycle]] = {}
+    for symbol in symbols:
+        if symbol.kind != "type" or not symbol.versions_present:
+            continue
+        last_present_version = symbol.versions_present[-1]
+        symbols_by_version.setdefault(last_present_version, []).append(symbol)
+
+    for version, version_symbols in symbols_by_version.items():
+        jar_path = version_to_jar_path.get(version)
+        if jar_path is None or not jar_path.exists():
+            continue
+        with zipfile.ZipFile(jar_path) as archive:
+            names = set(archive.namelist())
+            for symbol in version_symbols:
+                doc_file = symbol.latest_doc_path.split("#", 1)[0]
+                if doc_file not in names:
+                    continue
+                raw_html = archive.read(doc_file).decode("utf-8", errors="replace")
+                if artifact_source.language == "java":
+                    metadata[symbol.symbol_key] = parse_java_type_page(raw_html)
+                else:
+                    metadata[symbol.symbol_key] = parse_scala_type_page(raw_html)
 
     enriched: list[JvmDocSymbolLifecycle] = []
     for symbol in symbols:
@@ -545,6 +562,7 @@ def build_jvm_doc_lifecycle_report_from_sources(
     total_members = sum(artifact.member_count for artifact in artifacts)
     notes = [
         "Input acquisition stays outside x2mdx; this report is built from supplied local Javadoc/Scaladoc jars.",
+        "Object statuses must come from per-artifact status manifests unless Java deprecation metadata provides a deprecated fallback.",
         "Java deprecation metadata is best-effort from deprecated-list.html when present.",
         "Scala deprecation is not inferred from Scaladoc indexes in this initial implementation.",
         "Removed means the first configured version after the last observed presence.",
