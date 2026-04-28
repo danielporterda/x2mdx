@@ -196,7 +196,8 @@ def rooted_page_ref(root_prefix: str, target_path: Path, output_dir: Path) -> st
 
 
 def code_literal(value: str) -> str:
-    return f"`{str(value).replace('`', '\\`')}`"
+    escaped = str(value).replace("`", r"\`")
+    return f"`{escaped}`"
 
 
 def json_body(value: Any) -> str:
